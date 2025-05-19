@@ -59,8 +59,9 @@
 			buildPhases = (
 				B94180AE2DDAE334002BEF92 /* Sources */,
 				B94180AF2DDAE334002BEF92 /* Frameworks */,
-				B94180B02DDAE334002BEF92 /* Resources */,
-			);
+                               B94180B02DDAE334002BEF92 /* Resources */,
+                               B94182062DDAE695002BEF92 /* Lint */,
+                       );
 			buildRules = (
 			);
 			dependencies = (
@@ -132,6 +133,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+               B94182062DDAE695002BEF92 /* Lint */ = {
+                       isa = PBXShellScriptBuildPhase;
+                       buildActionMask = 2147483647;
+                       files = (
+                       );
+                       inputPaths = (
+                       );
+                       name = "Lint";
+                       outputPaths = (
+                       );
+                       runOnlyForDeploymentPostprocessing = 0;
+                       shellPath = /bin/sh;
+                       shellScript = "bash \"$PROJECT_DIR/Scripts/lint.sh\"";
+               };
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		B94180C02DDAE335002BEF92 /* Debug */ = {
