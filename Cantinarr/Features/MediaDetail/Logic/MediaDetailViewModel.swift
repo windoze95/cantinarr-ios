@@ -1,0 +1,108 @@
+import SwiftUI
+
+@MainActor
+final class MediaDetailViewModel: ObservableObject {
+    public private(set) var id: Int
+    @Published private(set) var mediaType: MediaType
+    @Published private(set) var availability: MediaAvailability = .unknown
+    @Published var title        = ""
+    @Published var tagline      = ""
+    @Published var overview     = ""
+    @Published var posterURL    : URL?
+    @Published var backdropURL  : URL?
+    @Published var seasons: [OverseerrAPIService.Season] = []
+    @Published var isLoading = false
+    @Published var error: String?
+    
+    @Published var trailerVideoID: String?
+    @Published var showTrailerPlayer: Bool = false
+
+    //    private let id: Int
+    private let service: OverseerrAPIService
+    private let userSession: UserSession
+
+    init(id: Int,
+         mediaType: MediaType,
+         service: OverseerrAPIService,
+         userSession: UserSession)
+    {
+        self.id = id
+        self.mediaType = mediaType
+        self.service = service
+        self.userSession = userSession
+    }
+    
+    // MARK: – bootstrap
+    func load() async {
+        isLoading = true ; defer { isLoading = false }
+        trailerVideoID = nil // Reset trailer ID on new load
+        do {
+            if mediaType == .movie {
+                let d = try await service.movieDetail(id: id)
+                availability = d.mediaInfo?.status ?? .unknown
+                title       = d.title
+                tagline     = d.tagline ?? ""
+                overview    = d.overview ?? ""
+                posterURL   = URL.tmdb(path: d.posterPath, width: 500)
+                backdropURL = URL.tmdb(path: d.backdropPath, width: 780)
+                // Extract trailer video ID from relatedVideos
+                if let videos = d.relatedVideos {
+                    // Find the first video that is a "Trailer" and from "YouTube"
+                    let officialTrailer = videos.first { video in
+                        video.type?.lowercased() == "trailer" && video.site?.lowercased() == "youtube" && video.key != nil
+                    }
+                    self.trailerVideoID = officialTrailer?.key
+                    // Optional: If no "Trailer" type, you could look for "Teaser" or other types as a fallback.
+                    if self.trailerVideoID == nil {
+                        self.trailerVideoID = videos.first { video in
+                            video.site?.lowercased() == "youtube" && video.key != nil // Any YouTube video if no specific trailer
+                        }?.key
+                    }
+                }
+            } else {
+                let d = try await service.tvDetail(id: id)
+                availability = d.mediaInfo?.status ?? .unknown
+                title       = d.name
+                tagline     = d.tagline ?? ""
+                overview    = d.overview ?? ""
+                posterURL   = URL.tmdb(path: d.posterPath, width: 500)
+                backdropURL = URL.tmdb(path: d.backdropPath, width: 780)
+                seasons     = d.seasons
+                if let videos = d.relatedVideos { // Assuming TVDetail now has relatedVideos
+                    let officialTrailer = videos.first { video in
+                        video.type?.lowercased() == "trailer" && video.site?.lowercased() == "youtube" && video.key != nil
+                    }
+                    self.trailerVideoID = officialTrailer?.key
+                    if self.trailerVideoID == nil {
+                        self.trailerVideoID = videos.first { video in
+                            video.site?.lowercased() == "youtube" && video.key != nil
+                        }?.key
+                    }
+                }
+            }
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+    
+    var youtubeEmbedURL: URL? {
+        guard let videoID = trailerVideoID else { return nil }
+        return URL(string: "https://www.youtube.com/embed/\(videoID)?playsinline=1&autoplay=1")
+    }
+    
+    // MARK: – user actions
+    func request() async { try? await service.request(mediaId: id, isMovie: mediaType == .movie) }
+    func report(issue type: String, message: String) async {
+        try? await service.reportIssue(mediaId: id, type: type, message: message)
+    }
+    
+    var isAdmin: Bool { userSession.role == .admin }
+}
+
+private extension URL {
+    /// Convenience builder for TMDB images.
+    static func tmdb(path: String?, width: Int) -> URL? {
+        guard let p = path else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/w\(width)\(p)")
+    }
+}
