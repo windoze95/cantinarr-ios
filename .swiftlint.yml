@@ -1,0 +1,15 @@
+# SwiftLint Configuration
+# Shared with SwiftFormat to maintain consistent style
+
+disabled_rules:
+  - trailing_whitespace
+  - todo
+
+line_length:
+  warning: 120
+  error: 150
+  ignores_comments: true
+  ignores_urls: true
+
+indentation:
+  indentation_width: 4
