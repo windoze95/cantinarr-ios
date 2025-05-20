@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina6_12" orientation="portrait" appearance="dark"/>
+    <device id="retina6_3" orientation="portrait" appearance="dark"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
@@ -12,39 +12,53 @@
         <scene sceneID="EHf-IW-A2E">
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                    <view key="view" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="HOW YOU DOING, YOU OLD PIRATE?" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="smM-z5-rLH">
-                                <rect key="frame" x="31" y="70" width="317" height="272"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" name="Menlo-Bold" family="Menlo" pointSize="35"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="AppLaunchIcon" translatesAutoresizingMaskIntoConstraints="NO" id="2Op-7o-f3O">
+                                <rect key="frame" x="51" y="204" width="300" height="300"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="300" id="4BY-Cw-uDB"/>
+                                    <constraint firstAttribute="width" constant="300" id="rMV-z1-fpw"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="HOW YOU DOING, YOU OLD PIRATE?" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="smM-z5-rLH">
+                                <rect key="frame" x="31" y="500" width="340" height="64"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="64" id="DSE-XV-FPY"/>
+                                    <constraint firstAttribute="width" constant="340" id="gAD-N9-svL"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Menlo-Bold" family="Menlo" pointSize="18"/>
                                 <color key="textColor" name="text0"/>
                                 <color key="highlightedColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <color key="shadowColor" name="TextAccent"/>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="AppIconLaunch" translatesAutoresizingMaskIntoConstraints="NO" id="qIx-iw-Y6p">
-                                <rect key="frame" x="69" y="350" width="240" height="128"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="AppLaunchIcon" translatesAutoresizingMaskIntoConstraints="NO" id="2Op-7o-f3O">
-                                <rect key="frame" x="76" y="506" width="240" height="128"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="meE-Yi-nx1">
+                                <rect key="frame" x="182.66666666666666" y="699" width="37" height="37"/>
+                            </activityIndicatorView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="C0G-1e-uDl"/>
                         <color key="backgroundColor" name="Color"/>
                         <color key="tintColor" name="AccentPrimary"/>
+                        <constraints>
+                            <constraint firstItem="smM-z5-rLH" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="8Qo-TA-GRc"/>
+                            <constraint firstItem="2Op-7o-f3O" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="AEK-hA-EWT"/>
+                            <constraint firstItem="meE-Yi-nx1" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="XN7-Gi-s7z"/>
+                            <constraint firstAttribute="bottom" secondItem="meE-Yi-nx1" secondAttribute="bottom" constant="138" id="g5s-AK-WhH"/>
+                            <constraint firstItem="2Op-7o-f3O" firstAttribute="centerX" secondItem="smM-z5-rLH" secondAttribute="centerX" id="g8A-O5-q1G"/>
+                            <constraint firstItem="2Op-7o-f3O" firstAttribute="top" secondItem="C0G-1e-uDl" secondAttribute="top" constant="80" id="hke-LB-hEx"/>
+                            <constraint firstItem="2Op-7o-f3O" firstAttribute="top" secondItem="smM-z5-rLH" secondAttribute="top" constant="-296" id="yox-Xv-WJs"/>
+                        </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="52.671755725190835" y="374.64788732394368"/>
+            <point key="canvasLocation" x="52.307692307692307" y="374.64454976303318"/>
         </scene>
     </scenes>
+    <color key="tintColor" name="AccentPrimary"/>
     <resources>
-        <image name="AppIconLaunch" width="512" height="512"/>
         <image name="AppLaunchIcon" width="1024" height="1024"/>
         <namedColor name="AccentPrimary">
             <color red="0.78799998760223389" green="0.53700000047683716" blue="0.21600000560283661" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
