@@ -60,37 +60,38 @@ struct RadarrMoviesView: View {
             await viewModel.loadContent()
         }
     }
+
     var body: some View {
-            // The NavigationView should ideally be higher up in the hierarchy,
-            // for example, in RadarrHomeEntry or even RootShellView if Radarr
-            // doesn't have its own TabView managing navigation.
-            // If RadarrHomeEntry has a TabView, each tab can indeed have its own NavigationView.
-            NavigationView {
-                Group { // This Group might still be okay, but the inner content is now simpler
-                    if viewModel.isLoading && viewModel.movies.isEmpty {
-                        loadingView
-                    } else if let error = viewModel.connectionError {
-                        errorView(error: error)
-                    } else if viewModel.movies.isEmpty {
-                        emptyMoviesView
-                    } else {
-                        moviesListView
-                    }
-                }
-                .navigationTitle("Movies")
-                // Modern navigation using .navigationDestination
-                .navigationDestination(for: RadarrMovie.self) { movie in
-                    RadarrMovieDetailView(
-                        movieId: movie.id,
-                        radarrService: viewModel.service // Pass the service instance from the ViewModel
-                    )
+        // The NavigationView should ideally be higher up in the hierarchy,
+        // for example, in RadarrHomeEntry or even RootShellView if Radarr
+        // doesn't have its own TabView managing navigation.
+        // If RadarrHomeEntry has a TabView, each tab can indeed have its own NavigationView.
+        NavigationView {
+            Group { // This Group might still be okay, but the inner content is now simpler
+                if viewModel.isLoading && viewModel.movies.isEmpty {
+                    loadingView
+                } else if let error = viewModel.connectionError {
+                    errorView(error: error)
+                } else if viewModel.movies.isEmpty {
+                    emptyMoviesView
+                } else {
+                    moviesListView
                 }
             }
-            .task {
-                if viewModel.movies.isEmpty {
-                    await viewModel.loadContent()
-                }
+            .navigationTitle("Movies")
+            // Modern navigation using .navigationDestination
+            .navigationDestination(for: RadarrMovie.self) { movie in
+                RadarrMovieDetailView(
+                    movieId: movie.id,
+                    radarrService: viewModel.service // Pass the service instance from the ViewModel
+                )
             }
+        }
+        .task {
+            if viewModel.movies.isEmpty {
+                await viewModel.loadContent()
+            }
+        }
         // .sheet(item: $showingMovieDetail) { movie in // Alternative presentation for detail
         //     NavigationView {
         //         RadarrMovieDetailView(movieId: movie.id, radarrService: viewModel.service)

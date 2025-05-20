@@ -1,11 +1,13 @@
-import SwiftUI
 import AuthenticationServices
 import Combine
+import SwiftUI
 
 @MainActor
 class OverseerrUsersViewModel: ObservableObject {
     // ─────────────────────────────────────────────
+
     // MARK: – Nested types
+
     // ─────────────────────────────────────────────
     struct MediaItem: Identifiable {
         let id: Int
@@ -21,37 +23,42 @@ class OverseerrUsersViewModel: ObservableObject {
     }
 
     // ─────────────────────────────────────────────
+
     // MARK: – Published state
+
     // ─────────────────────────────────────────────
     @Published var selectedMedia: MediaType = .movie {
         didSet {
             guard oldValue != selectedMedia else { return }
             saveFilters()
             // Reload discover media based on the new type, respecting keywords if active
-             Task { await loadMedia(reset: true) }
+            Task { await loadMedia(reset: true) }
         }
     }
+
     @Published var watchProviders: [OverseerrAPIService.WatchProvider] = []
     @Published var selectedProviders: Set<Int> = [] {
         didSet {
             guard oldValue != selectedProviders else { return }
             saveFilters()
-             Task { await loadMedia(reset: true) }
+            Task { await loadMedia(reset: true) }
         }
     }
+
     @Published var selectedGenres: Set<Int> = [] {
         didSet {
             guard oldValue != selectedGenres else { return }
             saveFilters()
-             Task { await loadMedia(reset: true) }
+            Task { await loadMedia(reset: true) }
         }
     }
+
     @Published var results: [MediaItem] = [] // Discover or Search results
     @Published var keywordSuggestions: [OverseerrAPIService.Keyword] = []
-    @Published var activeKeywordIDs: Set<Int> = []          // Filter state
-    @Published var activeKeywords: [OverseerrAPIService.Keyword] = []   // Display state for pills
+    @Published var activeKeywordIDs: Set<Int> = [] // Filter state
+    @Published var activeKeywords: [OverseerrAPIService.Keyword] = [] // Display state for pills
     @Published var movieRecs: [MediaItem] = []
-    @Published var tvRecs:    [MediaItem] = []
+    @Published var tvRecs: [MediaItem] = []
 
     @Published private(set) var authState: AuthState = .unknown
     @Published var connectionError: String? = nil
@@ -70,6 +77,7 @@ class OverseerrUsersViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: – Auth recovery helper
+
     private func recoverFromAuthFailure() {
         if authState == .unknown { return }
         authState = .unknown
@@ -77,14 +85,18 @@ class OverseerrUsersViewModel: ObservableObject {
     }
 
     // ─────────────────────────────────────────────
+
     // MARK: – Paging Helpers
+
     // ─────────────────────────────────────────────
     private var loader = PagedLoader()
     private var movieRecLoader = PagedLoader()
     private var tvRecLoader = PagedLoader()
 
     // ─────────────────────────────────────────────
+
     // MARK: – Dependencies & Callbacks
+
     // ─────────────────────────────────────────────
     var service: OverseerrUsersService
     private let settingsKey: String
@@ -94,9 +106,12 @@ class OverseerrUsersViewModel: ObservableObject {
     let keywordActivatedSubject = PassthroughSubject<Void, Never>()
 
     // ─────────────────────────────────────────────
+
     // MARK: – Init
+
     // ─────────────────────────────────────────────
-    init(service: OverseerrUsersService, settingsKey: String, onKeywordActivated: (() -> Void)? = nil) { // Added callback
+    init(service: OverseerrUsersService, settingsKey: String, onKeywordActivated _: (() -> Void)? = nil) {
+        // Added callback
         self.service = service
         self.settingsKey = settingsKey
 
@@ -118,14 +133,17 @@ class OverseerrUsersViewModel: ObservableObject {
                 guard let self = self else { return }
                 let previousState = self.authState
                 self.authState = state
-                let wasAuthenticated = { if case .authenticated = previousState { return true } else { return false } }()
+                let wasAuthenticated = { if case .authenticated = previousState { return true } else { return false }
+                }()
                 let isAuthenticatedNow = { if case .authenticated = state { return true } else { return false } }()
                 if !wasAuthenticated && isAuthenticatedNow { Task { await self.loadAllBasics() } }
             }
     }
 
     // ─────────────────────────────────────────────
+
     // MARK: – View life‑cycle / Entry Points
+
     // ─────────────────────────────────────────────
     func onAppear() {
         Task { await AuthManager.shared.ensureAuthenticated() }
@@ -147,16 +165,19 @@ class OverseerrUsersViewModel: ObservableObject {
     }
 
     // ─────────────────────────────────────────────
+
     // MARK: – Initial data load (Providers, etc.)
+
     // ─────────────────────────────────────────────
     func loadAllBasics() async {
         clearConnectionError()
         do {
             async let movieProviders = service.fetchWatchProviders(isMovie: true)
             async let tvProviders = service.fetchWatchProviders(isMovie: false)
-            let combined = try await (movieProviders + tvProviders)
+            let combined = try await(movieProviders + tvProviders)
             let unique = Dictionary(grouping: combined, by: \.id).compactMap { $0.value.first }
-            watchProviders = unique.sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
+            watchProviders = unique
+                .sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
 
             if selectedProviders.isEmpty && !watchProviders.isEmpty {
                 selectedProviders = Set(watchProviders.map(\.id))
@@ -164,19 +185,21 @@ class OverseerrUsersViewModel: ObservableObject {
             }
             clearConnectionError()
             if case .authenticated = authState, results.isEmpty && searchQuery.isEmpty && activeKeywordIDs.isEmpty {
-                 await loadMedia(reset: true)
+                await loadMedia(reset: true)
             }
         } catch is AuthError {
             recoverFromAuthFailure()
         } catch {
             print("🔴 Provider load error: \(error.localizedDescription)")
-            self.connectionError = "Failed to load service configuration. \(error.localizedDescription)"
+            connectionError = "Failed to load service configuration. \(error.localizedDescription)"
             watchProviders = []
         }
     }
 
     // ─────────────────────────────────────────────
+
     // MARK: – Media fetching (Discover - respects active keywords)
+
     // ─────────────────────────────────────────────
     func loadMedia(reset: Bool = false) async {
         // This loads "Discover" results, filtered by active keywords if present.
@@ -202,12 +225,32 @@ class OverseerrUsersViewModel: ObservableObject {
 
             switch selectedMedia {
             case .movie:
-                let rawResp = try await service.fetchMovies(providerIds: pids, genreIds: gids, keywordIds: kwds, page: loader.page)
-                fetchedItems = rawResp.results.map { MediaItem(id: $0.id, title: $0.title, posterPath: $0.posterPath, mediaType: .movie) }
+                let rawResp = try await service.fetchMovies(
+                    providerIds: pids,
+                    genreIds: gids,
+                    keywordIds: kwds,
+                    page: loader.page
+                )
+                fetchedItems = rawResp.results.map { MediaItem(
+                    id: $0.id,
+                    title: $0.title,
+                    posterPath: $0.posterPath,
+                    mediaType: .movie
+                ) }
                 responsePage = rawResp.page; responseTotalPages = rawResp.totalPages
             case .tv:
-                let rawResp = try await service.fetchTV(providerIds: pids, genreIds: gids, keywordIds: kwds, page: loader.page)
-                fetchedItems = rawResp.results.map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
+                let rawResp = try await service.fetchTV(
+                    providerIds: pids,
+                    genreIds: gids,
+                    keywordIds: kwds,
+                    page: loader.page
+                )
+                fetchedItems = rawResp.results.map { MediaItem(
+                    id: $0.id,
+                    title: $0.name,
+                    posterPath: $0.posterPath,
+                    mediaType: .tv
+                ) }
                 responsePage = rawResp.page; responseTotalPages = rawResp.totalPages
             case .person, .collection, .unknown:
                 print("⚠️ Unsupported media type for discover: \(selectedMedia)")
@@ -225,13 +268,15 @@ class OverseerrUsersViewModel: ObservableObject {
             print("🔴 Media load error (\(selectedMedia)): \(error.localizedDescription)")
             loader.cancelLoading()
             if loader.page == 1 || results.isEmpty {
-                self.connectionError = "Failed to load \(selectedMedia.displayName). \(error.localizedDescription)"
+                connectionError = "Failed to load \(selectedMedia.displayName). \(error.localizedDescription)"
             }
         }
     }
 
     // ─────────────────────────────────────────────
+
     // MARK: – Search Handling
+
     // ─────────────────────────────────────────────
     private func handleSearchChange(_ text: String) async {
         if text.isEmpty {
@@ -257,7 +302,7 @@ class OverseerrUsersViewModel: ObservableObject {
 
         // Fetch recommendations based on the first search result
         if let firstResultItem = results.first {
-             await fetchRecommendations(for: firstResultItem.id, mediaType: firstResultItem.mediaType)
+            await fetchRecommendations(for: firstResultItem.id, mediaType: firstResultItem.mediaType)
         }
     }
 
@@ -277,8 +322,13 @@ class OverseerrUsersViewModel: ObservableObject {
         do {
             let resp = try await service.search(query: searchQuery, page: loader.page)
             let items = resp.results.compactMap { raw -> MediaItem? in
-                guard let kind = raw.mediaType, (kind == .movie || kind == .tv) else { return nil }
-                return MediaItem(id: raw.id, title: raw.title ?? raw.name ?? "Untitled", posterPath: raw.posterPath, mediaType: kind)
+                guard let kind = raw.mediaType, kind == .movie || kind == .tv else { return nil }
+                return MediaItem(
+                    id: raw.id,
+                    title: raw.title ?? raw.name ?? "Untitled",
+                    posterPath: raw.posterPath,
+                    mediaType: kind
+                )
             }
 
             if loader.page == 1 { results = items }
@@ -292,13 +342,13 @@ class OverseerrUsersViewModel: ObservableObject {
             print("🔴 Search error: \(error.localizedDescription)")
             loader.cancelLoading()
             if loader.page == 1 || results.isEmpty {
-                self.connectionError = "Search failed. \(error.localizedDescription)"
+                connectionError = "Search failed. \(error.localizedDescription)"
             }
         }
     }
 
-
     // MARK: – Keyword Fetching & Filtering - (Unchanged from previous correct version)
+
     private func fetchKeywordSuggestions(for query: String) async {
         isLoadingKeywords = true
         var keywordFetchError: String? = nil
@@ -317,8 +367,9 @@ class OverseerrUsersViewModel: ObservableObject {
             connectionError = keywordFetchError
         }
     }
-    
+
     // MARK: – Keyword Activation
+
     func activate(keyword k: OverseerrAPIService.Keyword) {
         guard !activeKeywordIDs.contains(k.id) else { return }
         // Activating a keyword takes precedence over search.
@@ -326,8 +377,8 @@ class OverseerrUsersViewModel: ObservableObject {
         activeKeywordIDs.insert(k.id)
         // Avoid duplicate display names if somehow added twice
         if !activeKeywords.contains(where: { $0.id == k.id }) {
-             activeKeywords.append(k)
-             activeKeywords.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            activeKeywords.append(k)
+            activeKeywords.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         }
         clearSearchResultsAndRecs() // Clear previous results
 //        // Signal the UI to switch to the Advanced tab
@@ -338,14 +389,13 @@ class OverseerrUsersViewModel: ObservableObject {
         Task { await loadMedia(reset: true) }
     }
 
-
     func remove(keywordID: Int) {
         activeKeywordIDs.remove(keywordID)
         activeKeywords.removeAll { $0.id == keywordID }
         // If search is active, removing keyword doesn't change search results immediately.
         // If search is *not* active, reload the discover view with updated keywords.
         if searchQuery.isEmpty {
-             Task { await loadMedia(reset: true) }
+            Task { await loadMedia(reset: true) }
         }
     }
 
@@ -357,12 +407,22 @@ class OverseerrUsersViewModel: ObservableObject {
                 group.addTask { [weak self] in
                     guard let self = self else { return nil }
                     do {
-                        let movies = try await self.service.fetchMovies(providerIds: [], genreIds: [], keywordIds: [kw.id], page: 1)
+                        let movies = try await self.service.fetchMovies(
+                            providerIds: [],
+                            genreIds: [],
+                            keywordIds: [kw.id],
+                            page: 1
+                        )
                         if !movies.results.isEmpty { return kw }
-                        let tv = try await self.service.fetchTV(providerIds: [], genreIds: [], keywordIds: [kw.id], page: 1)
+                        let tv = try await self.service.fetchTV(
+                            providerIds: [],
+                            genreIds: [],
+                            keywordIds: [kw.id],
+                            page: 1
+                        )
                         if !tv.results.isEmpty { return kw }
                     } catch is AuthError {
-                         await self.recoverFromAuthFailure()
+                        await self.recoverFromAuthFailure()
                     } catch {
                         print("⚠️ Error probing keyword \(kw.name): \(error.localizedDescription)")
                     }
@@ -377,9 +437,9 @@ class OverseerrUsersViewModel: ObservableObject {
         }
     }
 
-
     // MARK: – Recommendation Fetching - (Unchanged from previous correct version)
-    private func fetchRecommendations(for baseItemId: Int, mediaType: MediaType) async {
+
+    private func fetchRecommendations(for baseItemId: Int, mediaType _: MediaType) async {
         recBaseID = baseItemId
         movieRecLoader.reset(); tvRecLoader.reset()
         movieRecs.removeAll(); tvRecs.removeAll()
@@ -392,10 +452,15 @@ class OverseerrUsersViewModel: ObservableObject {
         // Fetch Movie Recs
         do {
             let resp = try await service.movieRecommendations(for: baseItemId, page: movieRecLoader.page)
-            movieRecs = resp.results.map { MediaItem(id: $0.id, title: $0.title, posterPath: $0.posterPath, mediaType: .movie) }
+            movieRecs = resp.results.map { MediaItem(
+                id: $0.id,
+                title: $0.title,
+                posterPath: $0.posterPath,
+                mediaType: .movie
+            ) }
             movieRecLoader.endLoading(next: resp.totalPages)
         } catch is AuthError {
-             recoverFromAuthFailure(); movieFetchError = AuthError.notAuthenticated
+            recoverFromAuthFailure(); movieFetchError = AuthError.notAuthenticated
         } catch {
             movieFetchError = error; print("🔴 Movie recommendations error: \(error.localizedDescription)")
             movieRecs = []; movieRecLoader.reset()
@@ -405,10 +470,11 @@ class OverseerrUsersViewModel: ObservableObject {
         // Fetch TV Recs
         do {
             let resp = try await service.tvRecommendations(for: baseItemId, page: tvRecLoader.page)
-            tvRecs = resp.results.map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
+            tvRecs = resp.results
+                .map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
             tvRecLoader.endLoading(next: resp.totalPages)
         } catch is AuthError {
-             recoverFromAuthFailure(); tvFetchError = AuthError.notAuthenticated
+            recoverFromAuthFailure(); tvFetchError = AuthError.notAuthenticated
         } catch {
             tvFetchError = error; print("🔴 TV recommendations error: \(error.localizedDescription)")
             tvRecs = []; tvRecLoader.reset()
@@ -417,17 +483,26 @@ class OverseerrUsersViewModel: ObservableObject {
 
         // Error Reporting
         if let mvErr = movieFetchError, !(mvErr is AuthError),
-           let tvErr = tvFetchError, !(tvErr is AuthError) {
-             self.connectionError = "Failed to load recommendations."
+           let tvErr = tvFetchError, !(tvErr is AuthError)
+        {
+            connectionError = "Failed to load recommendations."
         } else if connectionError == nil && (movieFetchError != nil || tvFetchError != nil) {
-             if let mvErr = movieFetchError, !(mvErr is AuthError) { self.connectionError = "Failed to load movie recommendations. \(mvErr.localizedDescription)" }
-             else if let tvErr = tvFetchError, !(tvErr is AuthError) { self.connectionError = "Failed to load TV recommendations. \(tvErr.localizedDescription)" }
+            if let mvErr = movieFetchError,
+               !(mvErr is AuthError)
+            {
+                connectionError = "Failed to load movie recommendations. \(mvErr.localizedDescription)"
+            } else if let tvErr = tvFetchError,
+                      !(tvErr is AuthError)
+            {
+                connectionError = "Failed to load TV recommendations. \(tvErr.localizedDescription)"
+            }
         } else if connectionError == nil && movieFetchError == nil && tvFetchError == nil {
-             clearConnectionError()
+            clearConnectionError()
         }
     }
 
     // MARK: – Pagination Logic (Discover/Search, Recs) - (Unchanged from previous correct version)
+
     func loadMoreIfNeeded(current item: MediaItem, within list: [MediaItem]) {
         let thresholdIndex = list.index(list.endIndex, offsetBy: -AppConfig.prefetchThreshold)
         guard let currentIndex = list.firstIndex(where: { $0.id == item.id }),
@@ -443,7 +518,8 @@ class OverseerrUsersViewModel: ObservableObject {
         guard let baseID = recBaseID else { return }
         guard movieRecLoader.page <= movieRecLoader.totalPages, !isLoadingMovieRecs else { return }
         let thresholdIndex = movieRecs.index(movieRecs.endIndex, offsetBy: -AppConfig.prefetchThreshold)
-        guard let currentIndex = movieRecs.firstIndex(where: { $0.id == item.id }), currentIndex >= thresholdIndex else { return }
+        guard let currentIndex = movieRecs.firstIndex(where: { $0.id == item.id }),
+              currentIndex >= thresholdIndex else { return }
         guard movieRecLoader.beginLoading() else { return }
 
         isLoadingMovieRecs = true
@@ -451,13 +527,19 @@ class OverseerrUsersViewModel: ObservableObject {
             defer { isLoadingMovieRecs = false; movieRecLoader.endLoading(next: movieRecLoader.totalPages) }
             do {
                 let resp = try await service.movieRecommendations(for: baseID, page: movieRecLoader.page)
-                let more = resp.results.map { MediaItem(id: $0.id, title: $0.title, posterPath: $0.posterPath, mediaType: .movie) }
+                let more = resp.results.map { MediaItem(
+                    id: $0.id,
+                    title: $0.title,
+                    posterPath: $0.posterPath,
+                    mediaType: .movie
+                ) }
                 movieRecs.append(contentsOf: more)
                 movieRecLoader.endLoading(next: resp.totalPages)
             } catch is AuthError {
                 movieRecLoader.cancelLoading(); recoverFromAuthFailure()
             } catch {
-                movieRecLoader.cancelLoading(); print("🔴 Error loading more movie recommendations: \(error.localizedDescription)")
+                movieRecLoader
+                    .cancelLoading(); print("🔴 Error loading more movie recommendations: \(error.localizedDescription)")
             }
         }
     }
@@ -466,21 +548,28 @@ class OverseerrUsersViewModel: ObservableObject {
         guard let baseID = recBaseID else { return }
         guard tvRecLoader.page <= tvRecLoader.totalPages, !isLoadingTvRecs else { return }
         let thresholdIndex = tvRecs.index(tvRecs.endIndex, offsetBy: -AppConfig.prefetchThreshold)
-        guard let currentIndex = tvRecs.firstIndex(where: { $0.id == item.id }), currentIndex >= thresholdIndex else { return }
+        guard let currentIndex = tvRecs.firstIndex(where: { $0.id == item.id }),
+              currentIndex >= thresholdIndex else { return }
         guard tvRecLoader.beginLoading() else { return }
 
         isLoadingTvRecs = true
         Task {
-             defer { isLoadingTvRecs = false; tvRecLoader.endLoading(next: tvRecLoader.totalPages) }
+            defer { isLoadingTvRecs = false; tvRecLoader.endLoading(next: tvRecLoader.totalPages) }
             do {
                 let resp = try await service.tvRecommendations(for: baseID, page: tvRecLoader.page)
-                let more = resp.results.map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
+                let more = resp.results.map { MediaItem(
+                    id: $0.id,
+                    title: $0.name,
+                    posterPath: $0.posterPath,
+                    mediaType: .tv
+                ) }
                 tvRecs.append(contentsOf: more)
                 tvRecLoader.endLoading(next: resp.totalPages)
             } catch is AuthError {
                 tvRecLoader.cancelLoading(); recoverFromAuthFailure()
             } catch {
-                tvRecLoader.cancelLoading(); print("🔴 Error loading more TV recommendations: \(error.localizedDescription)")
+                tvRecLoader
+                    .cancelLoading(); print("🔴 Error loading more TV recommendations: \(error.localizedDescription)")
             }
         }
     }
@@ -497,12 +586,11 @@ class OverseerrUsersViewModel: ObservableObject {
         _selectedGenres = Published(initialValue: Set(saved.genreIds))
     }
 
-
     private func saveFilters() {
         let saved = SavedFilters(
             mediaType: selectedMedia,
             providerIds: Array(selectedProviders),
-            genreIds:   Array(selectedGenres)
+            genreIds: Array(selectedGenres)
         )
         if let data = try? JSONEncoder().encode(saved) {
             UserDefaults.standard.set(data, forKey: "discoverFilters-\(settingsKey)")
@@ -514,12 +602,14 @@ class OverseerrUsersViewModel: ObservableObject {
             KeychainHelper.save(key: tokenKey, data: data)
         }
     }
+
     private func loadTokenFromKeychain() -> String? {
         guard let data = KeychainHelper.load(key: tokenKey),
               let token = String(data: data, encoding: .utf8)
         else { return nil }
         return token
     }
+
     private func deleteTokenFromKeychain() {
         KeychainHelper.delete(key: tokenKey)
         sessionToken = nil
@@ -528,23 +618,25 @@ class OverseerrUsersViewModel: ObservableObject {
     // MARK: – Plex SSO - Unchanged
 
     private let clientID: String = {
-         let key = "PlexClientID"
-         if let existing = UserDefaults.standard.string(forKey: key) { return existing }
-         let uuid = UUID().uuidString
-         UserDefaults.standard.set(uuid, forKey: key)
-         return uuid
-     }()
+        let key = "PlexClientID"
+        if let existing = UserDefaults.standard.string(forKey: key) { return existing }
+        let uuid = UUID().uuidString
+        UserDefaults.standard.set(uuid, forKey: key)
+        return uuid
+    }()
 
     private let productName = "Cantinarr"
 
-    func startPlexSSO(host: String, port: String?) {
+    func startPlexSSO(host _: String, port _: String?) {
         Task {
             do {
-                 let pin = try await fetchPlexPIN()
-                 let plexURL = buildPlexOAuthURL(code: pin.code)
-                 let web = ASWebAuthenticationSession(url: plexURL, callbackURLScheme: nil) { callbackURL, error in
-                     print("ASWebAuthenticationSession completed. URL: \(callbackURL?.absoluteString ?? "nil"), Error: \(error?.localizedDescription ?? "nil")")
-                 }
+                let pin = try await fetchPlexPIN()
+                let plexURL = buildPlexOAuthURL(code: pin.code)
+                let web = ASWebAuthenticationSession(url: plexURL, callbackURLScheme: nil) { callbackURL, error in
+                    print(
+                        "ASWebAuthenticationSession completed. URL: \(callbackURL?.absoluteString ?? "nil"), Error: \(error?.localizedDescription ?? "nil")"
+                    )
+                }
                 web.presentationContextProvider = authContext
                 web.prefersEphemeralWebBrowserSession = true
                 web.start()
@@ -555,12 +647,12 @@ class OverseerrUsersViewModel: ObservableObject {
                 saveTokenToKeychain(authToken)
                 sessionToken = authToken
 
-                 await AuthManager.shared.probeSession()
+                await AuthManager.shared.probeSession()
 
             } catch {
                 print("🔴 Plex SSO failed: \(error.localizedDescription)")
                 self.connectionError = "Plex login failed. Please try again. (\(error.localizedDescription))"
-                 self.authState = .unauthenticated
+                self.authState = .unauthenticated
             }
         }
     }
@@ -575,13 +667,18 @@ class OverseerrUsersViewModel: ObservableObject {
         req.setValue(clientID, forHTTPHeaderField: "X-Plex-Client-Identifier")
         let (data, resp) = try await URLSession.shared.data(for: req)
         guard let http = resp as? HTTPURLResponse, http.statusCode == 201 else {
-            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch Plex PIN (status: \((resp as? HTTPURLResponse)?.statusCode ?? 0))"])
+            throw URLError(
+                .badServerResponse,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Failed to fetch Plex PIN (status: \((resp as? HTTPURLResponse)?.statusCode ?? 0))",
+                ]
+            )
         }
         return try JSONDecoder().decode(PlexPIN.self, from: data)
     }
 
-    private func pollForPlexToken(pinID: Int, code: String) async throws -> String {
-        for _ in 0..<120 {
+    private func pollForPlexToken(pinID: Int, code _: String) async throws -> String {
+        for _ in 0 ..< 120 {
             try await Task.sleep(nanoseconds: 1_000_000_000)
             let url = URL(string: "https://plex.tv/api/v2/pins/\(pinID)")!
             var req = URLRequest(url: url)
@@ -591,7 +688,10 @@ class OverseerrUsersViewModel: ObservableObject {
 
             let (data, resp) = try await URLSession.shared.data(for: req)
             guard let http = resp as? HTTPURLResponse else { continue }
-            if http.statusCode == 404 { throw URLError(.cancelled, userInfo: [NSLocalizedDescriptionKey: "Plex PIN expired or invalid."]) }
+            if http.statusCode == 404 { throw URLError(
+                .cancelled,
+                userInfo: [NSLocalizedDescriptionKey: "Plex PIN expired or invalid."]
+            ) }
             guard http.statusCode == 200 else { continue }
 
             guard let status = try? JSONDecoder().decode(PlexPIN.self, from: data) else { continue }
@@ -604,7 +704,7 @@ class OverseerrUsersViewModel: ObservableObject {
         let params = [
             "clientID": clientID,
             "code": code,
-            "context[device][product]": productName
+            "context[device][product]": productName,
         ]
         let frag = params.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
         return URL(string: "https://app.plex.tv/auth#?\(frag)")!

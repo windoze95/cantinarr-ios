@@ -44,14 +44,14 @@ struct ServiceConnectionErrorView: View {
 }
 
 #if DEBUG
-struct ServiceConnectionErrorView_Previews: PreviewProvider {
-    static var previews: some View {
-        ServiceConnectionErrorView(
-            serviceName: "Demo Overseerr",
-            errorMessage: "The server at 192.168.1.100:5055 could not be reached. Please check your network connection and the service settings.",
-            onRetry: { print("Retry tapped") },
-            onEditSettings: { print("Edit Settings tapped") }
-        )
+    struct ServiceConnectionErrorView_Previews: PreviewProvider {
+        static var previews: some View {
+            ServiceConnectionErrorView(
+                serviceName: "Demo Overseerr",
+                errorMessage: "The server at 192.168.1.100:5055 could not be reached. Please check your network connection and the service settings.",
+                onRetry: { print("Retry tapped") },
+                onEditSettings: { print("Edit Settings tapped") }
+            )
+        }
     }
-}
 #endif

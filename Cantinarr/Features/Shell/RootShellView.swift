@@ -5,9 +5,9 @@ struct RootShellView: View {
     @EnvironmentObject private var envStore: EnvironmentsStore
 
     // Drawer & sheet state
-    @State private var isMenuOpen       = false
+    @State private var isMenuOpen = false
     @State private var showSettingsSheet = false
-    
+
     private let edgeWidth: CGFloat = 24
 
     var body: some View {
@@ -51,7 +51,7 @@ struct RootShellView: View {
             .gesture(
                 DragGesture(minimumDistance: 20)
                     .onEnded { value in
-                        if isMenuOpen && value.translation.width < -40 {
+                        if isMenuOpen, value.translation.width < -40 {
                             withAnimation { isMenuOpen = false }
                         }
                     }
@@ -77,7 +77,7 @@ struct RootShellView: View {
             // Drawer
             if isMenuOpen {
                 SideMenuView(
-                    closeMenu:       { withAnimation { isMenuOpen = false } },
+                    closeMenu: { withAnimation { isMenuOpen = false } },
                     openSettings: {
                         // When opening settings from the general SideMenu,
                         // we don't pre-select a specific service for editing.
@@ -101,18 +101,19 @@ struct RootShellView: View {
             envStore.selectedServiceID = envStore.selectedEnvironment.services.first?.id
         }
     }
-    
+
     /// Opens the general settings sheet.
     func openGeneralSettings() {
         showSettingsSheet = true
     }
 
     // MARK: – Detail
+
     @ViewBuilder
     private var detailContent: some View {
         if let svcID = envStore.selectedServiceID,
-           let selectedServiceInstance = envStore.selectedServiceInstance { // Get the full instance to check its kind
-            
+           let selectedServiceInstance = envStore.selectedServiceInstance
+        { // Get the full instance to check its kind
             switch selectedServiceInstance.kind {
             case .overseerrUsers:
                 if let overseerrSettings = selectedServiceInstance.decode(OverseerrSettings.self) {
@@ -128,7 +129,7 @@ struct RootShellView: View {
                     Text("Error: Could not load Overseerr settings for \(selectedServiceInstance.displayName).")
                         .foregroundColor(.red)
                 }
-                
+
             case .radarr:
                 if let radarrSettings = selectedServiceInstance.decode(RadarrSettings.self) {
                     RadarrHomeEntry(
@@ -143,17 +144,18 @@ struct RootShellView: View {
                         .foregroundColor(.red)
                 }
             }
-            
+
         } else {
             // Placeholder when no service is selected or no services configured
             VStack {
                 Spacer()
-                Text(envStore.selectedEnvironment.services.isEmpty ? "No services configured for this environment." : "Select a service from the menu.")
+                Text(envStore.selectedEnvironment.services
+                    .isEmpty ? "No services configured for this environment." : "Select a service from the menu.")
                     .font(.title3)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
-                
+
                 if envStore.selectedEnvironment.services.isEmpty {
                     Button("Add Service in Settings") {
                         openGeneralSettings()

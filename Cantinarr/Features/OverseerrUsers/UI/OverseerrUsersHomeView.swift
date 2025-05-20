@@ -1,6 +1,6 @@
-import SwiftUI
-import Combine
 import AuthenticationServices
+import Combine
+import SwiftUI
 
 struct OverseerrUsersHomeView: View {
     // dependencies
@@ -13,13 +13,14 @@ struct OverseerrUsersHomeView: View {
     @State private var isSearchLoadingLocal = false
 
     // MARK: – Init
+
     init(trendingVM: TrendingViewModel,
          overseerrUsersVM: OverseerrUsersViewModel)
     {
         // _vm and _overseerrUsersVM are initialized by the @ObservedObject property wrapper
         // when the view is created and these objects are passed in.
         // We assign them directly.
-        self.vm = trendingVM
+        vm = trendingVM
         self.overseerrUsersVM = overseerrUsersVM
     }
 
@@ -43,7 +44,7 @@ struct OverseerrUsersHomeView: View {
         // Check for critical errors first (e.g., failure to load providers prevents core functionality)
         // Show a *contained* error view if basics fail, replacing the normal content.
         if let basicError = overseerrUsersVM.connectionError, overseerrUsersVM.watchProviders.isEmpty {
-             basicErrorView(error: basicError)
+            basicErrorView(error: basicError)
         } else {
             // Main scrollable content area
             ScrollView {
@@ -67,8 +68,8 @@ struct OverseerrUsersHomeView: View {
             .safeAreaInset(edge: .top) {
                 SearchBarView(text: $searchText, focus: $searchFieldFocused)
                     .padding(.horizontal) // Standard padding for the bar itself
-                    .padding(.top, 8)      // Padding above search bar
-                    .padding(.bottom, 4)   // Padding below search bar
+                    .padding(.top, 8) // Padding above search bar
+                    .padding(.bottom, 4) // Padding below search bar
                     .onChange(of: searchText) { new in
                         // When search text changes, update the ViewModel
                         if !new.isEmpty && overseerrUsersVM.searchQuery.isEmpty {
@@ -98,47 +99,47 @@ struct OverseerrUsersHomeView: View {
                 if vm.items.isEmpty && vm.connectionError == nil { // Only load if empty and no prior error
                     await vm.bootstrap()
                 }
-                 // Check if basics are loaded (might be redundant with HomeEntry's task)
-                 if overseerrUsersVM.watchProviders.isEmpty && overseerrUsersVM.connectionError == nil {
-                     await overseerrUsersVM.loadAllBasics()
-                 }
+                // Check if basics are loaded (might be redundant with HomeEntry's task)
+                if overseerrUsersVM.watchProviders.isEmpty && overseerrUsersVM.connectionError == nil {
+                    await overseerrUsersVM.loadAllBasics()
+                }
             }
             .scrollDismissesKeyboard(.immediately)
             // Dismiss keyboard on tap outside search bar
             .contentShape(Rectangle()) // Make the whole scroll view tappable
             .onTapGesture {
-                 searchFieldFocused = false
-                 UIApplication.shared.endEditing()
-             }
+                searchFieldFocused = false
+                UIApplication.shared.endEditing()
+            }
         }
     }
 
     // View for critical basic load errors (replaces whole view)
     @ViewBuilder
     private func basicErrorView(error: String) -> some View {
-         VStack(spacing: 15) {
-             Spacer()
-             Image(systemName: "wifi.exclamationmark")
-                 .font(.system(size: 50))
-                 .foregroundColor(.orange)
-             Text("Service Configuration Error")
-                 .font(.title3)
-                 .fontWeight(.semibold)
-             Text(error)
-                 .font(.callout)
-                 .foregroundColor(.secondary)
-                 .multilineTextAlignment(.center)
-                 .padding(.horizontal)
-             Button("Retry") {
-                 Task {
-                     await overseerrUsersVM.loadAllBasics() // Attempt to reload basic config
-                     // If basics succeed, other content might load via .task
-                 }
-             }
-             .buttonStyle(.borderedProminent)
-             Spacer()
-         }
-         .padding()
+        VStack(spacing: 15) {
+            Spacer()
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 50))
+                .foregroundColor(.orange)
+            Text("Service Configuration Error")
+                .font(.title3)
+                .fontWeight(.semibold)
+            Text(error)
+                .font(.callout)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            Button("Retry") {
+                Task {
+                    await overseerrUsersVM.loadAllBasics() // Attempt to reload basic config
+                    // If basics succeed, other content might load via .task
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            Spacer()
+        }
+        .padding()
     }
 
     // View for less critical inline errors (shown above content)
@@ -154,7 +155,7 @@ struct OverseerrUsersHomeView: View {
             Button {
                 overseerrUsersVM.connectionError = nil // Allow user to dismiss transient errors
             } label: {
-                 Image(systemName: "xmark.circle.fill")
+                Image(systemName: "xmark.circle.fill")
                     .foregroundColor(.secondary)
             }
             .buttonStyle(.plain)
@@ -171,21 +172,22 @@ struct OverseerrUsersHomeView: View {
     private var trendingSection: some View {
         // Display trending connection error if present
         if let error = vm.connectionError {
-             VStack {
-                 Image(systemName: "antenna.radiowaves.left.and.right.slash").font(.largeTitle).foregroundColor(.orange) // Changed Icon
-                 Text("Cannot Load Trending").font(.headline).padding(.bottom, 2) // Changed Text
-                 Text(error).font(.caption).multilineTextAlignment(.center).padding(.horizontal)
-                 Button("Retry") { Task { await vm.bootstrap() } }
+            VStack {
+                Image(systemName: "antenna.radiowaves.left.and.right.slash").font(.largeTitle)
+                    .foregroundColor(.orange) // Changed Icon
+                Text("Cannot Load Trending").font(.headline).padding(.bottom, 2) // Changed Text
+                Text(error).font(.caption).multilineTextAlignment(.center).padding(.horizontal)
+                Button("Retry") { Task { await vm.bootstrap() } }
                     .buttonStyle(.bordered).padding(.top, 5)
-             }
-             .frame(maxWidth: .infinity, minHeight: 200, alignment: .center)
-             .padding()
+            }
+            .frame(maxWidth: .infinity, minHeight: 200, alignment: .center)
+            .padding()
 
         } else if vm.items.isEmpty && vm.isLoading {
-             // Show shimmer only if items are empty and loading
-             Text("Trending").font(.title2).padding(.horizontal).opacity(0) // Placeholder title for spacing
-             HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                 .frame(height: 200) // Consistent height
+            // Show shimmer only if items are empty and loading
+            Text("Trending").font(.title2).padding(.horizontal).opacity(0) // Placeholder title for spacing
+            HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                .frame(height: 200) // Consistent height
         } else if !vm.items.isEmpty {
             // Show trending items
             Text("Trending")
@@ -199,14 +201,14 @@ struct OverseerrUsersHomeView: View {
                 vm.loadMoreIfNeeded(current: item)
             }
         } else {
-             // Empty state for trending (after load, if no items and no error)
-             Text("Trending")
-                 .font(.title2)
-                 .padding(.horizontal)
-             Text("No trending items found.")
-                 .foregroundColor(.secondary)
-                 .padding()
-                 .frame(maxWidth: .infinity, minHeight: 100, alignment: .center) // Smaller height for empty message
+            // Empty state for trending (after load, if no items and no error)
+            Text("Trending")
+                .font(.title2)
+                .padding(.horizontal)
+            Text("No trending items found.")
+                .foregroundColor(.secondary)
+                .padding()
+                .frame(maxWidth: .infinity, minHeight: 100, alignment: .center) // Smaller height for empty message
         }
     }
 
@@ -223,7 +225,9 @@ struct OverseerrUsersHomeView: View {
                 Text("Search Results").font(.headline).padding(.horizontal).opacity(0) // Placeholder title for spacing
                 HorizontalMediaRow(items: [], isLoading: true) { _ in }
                     .frame(height: 200) // Consistent height
-            } else if !isSearchLoadingLocal && !overseerrUsersVM.isLoadingSearch && overseerrUsersVM.results.isEmpty && !searchText.isEmpty {
+            } else if !isSearchLoadingLocal && !overseerrUsersVM.isLoadingSearch && overseerrUsersVM.results
+                .isEmpty && !searchText.isEmpty
+            {
                 // No results found message only if search wasn't empty and not loading
                 HStack {
                     Spacer()
@@ -250,16 +254,16 @@ struct OverseerrUsersHomeView: View {
                     isLoading: overseerrUsersVM.isLoadingSearch // Pass loading state
                 ) { item in
                     overseerrUsersVM.loadMoreIfNeeded(current: item,
-                                                within: overseerrUsersVM.results)
+                                                      within: overseerrUsersVM.results)
                 }
             }
 
             // Keyword Suggestions (Handles its own loading/empty state)
             if overseerrUsersVM.isLoadingKeywords {
-                 Text("Search by Keyword").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
+                Text("Search by Keyword").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        ForEach(0..<5, id: \.self) { _ in
+                        ForEach(0 ..< 5, id: \.self) { _ in
                             RoundedRectangle(cornerRadius: 16).fill(Color.gray.opacity(0.3))
                                 .frame(width: 100, height: 32).shimmer()
                         }
@@ -285,18 +289,18 @@ struct OverseerrUsersHomeView: View {
             VStack(alignment: .leading, spacing: 16) { // Group recommendations
                 // Movie Recommendations
                 if overseerrUsersVM.isLoadingMovieRecs && overseerrUsersVM.movieRecs.isEmpty {
-                     Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                     HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                    Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
+                    HorizontalMediaRow(items: [], isLoading: true) { _ in }
                         .frame(height: 200)
                 } else if !overseerrUsersVM.movieRecs.isEmpty {
-                     Text("Movies You Might Like")
+                    Text("Movies You Might Like")
                         .font(.headline).padding(.horizontal)
-                     HorizontalMediaRow(
+                    HorizontalMediaRow(
                         items: overseerrUsersVM.movieRecs,
                         isLoading: overseerrUsersVM.isLoadingMovieRecs
-                     ) { item in
+                    ) { item in
                         overseerrUsersVM.loadMoreMovieRecsIfNeeded(current: item)
-                     }
+                    }
                 }
 
                 // TV Recommendations

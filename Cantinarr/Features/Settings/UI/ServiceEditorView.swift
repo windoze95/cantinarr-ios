@@ -10,14 +10,16 @@ struct ServiceEditorView: View {
     private var isDisplayNameOK: Bool {
         !draft.displayName.trimmingCharacters(in: .whitespaces).isEmpty
     }
+
     private var isJSONValid: Bool {
         guard let data = draft.configurationJSON.data(using: .utf8) else { return false }
         return (try? JSONSerialization.jsonObject(with: data)) != nil
     }
 
     init(draft: ServiceDraft,
-         onSave: @escaping (ServiceDraft) -> Void) {
-        _draft  = State(initialValue: draft)
+         onSave: @escaping (ServiceDraft) -> Void)
+    {
+        _draft = State(initialValue: draft)
         self.onSave = onSave
     }
 
@@ -41,7 +43,7 @@ struct ServiceEditorView: View {
                     TextEditor(text: $draft.configurationJSON)
                         .font(.system(.body, design: .monospaced))
                         .frame(minHeight: 160)
-                    // Red border if JSON invalid
+                        // Red border if JSON invalid
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(isJSONValid ? Color.clear : Color.red, lineWidth: 2)
@@ -50,7 +52,7 @@ struct ServiceEditorView: View {
             }
         }
         .navigationTitle(draft.displayName.isEmpty ? "New Service"
-                                                   : "Edit Service")
+            : "Edit Service")
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {

@@ -1,12 +1,12 @@
-import Foundation
 import Combine
+import Foundation
 import WebKit
 
 /// Shared cookie store so that WKWebView and URLSession share authentication cookies.
-fileprivate let sharedDataStore = WKWebsiteDataStore.default()
+private let sharedDataStore = WKWebsiteDataStore.default()
 
 enum AuthError: Error {
-  case notAuthenticated
+    case notAuthenticated
 }
 
 struct User: Codable { // This struct should match the /auth/me response
@@ -23,6 +23,7 @@ struct User: Codable { // This struct should match the /auth/me response
 @MainActor
 class OverseerrAPIService {
     // MARK: – Configuration
+
     let host: String
     let port: String?
     let useSSL: Bool
@@ -30,14 +31,15 @@ class OverseerrAPIService {
     let baseURL: URL
     /// URLSession that shares cookies with WKWebView
     private let session: URLSession
-    
+
     private let jsonDecoder: JSONDecoder = {
         let d = JSONDecoder()
         d.keyDecodingStrategy = .convertFromSnakeCase
         return d
     }()
-    
+
     // MARK: - Convenience initializer
+
     convenience init(settings: OverseerrSettings) {
         self.init(host: settings.host,
                   port: settings.port,
@@ -54,51 +56,51 @@ class OverseerrAPIService {
         // pick scheme based on useSSL
         var comps = URLComponents()
         comps.scheme = scheme
-        comps.host   = host
+        comps.host = host
         if let p = port, !p.isEmpty {
             comps.port = Int(p)
         }
-        comps.path   = "/api/v1"
+        comps.path = "/api/v1"
         guard let url = comps.url else {
             fatalError("Invalid Overseerr base URL")
         }
-        self.baseURL = url
+        baseURL = url
 
         let cfg = URLSessionConfiguration.default
-        cfg.httpCookieStorage      = HTTPCookieStorage.shared
+        cfg.httpCookieStorage = HTTPCookieStorage.shared
         cfg.httpCookieAcceptPolicy = .always
-        self.session = URLSession(configuration: cfg)
+        session = URLSession(configuration: cfg)
     }
-    
+
     // MARK: – Authentication
-    
+
     /// Checks if there is a valid login session (overseerr’s cookie-based `/auth/me`).
     func isAuthenticated() async -> Bool {
         let url = baseURL.appendingPathComponent("auth/me")
         var req = URLRequest(url: url)
         req.httpMethod = "GET"
         do {
-            let (_, http) = try await data(for: req)  // ← unified path
+            let (_, http) = try await data(for: req) // ← unified path
             return http.statusCode == 200
         } catch {
             return false
         }
     }
-    
+
     // MARK: – Watch Providers
-    
+
     struct WatchProvider: Codable, Identifiable {
         let id: Int
         let name: String
     }
 
     func fetchWatchProviders(isMovie: Bool) async throws -> [WatchProvider] {
-            let endpoint = isMovie ? "watchproviders/movies" : "watchproviders/tv"
-            var comps = URLComponents(url: baseURL.appendingPathComponent(endpoint),
-                                      resolvingAgainstBaseURL: false)!
-            comps.queryItems = [ .init(name: "watchRegion",
-                                       value: Locale.current.regionCode ?? "US") ]
-            let (d, resp) = try await data(for: URLRequest(url: comps.url!))
+        let endpoint = isMovie ? "watchproviders/movies" : "watchproviders/tv"
+        var comps = URLComponents(url: baseURL.appendingPathComponent(endpoint),
+                                  resolvingAgainstBaseURL: false)!
+        comps.queryItems = [.init(name: "watchRegion",
+                                  value: Locale.current.regionCode ?? "US")]
+        let (d, resp) = try await data(for: URLRequest(url: comps.url!))
         guard let http = resp as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
@@ -109,16 +111,16 @@ class OverseerrAPIService {
         guard http.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
-            return try jsonDecoder.decode([WatchProvider].self, from: d)
-        }
-    
+        return try jsonDecoder.decode([WatchProvider].self, from: d)
+    }
+
     // MARK: – Keywords
 
     struct Keyword: Codable, Identifiable {
         let id: Int
         let name: String
     }
-    
+
     /// /search/keyword?query=foo
     func keywordSearch(query: String) async throws -> [Keyword] {
         guard !query.isEmpty else { return [] }
@@ -126,7 +128,7 @@ class OverseerrAPIService {
             url: baseURL.appendingPathComponent("search/keyword"),
             resolvingAgainstBaseURL: false
         )!
-        comps.queryItems = [ .init(name: "query", value: query) ]
+        comps.queryItems = [.init(name: "query", value: query)]
         let (data, resp) = try await data(for: URLRequest(url: comps.url!))
         guard let http = resp as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
@@ -146,34 +148,34 @@ class OverseerrAPIService {
     // MARK: – Recommendations
 
     func movieRecommendations(for id: Int, page: Int = 1)
-      async throws -> DiscoverResponse<Movie> {
-
+        async throws -> DiscoverResponse<Movie>
+    {
         try await discover(endpoint: "movie/\(id)/recommendations",
                            providerIds: [], genreIds: [], page: page)
     }
 
     func tvRecommendations(for id: Int, page: Int = 1)
-      async throws -> DiscoverResponse<TVShow> {
-
+        async throws -> DiscoverResponse<TVShow>
+    {
         try await discover(endpoint: "tv/\(id)/recommendations",
                            providerIds: [], genreIds: [], page: page)
     }
-    
+
     // MARK: – Discover
-    
+
     struct DiscoverResponse<T: Codable>: Codable {
         let page: Int
         let totalPages: Int
         let results: [T]
     }
-    
+
     struct Movie: Codable, Identifiable {
         let id: Int
         let title: String
         let posterPath: String?
         let genreIds: [Int]?
     }
-    
+
     struct TVShow: Codable, Identifiable {
         let id: Int
         let name: String
@@ -186,29 +188,29 @@ class OverseerrAPIService {
         let id: Int
         let mediaType: MediaType
         let title: String?
-        let name : String?
+        let name: String?
         let posterPath: String?
     }
-    
+
     // ───────── SEARCH ─────────
     struct SearchItem: Codable, Identifiable {
         let id: Int
         let mediaType: MediaType?
         let title: String?
-        let name : String?
+        let name: String?
         let posterPath: String?
     }
 
     func search(query: String, page: Int)
-      async throws -> DiscoverResponse<SearchItem> {
-
+        async throws -> DiscoverResponse<SearchItem>
+    {
         var comps = URLComponents(
             url: baseURL.appendingPathComponent("search"),
             resolvingAgainstBaseURL: false
         )!
         comps.queryItems = [
             .init(name: "query", value: query),
-            .init(name: "page",  value: "\(page)")
+            .init(name: "page", value: "\(page)"),
         ]
         let (data, resp) = try await data(for: URLRequest(url: comps.url!))
         guard (resp as? HTTPURLResponse)?.statusCode == 200
@@ -218,7 +220,9 @@ class OverseerrAPIService {
     }
 
     // MARK: – Fetch helpers
+
     // MARK: – Discover helpers
+
     private func discover<T: Codable>(
         endpoint: String,
         providerIds: [Int],
@@ -229,7 +233,7 @@ class OverseerrAPIService {
         var comps = URLComponents(url: baseURL.appendingPathComponent(endpoint),
                                   resolvingAgainstBaseURL: false)!
         var q: [URLQueryItem] = [
-            .init(name: "page", value: "\(page)")
+            .init(name: "page", value: "\(page)"),
         ]
         if !providerIds.isEmpty {
             q.append(.init(name: "watchProviders",
@@ -261,6 +265,7 @@ class OverseerrAPIService {
     }
 
     // MARK: – Public discover fetches
+
     func fetchMovies(
         providerIds: [Int],
         genreIds: [Int],
@@ -304,6 +309,7 @@ class OverseerrAPIService {
     }
 
     // MARK: – Unified request helper
+
     @discardableResult
     func data(for req: URLRequest) async throws -> (Data, HTTPURLResponse) {
         // hit the network through the dedicated session
@@ -321,39 +327,43 @@ class OverseerrAPIService {
 
         return (data, http)
     }
-    
+
     func fetchCurrentUser() async throws -> User { // Ensure User struct matches /auth/me response
         let (data, resp) = try await self.data(for: URLRequest(url: baseURL.appendingPathComponent("auth/me")))
         guard resp.statusCode == 200 else {
-            throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch current user. Status: \(resp.statusCode)"])
+            throw URLError(
+                .badServerResponse,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to fetch current user. Status: \(resp.statusCode)"]
+            )
         }
         return try jsonDecoder.decode(User.self, from: data)
     }
 }
 
 // MARK: – Plex SSO helper
+
 extension OverseerrAPIService {
     func plexSSORedirectURL() async throws -> URL {
         // 1) Build the correct URL: http or https + host/port + /api/v1/auth/plex
         let endpoint = baseURL.appendingPathComponent("auth/plex")
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
-        
+
         // Add these two lines:
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
+
         // Asend an empty JSON body so some servers see a non-nil body
         request.httpBody = Data()
-        
+
         // Send it
         let (data, resp) = try await data(for: request)
         guard let http = resp as? HTTPURLResponse, http.statusCode == 200 else {
             let body = String(data: data, encoding: .utf8) ?? "(empty)"
-            print("🛑 /api/v1/auth/plex returned status \( (resp as? HTTPURLResponse)?.statusCode ?? -1 ):\n\(body)")
+            print("🛑 /api/v1/auth/plex returned status \((resp as? HTTPURLResponse)?.statusCode ?? -1):\n\(body)")
             throw URLError(.badServerResponse)
         }
-        
+
         // Decode the JSON and return the Plex URL
         struct Redirect: Decodable { let url: String }
         let redirect = try JSONDecoder().decode(Redirect.self, from: data)

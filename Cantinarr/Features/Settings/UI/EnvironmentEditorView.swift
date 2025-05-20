@@ -4,12 +4,13 @@ import SwiftUI
 struct EnvironmentEditorView: View {
     // Pass‑in a *copy* of the draft so we can cancel without side‑effects.
     @State private var draft: EnvironmentDraft
-    let onSave: (EnvironmentDraft) -> Void          // caller mutates its array
+    let onSave: (EnvironmentDraft) -> Void // caller mutates its array
     @Environment(\.dismiss) private var dismiss
 
     init(draft: EnvironmentDraft,
-         onSave: @escaping (EnvironmentDraft) -> Void) {
-        _draft  = State(initialValue: draft)
+         onSave: @escaping (EnvironmentDraft) -> Void)
+    {
+        _draft = State(initialValue: draft)
         self.onSave = onSave
     }
 
@@ -21,7 +22,7 @@ struct EnvironmentEditorView: View {
             }
         }
         .navigationTitle(draft.name.isEmpty ? "New Environment"
-                                            : "Edit Environment")
+            : "Edit Environment")
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {

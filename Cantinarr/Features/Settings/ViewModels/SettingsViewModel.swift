@@ -1,6 +1,5 @@
-import SwiftUI
 import Combine
-
+import SwiftUI
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
@@ -12,7 +11,7 @@ final class SettingsViewModel: ObservableObject {
     init(store: EnvironmentsStore) {
         self.store = store
         // Make a deep copy of drafts to avoid direct mutation issues with store's source
-        self.drafts = store.environments.map { EnvironmentDraft($0) }
+        drafts = store.environments.map { EnvironmentDraft($0) }
 
         // Propagate edits back to store
         $drafts
@@ -25,14 +24,14 @@ final class SettingsViewModel: ObservableObject {
     }
 
     func addEnvironment() {
-        let newEnv = EnvironmentDraft(ServerEnvironment(name:"New Environment"))
+        let newEnv = EnvironmentDraft(ServerEnvironment(name: "New Environment"))
         drafts.append(newEnv)
     }
 
     func deleteEnvironments(at offsets: IndexSet) {
         drafts.remove(atOffsets: offsets)
     }
-    
+
     // New method to delete a service from a specific environment
     func deleteService(inEnvironment envID: UUID, at offsets: IndexSet) {
         guard let envIndex = drafts.firstIndex(where: { $0.id == envID }) else { return }

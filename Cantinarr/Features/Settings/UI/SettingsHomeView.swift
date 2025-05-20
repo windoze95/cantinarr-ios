@@ -25,17 +25,18 @@ struct SettingsHomeView: View {
                         }
                     }
                     Button {
-                        currentEnvID   = env.id
+                        currentEnvID = env.id
                         editingService = ServiceDraft(
-                            ServiceInstance(kind:.overseerrUsers,
-                                            displayName:"",
-                                            configuration:nil))
+                            ServiceInstance(kind: .overseerrUsers,
+                                            displayName: "",
+                                            configuration: nil)
+                        )
                     } label: {
                         Label("Add Service…", systemImage: "plus")
                     }
                 } header: { Text(env.name) }
             }
-            .onDelete { vm.deleteEnvironments(at:$0) }
+            .onDelete { vm.deleteEnvironments(at: $0) }
         }
         .navigationTitle("Environments")
         .toolbar { Button("Add") { vm.addEnvironment() } }
@@ -43,7 +44,7 @@ struct SettingsHomeView: View {
             NavigationStack {
                 EnvironmentEditorView(draft: draft) { newDraft in
                     if let idx = vm.drafts.firstIndex(of: draft) {
-                        vm.drafts[idx] = newDraft        // write‑back
+                        vm.drafts[idx] = newDraft // write‑back
                     }
                 }
             }
@@ -53,13 +54,12 @@ struct SettingsHomeView: View {
                 ServiceEditorView(draft: draft) { new in
                     // Locate the environment that opened the sheet
                     if let eIdx = vm.drafts.firstIndex(where: { $0.id == currentEnvID }) {
-
                         // Is this an edit (already exists) … ?
                         if let sIdx = vm.drafts[eIdx].services.firstIndex(of: draft) {
-                            vm.drafts[eIdx].services[sIdx] = new      // ▸ update
+                            vm.drafts[eIdx].services[sIdx] = new // ▸ update
                         } else {
                             // … or a brand‑new service?
-                            vm.drafts[eIdx].services.append(new)      // ▸ insert
+                            vm.drafts[eIdx].services.append(new) // ▸ insert
                         }
                     }
                 }

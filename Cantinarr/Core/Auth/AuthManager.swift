@@ -1,31 +1,35 @@
-import Foundation
 import Combine
+import Foundation
 
 /// Actor = thread‑safe without extra locks.
 actor AuthManager {
-
     // MARK: – Public singleton
+
     static let shared = AuthManager()
     private init() {}
 
     // MARK: – Published state
-    nonisolated let subject = CurrentValueSubject<AuthState,Never>(.unknown)
-    nonisolated var publisher: AnyPublisher<AuthState,Never> {
+
+    nonisolated let subject = CurrentValueSubject<AuthState, Never>(.unknown)
+    nonisolated var publisher: AnyPublisher<AuthState, Never> {
         subject.eraseToAnyPublisher()
     }
+
     nonisolated var value: AuthState { subject.value }
 
     // MARK: – Config injected once at app launch
+
     private var service: OverseerrAPIService!
 
     /// Call once from `App.bootstrap` after you know which Overseerr you're talking to.
     func configure(service: OverseerrAPIService) {
         self.service = service
-        lastProbe     = nil
+        lastProbe = nil
         Task { await probeSession() }
     }
 
     // MARK: – Cached validation
+
     private var lastProbe: Date?
 
     /// Cheap helper any view‑model can call.
@@ -48,13 +52,13 @@ actor AuthManager {
         if HTTPCookieStorage.shared.cookies?
             .contains(where: { $0.name == "connect.sid" }) == true
         {
-            subject.send(.authenticated(expiry:nil))
+            subject.send(.authenticated(expiry: nil))
         }
 
         // Slow network probe (runs once / 30 s at most)
         let ok = await s.isAuthenticated()
         await MainActor.run {
-            subject.send(ok ? .authenticated(expiry:nil) : .unauthenticated)
+            subject.send(ok ? .authenticated(expiry: nil) : .unauthenticated)
         }
     }
 

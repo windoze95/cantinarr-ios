@@ -1,5 +1,5 @@
-import SwiftUI
 import NukeUI
+import SwiftUI
 
 private struct TaglineHeightKeyRadarr: PreferenceKey {
     static var defaultValue: CGFloat = .zero
@@ -15,7 +15,10 @@ struct RadarrMovieDetailView: View {
     @State private var showDeleteConfirmation = false
 
     init(movieId: Int, radarrService: RadarrAPIService) {
-        _viewModel = StateObject(wrappedValue: RadarrMovieDetailViewModel(movieId: movieId, radarrService: radarrService))
+        _viewModel = StateObject(wrappedValue: RadarrMovieDetailViewModel(
+            movieId: movieId,
+            radarrService: radarrService
+        ))
     }
 
     @ViewBuilder
@@ -38,7 +41,7 @@ struct RadarrMovieDetailView: View {
         GeometryReader { rootGeo in
             blurredBackground
 
-            let safeWidth  = rootGeo.size.width - rootGeo.safeAreaInsets.leading - rootGeo.safeAreaInsets.trailing
+            let safeWidth = rootGeo.size.width - rootGeo.safeAreaInsets.leading - rootGeo.safeAreaInsets.trailing
             let safeHeight = rootGeo.size.height - rootGeo.safeAreaInsets.bottom
 
             if viewModel.isLoading && viewModel.movie == nil {
@@ -58,8 +61,8 @@ struct RadarrMovieDetailView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             } else if let movie = viewModel.movie {
                 ScrollView(.vertical, showsIndicators: false) {
-                    let headerMax = max(0,  safeHeight - 100 - taglineHeight)
-                    let headerMin = max(44, safeWidth  - 200)
+                    let headerMax = max(0, safeHeight - 100 - taglineHeight)
+                    let headerMin = max(44, safeWidth - 200)
 
                     ShrinkOnScrollHeaderRadarr(maxHeight: headerMax, minHeight: headerMin) {
                         movieHeader(movie: movie)
@@ -77,27 +80,34 @@ struct RadarrMovieDetailView: View {
                                 Color.clear.preference(key: TaglineHeightKeyRadarr.self, value: tgGeo.size.height)
                             })
                             .padding(.bottom, 8) // Spacing after overview before details
-                        
+
                         Divider()
-                        
+
                         movieDetailsSection(movie: movie)
-                        
+
                         Divider().padding(.vertical, 8)
-                        
+
                         actionButtonsSection(movie: movie)
                     }
                     .padding() // Horizontal and some vertical padding for the content below header
                     .frame(maxWidth: safeWidth, alignment: .leading)
                 }
                 .coordinateSpace(name: "radarrScroll")
-                .overlay(alignment: .topTrailing) { closeButton.padding(.top, rootGeo.safeAreaInsets.top > 0 ? rootGeo.safeAreaInsets.top : 20) } // Adjust padding based on safe area
+                .overlay(alignment: .topTrailing) { closeButton.padding(
+                    .top,
+                    rootGeo.safeAreaInsets.top > 0 ? rootGeo.safeAreaInsets.top : 20
+                ) } // Adjust padding based on safe area
                 .onPreferenceChange(TaglineHeightKeyRadarr.self) { taglineHeight = $0 }
                 .alert(isPresented: $viewModel.showCommandStatusAlert) {
-                    Alert(title: Text("Radarr Command"), message: Text(viewModel.commandStatusMessage ?? "Unknown status."), dismissButton: .default(Text("OK")))
+                    Alert(
+                        title: Text("Radarr Command"),
+                        message: Text(viewModel.commandStatusMessage ?? "Unknown status."),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
             } else {
                 // Case where movie is nil after loading (e.g., deleted then view not dismissed)
-                 Text("Movie data not available.")
+                Text("Movie data not available.")
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -127,7 +137,7 @@ struct RadarrMovieDetailView: View {
                         .font(.title2.weight(.bold))
                         .lineLimit(3)
                         .foregroundColor(.white)
-                    
+
                     HStack {
                         Text(String(movie.year))
                         Text("•")
@@ -161,7 +171,7 @@ struct RadarrMovieDetailView: View {
         }
         .clipped()
     }
-    
+
     @ViewBuilder
     private func movieDetailsSection(movie: RadarrMovie) -> some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -210,7 +220,7 @@ struct RadarrMovieDetailView: View {
                 }
                 .buttonStyle(.bordered)
             }
-            
+
             // TODO: Add Edit button (placeholder for now)
             // Button("Edit Movie Details") { /* Navigate to an edit screen */ }
             // .buttonStyle(.bordered)
@@ -226,7 +236,8 @@ struct RadarrMovieDetailView: View {
             .buttonStyle(.borderedProminent)
             .confirmationDialog("Delete \(movie.title)?",
                                 isPresented: $showDeleteConfirmation,
-                                titleVisibility: .visible) {
+                                titleVisibility: .visible)
+            {
                 Button("Delete Movie and Files", role: .destructive) {
                     Task { await viewModel.deleteMovie(alsoDeleteFiles: true) }
                 }
@@ -235,14 +246,14 @@ struct RadarrMovieDetailView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                 Text("This action cannot be undone. Choose an option for file deletion.")
+                Text("This action cannot be undone. Choose an option for file deletion.")
             }
         }
     }
 
     private var closeButton: some View {
         Button { dismiss() } label: {
-            Image(systemName:"xmark.circle.fill")
+            Image(systemName: "xmark.circle.fill")
                 .font(.title) // Larger for easier tapping
                 .foregroundColor(.white.opacity(0.7))
                 .background(Circle().fill(Color.black.opacity(0.3))) // Slight background for better visibility
@@ -263,7 +274,7 @@ struct RadarrMovieDetailView: View {
             }
         }
     }
-    
+
     // ShrinkOnScrollHeader adapted for this view
     private struct ShrinkOnScrollHeaderRadarr<Content: View>: View {
         let maxHeight: CGFloat
@@ -272,8 +283,8 @@ struct RadarrMovieDetailView: View {
 
         var body: some View {
             GeometryReader { g in
-                let safeMin  = max(0,  minHeight)
-                let safeMax  = max(safeMin, maxHeight)
+                let safeMin = max(0, minHeight)
+                let safeMax = max(safeMin, maxHeight)
                 let offset = g.frame(in: .named("radarrScroll")).minY
                 let height = max(safeMin, safeMax - offset)
 

@@ -8,10 +8,10 @@ struct RadarrHomeEntry: View {
     // if it doesn't have @Published properties that this view directly observes.
     // It's created once and passed to ViewModels that ARE @StateObjects.
     private let radarrServiceInstance: RadarrAPIService
-    
+
     @State private var initialConnectionError: String? = nil
     @State private var isLoadingInitialCheck: Bool = true
-    
+
     // ViewModels for each tab ARE @StateObjects
     @StateObject private var moviesVM: RadarrMoviesViewModel
     // Add other ViewModels for Upcoming, Missing etc. later
@@ -19,13 +19,13 @@ struct RadarrHomeEntry: View {
     init(settings: RadarrSettings, openSettingsSheetForCurrentService: @escaping () -> Void) {
         self.settings = settings
         self.openSettingsSheetForCurrentService = openSettingsSheetForCurrentService
-        
+
         let service = RadarrAPIService(settings: settings)
-        self.radarrServiceInstance = service // Store the instance
+        radarrServiceInstance = service // Store the instance
         _moviesVM = StateObject(wrappedValue: RadarrMoviesViewModel(service: service))
         // Initialize other VMs here using the same 'service' instance
     }
-    
+
     private func performInitialCheckAndLoad() async {
         isLoadingInitialCheck = true
         initialConnectionError = nil
@@ -35,11 +35,10 @@ struct RadarrHomeEntry: View {
         } catch let RadarrAPIService.RadarrError.apiError(message, statusCode) {
             self.initialConnectionError = "Radarr API Error (\(statusCode)): \(message)"
         } catch {
-            self.initialConnectionError = "Could not connect to Radarr: \(error.localizedDescription)"
+            initialConnectionError = "Could not connect to Radarr: \(error.localizedDescription)"
         }
         isLoadingInitialCheck = false
     }
-
 
     var body: some View {
         Group {
