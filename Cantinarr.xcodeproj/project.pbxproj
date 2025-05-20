@@ -59,9 +59,9 @@
 			buildPhases = (
 				B94180AE2DDAE334002BEF92 /* Sources */,
 				B94180AF2DDAE334002BEF92 /* Frameworks */,
-                               B94180B02DDAE334002BEF92 /* Resources */,
-                               B94182062DDAE695002BEF92 /* Lint */,
-                       );
+				B94180B02DDAE334002BEF92 /* Resources */,
+				B94182062DDAE695002BEF92 /* Lint */,
+			);
 			buildRules = (
 			);
 			dependencies = (
@@ -124,6 +124,24 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		B94182062DDAE695002BEF92 /* Lint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(PROJECT_DIR)/Scripts/lint.sh",
+			);
+			name = Lint;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "bash \"$PROJECT_DIR/Scripts/lint.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		B94180AE2DDAE334002BEF92 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -133,23 +151,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-               B94182062DDAE695002BEF92 /* Lint */ = {
-                       isa = PBXShellScriptBuildPhase;
-                       buildActionMask = 2147483647;
-                       files = (
-                       );
-                       inputPaths = (
-                       );
-                       name = "Lint";
-                       outputPaths = (
-                       );
-                       runOnlyForDeploymentPostprocessing = 0;
-                       shellPath = /bin/sh;
-                       shellScript = "bash \"$PROJECT_DIR/Scripts/lint.sh\"";
-               };
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		B94180C02DDAE335002BEF92 /* Debug */ = {
@@ -285,6 +286,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -314,6 +317,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				LD_RUNPATH_SEARCH_PATHS = (
