@@ -1,5 +1,5 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 @MainActor
 class RadarrMoviesViewModel: ObservableObject {
@@ -9,7 +9,8 @@ class RadarrMoviesViewModel: ObservableObject {
     @Published var qualityProfiles: [Int: String] = [:] // [ID: Name]
 
     let service: RadarrAPIService
-    private var pageLoader = PagedLoader() // If Radarr movie list is paginated server-side (often it's not, but good for consistency)
+    private var pageLoader =
+        PagedLoader() // If Radarr movie list is paginated server-side (often it's not, but good for consistency)
 
     init(service: RadarrAPIService) {
         self.service = service
@@ -19,7 +20,7 @@ class RadarrMoviesViewModel: ObservableObject {
         guard !isLoading else { return }
         isLoading = true
         connectionError = nil
-        
+
         // Fetch quality profiles first to map names
         if qualityProfiles.isEmpty {
             await fetchQualityProfiles()
@@ -30,12 +31,12 @@ class RadarrMoviesViewModel: ObservableObject {
         } catch let RadarrAPIService.RadarrError.apiError(message, statusCode) {
             self.connectionError = "Radarr API Error (\(statusCode)): \(message)"
         } catch {
-            self.connectionError = "Failed to load movies: \(error.localizedDescription)"
+            connectionError = "Failed to load movies: \(error.localizedDescription)"
             print("🔴 Radarr Movies VM Error: \(error)")
         }
         isLoading = false
     }
-    
+
     private func fetchQualityProfiles() async {
         do {
             let profiles = try await service.getQualityProfiles()
@@ -43,7 +44,7 @@ class RadarrMoviesViewModel: ObservableObject {
             for profile in profiles {
                 profileMap[profile.id] = profile.name
             }
-            self.qualityProfiles = profileMap
+            qualityProfiles = profileMap
         } catch {
             print("🔴 Failed to load Radarr quality profiles: \(error.localizedDescription)")
             // Non-critical, list view can show IDs or "N/A" for profile names
@@ -51,11 +52,11 @@ class RadarrMoviesViewModel: ObservableObject {
     }
 
     // Placeholder for future pagination or filtering
-    func loadMoreIfNeeded(currentMovie movie: RadarrMovie) {
+    func loadMoreIfNeeded(currentMovie _: RadarrMovie) {
         // Radarr's /movie endpoint typically returns all movies.
         // If server-side pagination were used, implement logic here.
     }
-    
+
     func getQualityProfileName(for id: Int) -> String? {
         return qualityProfiles[id]
     }

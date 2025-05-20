@@ -12,6 +12,6 @@ struct ContentView_Previews: PreviewProvider {
             .environmentObject(EnvironmentsStore())
             .environmentObject(UserSession())
             .environment(\.managedObjectContext,
-                          PersistenceController.shared.container.viewContext)
+                         PersistenceController.shared.container.viewContext)
     }
 }

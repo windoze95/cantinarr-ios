@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: – Horizontal scroll row
+
 struct HorizontalMediaRow: View {
     let items: [OverseerrUsersViewModel.MediaItem]
     let isLoading: Bool
@@ -11,7 +12,7 @@ struct HorizontalMediaRow: View {
             LazyHStack(spacing: 12) {
                 if items.isEmpty && isLoading {
                     // show 5 shimmering placeholders
-                    ForEach(0..<5, id: \.self) { _ in
+                    ForEach(0 ..< 5, id: \.self) { _ in
                         LoadingMediaCardView()
                     }
                 } else {
@@ -39,9 +40,11 @@ struct HorizontalMediaRow: View {
 }
 
 // MARK: – Keyword suggestion pills
+
 struct KeywordPill: View {
-    let keyword: OverseerrAPIService.Keyword // Ensure OverseerrAPIService.Keyword is Identifiable if used in ForEach directly
-    
+    let keyword: OverseerrAPIService
+        .Keyword // Ensure OverseerrAPIService.Keyword is Identifiable if used in ForEach directly
+
     var body: some View {
         Text(keyword.name)
             .font(.caption) // Slightly smaller for pills
@@ -60,7 +63,7 @@ struct KeywordSuggestionRow: View {
     // Adjust rows based on desired density and KeywordPill height
     private let rows: [GridItem] = [
         GridItem(.flexible(minimum: 32, maximum: 40)), // Allow some flexibility
-        GridItem(.flexible(minimum: 32, maximum: 40))
+        GridItem(.flexible(minimum: 32, maximum: 40)),
     ]
 
     var body: some View {

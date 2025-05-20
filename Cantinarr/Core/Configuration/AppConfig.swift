@@ -3,7 +3,7 @@ import UIKit
 //  Centralised tunable constants.
 enum AppConfig {
     static let debounceInterval: Double = 0.3
-    static let prefetchThreshold  = 5            // items before list end
+    static let prefetchThreshold = 5 // items before list end
 }
 
 extension UIApplication {

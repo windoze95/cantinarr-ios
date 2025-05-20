@@ -1,4 +1,5 @@
 import SwiftUI
+
 struct ManageMediaSheet: View {
     let mediaID: Int
     @Environment(\.dismiss) private var dismiss

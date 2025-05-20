@@ -2,7 +2,7 @@ import SwiftUI
 
 @MainActor
 final class TrendingViewModel: ObservableObject {
-    typealias MediaItem = OverseerrUsersViewModel.MediaItem   // reuse struct
+    typealias MediaItem = OverseerrUsersViewModel.MediaItem // reuse struct
 
     // Dependencies
     private let service: OverseerrAPIService
@@ -16,12 +16,14 @@ final class TrendingViewModel: ObservableObject {
     @Published var connectionError: String? = nil
 
     // MARK: – Init
+
     init(service: OverseerrAPIService) {
         self.service = service
     }
 
     // MARK: – Public API
-    func bootstrap() async {        // first load
+
+    func bootstrap() async { // first load
         connectionError = nil // Reset on new attempt
         items.removeAll() // Clear old items
         loader.reset()
@@ -37,6 +39,7 @@ final class TrendingViewModel: ObservableObject {
     }
 
     // MARK: – Internals
+
     private func fetchNextPage() async {
         guard loader.beginLoading() else { return }
         isLoading = true
@@ -44,7 +47,7 @@ final class TrendingViewModel: ObservableObject {
 
         do {
             let resp = try await service.fetchTrending(
-                providerIds: [],                 // all providers
+                providerIds: [], // all providers
                 page: loader.page
             )
 
@@ -69,7 +72,7 @@ final class TrendingViewModel: ObservableObject {
             // Only set error if items are empty, otherwise it might be a pagination error
             // and some content is still visible. Or, always show if it's a significant failure.
             if items.isEmpty {
-                 self.connectionError = "Failed to load trending items. \(error.localizedDescription)"
+                connectionError = "Failed to load trending items. \(error.localizedDescription)"
             }
             print("Trending fetch failed: \(error)")
         }

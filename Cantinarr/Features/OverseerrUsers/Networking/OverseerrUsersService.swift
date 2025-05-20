@@ -18,7 +18,7 @@ protocol OverseerrUsersService {
         keywordIds: [Int],
         page: Int
     ) async throws -> OverseerrAPIService.DiscoverResponse<OverseerrAPIService.Movie>
-  
+
     func fetchTV(
         providerIds: [Int],
         genreIds: [Int],

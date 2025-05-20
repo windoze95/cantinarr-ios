@@ -1,6 +1,6 @@
-import SwiftUI
 import Combine
 import Foundation
+import SwiftUI
 
 /// Where we save the single JSON blob.
 private let environmentsFileURL: URL = {
@@ -18,9 +18,9 @@ final class EnvironmentsStore: ObservableObject {
     @Published var environments: [ServerEnvironment]
     @Published var selectedEnvironmentID: ServerEnvironment.ID
     @Published var selectedServiceID: ServiceInstance.ID?
-    
+
     private var saveCancellable: AnyCancellable?
-    
+
     /// Used the first time the app launches.
     private static let sampleData: [ServerEnvironment] = {
         let overseerr = ServiceInstance(
@@ -38,25 +38,25 @@ final class EnvironmentsStore: ObservableObject {
         let envs = (try? Self.load()) ?? Self.sampleData
 
         // Initial selections
-        self.environments          = envs
-            self.selectedEnvironmentID = envs.first?.id ?? UUID()
-            self.selectedServiceID     = envs.first?.services.first?.id
+        environments = envs
+        selectedEnvironmentID = envs.first?.id ?? UUID()
+        selectedServiceID = envs.first?.services.first?.id
 
         // Auto‑save whenever the list *or* the selection changes
         saveCancellable = Publishers
             .CombineLatest($environments, $selectedEnvironmentID)
             .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
-            .sink { [weak self] _ in                    // ① capture weak
-                guard let self = self else { return }   // ② unwrap
+            .sink { [weak self] _ in // ① capture weak
+                guard let self = self else { return } // ② unwrap
                 try? self.save()
             }
     }
-    
+
     private static func load() throws -> [ServerEnvironment] {
         let data = try Data(contentsOf: environmentsFileURL)
         return try JSONDecoder().decode([ServerEnvironment].self, from: data)
     }
-    
+
     @discardableResult
     private func save() throws -> URL {
         let data = try JSONEncoder().encode(environments)
@@ -64,15 +64,18 @@ final class EnvironmentsStore: ObservableObject {
         return environmentsFileURL
     }
 
-    // MARK: – Convenience
+    // MARK:  – Convenience
+
     var selectedEnvironment: ServerEnvironment {
         environments.first { $0.id == selectedEnvironmentID }!
     }
+
     var selectedServiceInstance: ServiceInstance? {
         selectedEnvironment.services.first { $0.id == selectedServiceID }
     }
 
-    // MARK: – Mutating helpers
+    // MARK:  – Mutating helpers
+
     func select(environment env: ServerEnvironment) { selectedEnvironmentID = env.id }
-    func select(service svc: ServiceInstance) { selectedServiceID     = svc.id }
+    func select(service svc: ServiceInstance) { selectedServiceID = svc.id }
 }

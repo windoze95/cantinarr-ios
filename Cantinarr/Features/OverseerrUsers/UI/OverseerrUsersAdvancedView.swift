@@ -1,5 +1,5 @@
-import SwiftUI
 import AuthenticationServices
+import SwiftUI
 
 struct OverseerrUsersAdvancedView: View {
     @EnvironmentObject private var envStore: EnvironmentsStore
@@ -7,28 +7,30 @@ struct OverseerrUsersAdvancedView: View {
 
     @State private var isSearchLoadingLocal = false
     @State private var showingNetworkSelector = false
-    
+
     @State private var searchText = ""
     @FocusState private var searchFieldFocused: Bool
 
     // MARK: – Init
+
     init(viewModel: OverseerrUsersViewModel) {
         _vm = StateObject(wrappedValue: viewModel)
     }
 
     // MARK: – Body
+
     var body: some View {
         Group {
             switch vm.authState {
             case .unknown:
                 ProgressView("Checking session…")
-                    .task { await vm.onAppear() }        // kick the probe once
+                    .task { await vm.onAppear() } // kick the probe once
                     .frame(maxWidth: .infinity,
                            maxHeight: .infinity)
 
             case .unauthenticated:
                 loginButton
-                    .task { await vm.onAppear() }        // so the view will re‑check
+                    .task { await vm.onAppear() } // so the view will re‑check
                                                         // if the user backs out & returns
 
             case .authenticated:
@@ -42,12 +44,14 @@ struct OverseerrUsersAdvancedView: View {
     }
 
     // MARK: – Login Button
+
     private var loginButton: some View {
         VStack {
             Spacer()
             Button("Login with Plex") {
                 if let s = envStore.selectedServiceInstance?
-                    .decode(OverseerrSettings.self) {
+                    .decode(OverseerrSettings.self)
+                {
                     vm.startPlexSSO(host: s.host, port: s.port)
                 }
             }
@@ -60,20 +64,23 @@ struct OverseerrUsersAdvancedView: View {
     }
 
     // MARK: – Main Content
+
     private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if vm.searchQuery.isEmpty {
-                    
                     // Movies / TV picker
                     Picker("Media", selection: $vm.selectedMedia) {
-                        ForEach(MediaType.allCases.filter { $0 != .unknown && $0 != .person && $0 != .collection }) { mt in // Filtered for relevant types
+                        ForEach(MediaType.allCases
+                            .filter { $0 != .unknown && $0 != .person && $0 != .collection })
+                        { mt in
+                            // Filtered for relevant types
                             Text(mt.displayName).tag(mt)
                         }
                     }
                     .pickerStyle(.segmented)
                     .padding(.horizontal)
-                    
+
                     // Active keyword pillszzz
                     if !vm.activeKeywordIDs.isEmpty {
                         ActiveKeywordsView()
@@ -94,47 +101,47 @@ struct OverseerrUsersAdvancedView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.bottom)          // keeps last row from sitting against the screen edge
+                    .padding(.bottom) // keeps last row from sitting against the screen edge
                 } else { // Search query is not empty
                     Text("Search Results")
-                            .font(.headline)
-                            .padding(.horizontal)
+                        .font(.headline)
+                        .padding(.horizontal)
 
                     VStack(alignment: .leading, spacing: 8) {
-                    // 1️⃣ While local OR real loading and no results → shimmer
-                    if (isSearchLoadingLocal || vm.isLoadingSearch)
-                       && vm.results.isEmpty
-                    {
-                        HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                            .frame(height: 180)
+                        // 1️⃣ While local OR real loading and no results → shimmer
+                        if (isSearchLoadingLocal || vm.isLoadingSearch)
+                            && vm.results.isEmpty
+                        {
+                            HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                                .frame(height: 180)
 
-                    // 2️⃣ When fully done loading and still no results → “no results”
-                    } else if !isSearchLoadingLocal
-                              && !vm.isLoadingSearch
-                              && vm.results.isEmpty
-                    {
-                        HStack {
-                            Spacer()
-                            VStack(spacing: 4) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.largeTitle)
-                                    .foregroundColor(.secondary)
-                                Text("No results found")
-                                    .foregroundColor(.secondary)
+                            // 2️⃣ When fully done loading and still no results → “no results”
+                        } else if !isSearchLoadingLocal
+                            && !vm.isLoadingSearch
+                            && vm.results.isEmpty
+                        {
+                            HStack {
+                                Spacer()
+                                VStack(spacing: 4) {
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.largeTitle)
+                                        .foregroundColor(.secondary)
+                                    Text("No results found")
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
                             }
-                            Spacer()
-                        }
-                        .frame(height: 160)
+                            .frame(height: 160)
 
-                    // 3️⃣ Otherwise → show the real results row
-                    } else {
-                        HorizontalMediaRow(
-                            items: vm.results,
-                            isLoading: vm.isLoadingSearch
-                        ) { item in
-                            vm.loadMoreIfNeeded(current: item, within: vm.results)
+                            // 3️⃣ Otherwise → show the real results row
+                        } else {
+                            HorizontalMediaRow(
+                                items: vm.results,
+                                isLoading: vm.isLoadingSearch
+                            ) { item in
+                                vm.loadMoreIfNeeded(current: item, within: vm.results)
+                            }
                         }
-                    }
                     }
                     // Only suggestions not already active
                     let filteredSuggestions = vm.keywordSuggestions
@@ -142,14 +149,14 @@ struct OverseerrUsersAdvancedView: View {
 
                     if vm.isLoadingKeywords || !filteredSuggestions.isEmpty {
                         Text("Search by Keyword")
-                                    .font(.headline)
-                                    .padding(.horizontal)
+                            .font(.headline)
+                            .padding(.horizontal)
 
                         if vm.isLoadingKeywords {
                             // shimmer placeholders while loading
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 8) {
-                                    ForEach(0..<5, id: \.self) { _ in
+                                    ForEach(0 ..< 5, id: \.self) { _ in
                                         // pill placeholder
                                         RoundedRectangle(cornerRadius: 16)
                                             .fill(Color.gray.opacity(0.3))
@@ -165,11 +172,13 @@ struct OverseerrUsersAdvancedView: View {
                                 searchText = ""
                                 searchFieldFocused = false
 
-                                vm.activate(keyword: kw) // This will also trigger view switch if conditions met in HomeEntry
+                                vm
+                                    .activate(keyword: kw) // This will also trigger view switch if conditions met in
+                                // HomeEntry
                             }
                         }
                     }
-                    
+
                     // Movie recommendations
                     if !vm.movieRecs.isEmpty {
                         Text("Movies you might like")
@@ -180,9 +189,8 @@ struct OverseerrUsersAdvancedView: View {
                         ) { item in
                             vm.loadMoreMovieRecsIfNeeded(current: item)
                         }
-                        
                     }
-                    
+
                     // TV recommendations
                     if !vm.tvRecs.isEmpty {
                         Text("Shows you might like")
@@ -193,18 +201,18 @@ struct OverseerrUsersAdvancedView: View {
                         ) { item in
                             vm.loadMoreTvRecsIfNeeded(current: item)
                         }
-                        .padding(.bottom)          // keeps last row from sitting against the screen edge
+                        .padding(.bottom) // keeps last row from sitting against the screen edge
                     }
                 }
             }
-            .padding(.top, 8)             // space below the pinned search bar
+            .padding(.top, 8) // space below the pinned search bar
         }
-        .scrollDismissesKeyboard(.immediately)          // hides as soon as you drag
-        .simultaneousGesture(                      // hides on any tap *without*
-            TapGesture()                           // stealing the tap from cells
+        .scrollDismissesKeyboard(.immediately) // hides as soon as you drag
+        .simultaneousGesture( // hides on any tap *without*
+            TapGesture() // stealing the tap from cells
                 .onEnded {
                     searchFieldFocused = false
-                    UIApplication.shared.endEditing()  // force-hide keyboard
+                    UIApplication.shared.endEditing() // force-hide keyboard
                 }
         )
         // any tap on the content area will clear focus
@@ -213,33 +221,33 @@ struct OverseerrUsersAdvancedView: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     searchFieldFocused = false
-                    UIApplication.shared.endEditing()  // force-hide keyboard
+                    UIApplication.shared.endEditing() // force-hide keyboard
                 }
         )
 
         // 🔒 Sticky search bar
         .safeAreaInset(edge: .top) {
             HStack(spacing: 12) {
-                        SearchBarView(text: $searchText, focus: $searchFieldFocused)
-                            .onChange(of: searchText) { _, newValue in
-                                if !newValue.isEmpty {
-                                    // 1) clear out stale cards immediately
-                                    vm.results.removeAll()
-                                    vm.keywordSuggestions.removeAll()
-                                    // 2) show shimmer immediately
-                                    isSearchLoadingLocal = true
-                                }
-                                vm.searchQuery = newValue // This will be observed by OverseerrUsersHomeEntry
-                            }
-                            .onChange(of: vm.isLoadingSearch) { loading in
-                                // when real search finishes, stop local shimmer
-                                if !loading {
-                                    isSearchLoadingLocal = false
-                                }
-                            }
+                SearchBarView(text: $searchText, focus: $searchFieldFocused)
+                    .onChange(of: searchText) { _, newValue in
+                        if !newValue.isEmpty {
+                            // 1) clear out stale cards immediately
+                            vm.results.removeAll()
+                            vm.keywordSuggestions.removeAll()
+                            // 2) show shimmer immediately
+                            isSearchLoadingLocal = true
+                        }
+                        vm.searchQuery = newValue // This will be observed by OverseerrUsersHomeEntry
                     }
-                    .padding()
-                    .background(.ultraThinMaterial) // .regularMaterial or .ultraThinMaterial
+                    .onChange(of: vm.isLoadingSearch) { loading in
+                        // when real search finishes, stop local shimmer
+                        if !loading {
+                            isSearchLoadingLocal = false
+                        }
+                    }
+            }
+            .padding()
+            .background(.ultraThinMaterial) // .regularMaterial or .ultraThinMaterial
         }
         .navigationBarTitleDisplayMode(.inline) // compact nav bar, no big title
         .navigationBarBackButtonHidden(true) // Important: hide default back button
@@ -251,7 +259,7 @@ struct OverseerrUsersAdvancedView: View {
 // --------------------------------------------------
 class AuthHelper: NSObject, ASWebAuthenticationPresentationContextProviding {
     static let shared = AuthHelper()
-    private override init() { }
+    override private init() {}
 
     private var session: ASWebAuthenticationSession?
     weak var delegate: PlexSSODelegate?
@@ -280,7 +288,7 @@ class AuthHelper: NSObject, ASWebAuthenticationPresentationContextProviding {
         s.start()
     }
 
-    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+    func presentationAnchor(for _: ASWebAuthenticationSession) -> ASPresentationAnchor {
         let windowScene = UIApplication.shared.connectedScenes
             .first { $0.activationState == .foregroundActive }
             .flatMap { $0 as? UIWindowScene }

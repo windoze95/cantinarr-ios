@@ -1,4 +1,4 @@
 @MainActor
 protocol PlexSSODelegate: AnyObject {
-  func didReceivePlexToken(_ token: String)
+    func didReceivePlexToken(_ token: String)
 }

@@ -5,15 +5,14 @@ struct SideMenuView: View {
     @EnvironmentObject private var envStore: EnvironmentsStore
 
     /// Callbacks for host container
-    var closeMenu : () -> Void
+    var closeMenu: () -> Void
     var openSettings: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-
             // ───── Gear row
             Button {
-                closeMenu()            // close drawer
+                closeMenu() // close drawer
                 openSettings()
             } label: {
                 Label("Settings", systemImage: "gearshape")
@@ -51,14 +50,14 @@ struct SideMenuView: View {
             .pickerStyle(.segmented)
             .padding()
         }
-        .frame(maxWidth: 260, alignment: .leading)  // drawer width
+        .frame(maxWidth: 260, alignment: .leading) // drawer width
         .background(Material.ultraThin)
         .edgesIgnoringSafeArea(.all)
-        .highPriorityGesture(                         // wins over button taps
+        .highPriorityGesture( // wins over button taps
             DragGesture(minimumDistance: 20)
                 .onEnded { value in
                     if value.translation.width < -80 { // swipe left ≥ 80 pts
-                        closeMenu()                    // supplied callback
+                        closeMenu() // supplied callback
                     }
                 }
         )

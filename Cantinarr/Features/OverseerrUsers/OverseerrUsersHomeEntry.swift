@@ -1,5 +1,5 @@
-import SwiftUI
 import Combine // Import Combine
+import SwiftUI
 
 /// Enum to represent the tabs in the Overseerr section.
 enum OverseerrTab {
@@ -40,7 +40,6 @@ struct OverseerrUsersHomeEntry: View {
         ))
     }
 
-
     var body: some View {
         // Main view structure driven by authentication state
         switch overseerrUsersVM.authState {
@@ -53,44 +52,44 @@ struct OverseerrUsersHomeEntry: View {
             // Show login view when not authenticated.
             OverseerrLoginView(
                 onLoginTap: {
-                     if let s = envStore.selectedServiceInstance?.decode(OverseerrSettings.self) {
+                    if let s = envStore.selectedServiceInstance?.decode(OverseerrSettings.self) {
                         overseerrUsersVM.startPlexSSO(host: s.host, port: s.port)
                     }
                 },
                 onEditSettings: openSettingsSheetForCurrentService // Allow editing settings from login view
-             )
-             .task { await overseerrUsersVM.onAppear() } // Re-check auth if view appears again
+            )
+            .task { await overseerrUsersVM.onAppear() } // Re-check auth if view appears again
 
         case .authenticated:
             // User is authenticated: Show TabView with Home and Advanced views
-             TabView(selection: $selectedTab) {
-                 OverseerrUsersHomeView(
-                     trendingVM: trendingVM,
-                     overseerrUsersVM: overseerrUsersVM
-                 )
-                 .tabItem {
-                     Label("Home", systemImage: "house.fill")
-                 }
-                 .tag(OverseerrTab.home) // Tag for selection binding
+            TabView(selection: $selectedTab) {
+                OverseerrUsersHomeView(
+                    trendingVM: trendingVM,
+                    overseerrUsersVM: overseerrUsersVM
+                )
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+                .tag(OverseerrTab.home) // Tag for selection binding
 
-                 OverseerrUsersAdvancedView(
-                     viewModel: overseerrUsersVM
-                 )
-                 .tabItem {
-                     Label("Advanced", systemImage: "slider.horizontal.3")
-                 }
-                 .tag(OverseerrTab.advanced) // Tag for selection binding
-             }
-             .onReceive(overseerrUsersVM.keywordActivatedSubject) { _ in
-                 // When the subject sends a value, switch the tab
-                 selectedTab = .advanced
-             }
-             // Ensure basic configurations (like providers) are loaded upon authentication
-             .task {
-                 if overseerrUsersVM.watchProviders.isEmpty && overseerrUsersVM.connectionError == nil {
-                     await overseerrUsersVM.loadAllBasics()
-                 }
-             }
+                OverseerrUsersAdvancedView(
+                    viewModel: overseerrUsersVM
+                )
+                .tabItem {
+                    Label("Advanced", systemImage: "slider.horizontal.3")
+                }
+                .tag(OverseerrTab.advanced) // Tag for selection binding
+            }
+            .onReceive(overseerrUsersVM.keywordActivatedSubject) { _ in
+                // When the subject sends a value, switch the tab
+                selectedTab = .advanced
+            }
+            // Ensure basic configurations (like providers) are loaded upon authentication
+            .task {
+                if overseerrUsersVM.watchProviders.isEmpty && overseerrUsersVM.connectionError == nil {
+                    await overseerrUsersVM.loadAllBasics()
+                }
+            }
         }
     }
 

@@ -1,5 +1,5 @@
-import SwiftUI
 import NukeUI
+import SwiftUI
 
 struct RadarrMovieListItemView: View {
     let movie: RadarrMovie
@@ -23,7 +23,7 @@ struct RadarrMovieListItemView: View {
         formatter.unitsStyle = .abbreviated
         return formatter.string(from: TimeInterval(movie.runtime * 60)) ?? "N/A"
     }
-    
+
     private var availabilityStatus: (text: String, color: Color) {
         if movie.hasFile {
             return ("Downloaded", .green)
@@ -124,9 +124,13 @@ struct RadarrMovieListItemView: View {
                 }
                 .scaleEffect(1.1) // Slightly zoom to ensure blur covers edges
                 .clipped()
-                
+
                 LinearGradient(
-                    gradient: Gradient(colors: [Color.black.opacity(0.75), Color.black.opacity(0.5), Color.black.opacity(0.75)]),
+                    gradient: Gradient(colors: [
+                        Color.black.opacity(0.75),
+                        Color.black.opacity(0.5),
+                        Color.black.opacity(0.75),
+                    ]),
                     startPoint: .leading,
                     endPoint: .trailing
                 )

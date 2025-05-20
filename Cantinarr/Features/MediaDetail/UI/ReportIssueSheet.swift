@@ -1,4 +1,5 @@
 import SwiftUI
+
 struct ReportIssueSheet: View {
     @ObservedObject var vm: MediaDetailViewModel
     @Environment(\.dismiss) private var dismiss

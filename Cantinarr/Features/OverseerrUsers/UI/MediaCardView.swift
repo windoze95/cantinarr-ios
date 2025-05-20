@@ -1,5 +1,5 @@
-import SwiftUI
 import NukeUI
+import SwiftUI
 
 struct MediaCardView: View {
     let id: Int
@@ -8,18 +8,21 @@ struct MediaCardView: View {
     let posterPath: String?
 
     @EnvironmentObject private var envStore: EnvironmentsStore
-    @EnvironmentObject private var userSession:  UserSession
+    @EnvironmentObject private var userSession: UserSession
 
     // MARK: – Image helper
+
     private var posterURL: URL? {
         guard let path = posterPath else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w300\(path)")
     }
 
     // MARK: – Body
+
     var body: some View {
         if let settings = envStore.selectedServiceInstance?
-            .decode(OverseerrSettings.self) {
+            .decode(OverseerrSettings.self)
+        {
             NavigationLink {
                 MediaDetailView(
                     id: id,
@@ -39,6 +42,7 @@ struct MediaCardView: View {
     }
 
     // MARK: – Poster + title
+
     @ViewBuilder
     private var posterAndTitle: some View {
         VStack(spacing: 8) {
@@ -46,8 +50,8 @@ struct MediaCardView: View {
                 LazyImage(url: url) { state in
                     if let img = state.image {
                         img.resizable()
-                           .scaledToFill()
-                           .transition(.opacity)
+                            .scaledToFill()
+                            .transition(.opacity)
                     } else if state.error != nil {
                         Color.gray.opacity(0.2)
                     } else {

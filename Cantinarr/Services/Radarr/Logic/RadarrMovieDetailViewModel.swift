@@ -1,5 +1,5 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 @MainActor
 class RadarrMovieDetailViewModel: ObservableObject {
@@ -28,7 +28,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
 
         do {
             let fetchedMovie = try await radarrService.getMovie(id: movieId)
-            self.movie = fetchedMovie
+            movie = fetchedMovie
             await fetchQualityProfileName(id: fetchedMovie.qualityProfileId)
         } catch let RadarrAPIService.RadarrError.apiError(message, statusCode) {
             self.error = "Radarr API Error (\(statusCode)): \(message)"
@@ -42,55 +42,55 @@ class RadarrMovieDetailViewModel: ObservableObject {
         do {
             // This could be optimized if profiles are fetched globally once
             let profiles = try await radarrService.getQualityProfiles()
-            self.qualityProfileName = profiles.first(where: { $0.id == id })?.name ?? "Unknown Profile (\(id))"
+            qualityProfileName = profiles.first(where: { $0.id == id })?.name ?? "Unknown Profile (\(id))"
         } catch {
             print("🔴 Failed to fetch quality profile name: \(error.localizedDescription)")
-            self.qualityProfileName = "Error (\(id))"
+            qualityProfileName = "Error (\(id))"
         }
     }
-    
+
     var availabilityStatusText: String {
         guard let movie = movie else { return "Unknown" }
         if movie.hasFile { return "Downloaded" }
         if movie.monitored {
-             switch movie.minimumAvailability.lowercased() {
-                case "announced", "tba": return "Announced"
-                case "incinemas": return "In Cinemas"
-                case "released", "predb": return "Missing (Searching)"
-                default: return "Monitored (\(movie.minimumAvailability))"
+            switch movie.minimumAvailability.lowercased() {
+            case "announced", "tba": return "Announced"
+            case "incinemas": return "In Cinemas"
+            case "released", "predb": return "Missing (Searching)"
+            default: return "Monitored (\(movie.minimumAvailability))"
             }
         }
         return "Unmonitored"
     }
-    
+
     var availabilityStatusColor: Color {
         guard let movie = movie else { return .gray }
         if movie.hasFile { return .green }
         if movie.monitored {
             switch movie.minimumAvailability.lowercased() {
-               case "announced", "tba": return .gray
-               case "incinemas": return .blue
-               case "released", "predb": return .orange
-               default: return .yellow
-           }
+            case "announced", "tba": return .gray
+            case "incinemas": return .blue
+            case "released", "predb": return .orange
+            default: return .yellow
+            }
         }
         return .purple
     }
 
     func toggleMonitoring() async {
-        guard var movieToUpdate = self.movie else { return } // movieToUpdate is a mutable COPY
+        guard var movieToUpdate = movie else { return } // movieToUpdate is a mutable COPY
         movieToUpdate.monitored.toggle() // This will now work because 'monitored' is a 'var' in the struct
-        
+
         do {
             // When sending movieToUpdate to radarrService.updateMovie,
             // ensure it's the complete, correct payload Radarr expects for an update.
             let updatedMovie = try await radarrService.updateMovie(movieToUpdate)
-            self.movie = updatedMovie
-            self.commandStatusMessage = movieToUpdate.monitored ? "Movie is now monitored." : "Movie is no longer monitored."
-            self.showCommandStatusAlert = true
+            movie = updatedMovie
+            commandStatusMessage = movieToUpdate.monitored ? "Movie is now monitored." : "Movie is no longer monitored."
+            showCommandStatusAlert = true
         } catch {
-            self.commandStatusMessage = "Failed to update monitoring status: \(error.localizedDescription)"
-            self.showCommandStatusAlert = true
+            commandStatusMessage = "Failed to update monitoring status: \(error.localizedDescription)"
+            showCommandStatusAlert = true
             // Revert local state if API call failed
             // No need to toggle again here if the original self.movie wasn't changed yet
             // self.movie will still hold the state before the attempted API call if it failed early
@@ -99,7 +99,8 @@ class RadarrMovieDetailViewModel: ObservableObject {
             // You might need to store the original self.movie state before modification if complex logic.
             // For a simple toggle, if updateMovie fails, self.movie might not have changed yet.
             // However, if self.movie was updated optimistically *before* the API call, then revert.
-            // Current structure: local movieToUpdate is modified, then API call. If API fails, self.movie is not yet movieToUpdate.
+            // Current structure: local movieToUpdate is modified, then API call. If API fails, self.movie is not yet
+            // movieToUpdate.
             // So, the "revert" "movieToUpdate.monitored.toggle()" is not needed with current structure.
             // If you were to do:
             // self.movie?.monitored.toggle() // Optimistic UI update
@@ -108,36 +109,37 @@ class RadarrMovieDetailViewModel: ObservableObject {
     }
 
     func triggerMovieSearch() async {
-        guard let currentMovie = self.movie, currentMovie.monitored, !currentMovie.hasFile else {
-            self.commandStatusMessage = "Movie is already downloaded or not monitored for search."
-            self.showCommandStatusAlert = true
+        guard let currentMovie = movie, currentMovie.monitored, !currentMovie.hasFile else {
+            commandStatusMessage = "Movie is already downloaded or not monitored for search."
+            showCommandStatusAlert = true
             return
         }
-        
+
         commandStatusMessage = "Searching for movie..." // Initial feedback
 
         do {
             let commandResponse = try await radarrService.searchForMovie(currentMovie.id)
-            self.commandStatusMessage = commandResponse.message ?? "Search command sent. Status: \(commandResponse.status ?? "Unknown")"
+            commandStatusMessage = commandResponse
+                .message ?? "Search command sent. Status: \(commandResponse.status ?? "Unknown")"
             // Optionally, refresh movie details after a delay or based on command status
             // For now, just show the command response message.
         } catch {
-            self.commandStatusMessage = "Failed to trigger movie search: \(error.localizedDescription)"
+            commandStatusMessage = "Failed to trigger movie search: \(error.localizedDescription)"
         }
-        self.showCommandStatusAlert = true
+        showCommandStatusAlert = true
     }
 
     func deleteMovie(alsoDeleteFiles: Bool) async {
-        guard let movieToDelete = self.movie else { return }
+        guard let movieToDelete = movie else { return }
         do {
             try await radarrService.deleteMovie(movieToDelete.id, deleteFiles: alsoDeleteFiles)
-            self.commandStatusMessage = "Movie deleted successfully."
-            self.showCommandStatusAlert = true
+            commandStatusMessage = "Movie deleted successfully."
+            showCommandStatusAlert = true
             // After deletion, the view should probably be dismissed or state cleared
-            self.movie = nil // Clear the movie to indicate it's gone
+            movie = nil // Clear the movie to indicate it's gone
         } catch {
-            self.commandStatusMessage = "Failed to delete movie: \(error.localizedDescription)"
-            self.showCommandStatusAlert = true
+            commandStatusMessage = "Failed to delete movie: \(error.localizedDescription)"
+            showCommandStatusAlert = true
         }
     }
 
@@ -156,14 +158,15 @@ class RadarrMovieDetailViewModel: ObservableObject {
         formatter.unitsStyle = .abbreviated
         return formatter.string(from: TimeInterval(runtime * 60)) ?? "N/A"
     }
-    
+
     func openIMDb() {
         guard let imdbId = movie?.imdbId, let url = URL(string: "https://www.imdb.com/title/\(imdbId)") else { return }
         UIApplication.shared.open(url)
     }
 
     func openTMDb() {
-        guard let tmdbId = movie?.tmdbId, let url = URL(string: "https://www.themoviedb.org/movie/\(tmdbId)") else { return }
+        guard let tmdbId = movie?.tmdbId,
+              let url = URL(string: "https://www.themoviedb.org/movie/\(tmdbId)") else { return }
         UIApplication.shared.open(url)
     }
 }

@@ -4,9 +4,9 @@ import SwiftUI
 
 @MainActor
 struct PagedLoader {
-    private(set) var page        = 1
-    private(set) var totalPages  = 1
-    private(set) var isLoading   = false
+    private(set) var page = 1
+    private(set) var totalPages = 1
+    private(set) var isLoading = false
 
     /// Reset counters for a brand‑new query or refresh.
     mutating func reset() {
