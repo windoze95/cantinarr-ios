@@ -1,3 +1,6 @@
+// File: NetworkSelectionView.swift
+// Purpose: Defines NetworkSelectionView component for Cantinarr
+
 import SwiftUI
 
 /// A sheet that lists all watchProviders with checkmarks, letting the user tap to select/deselect.

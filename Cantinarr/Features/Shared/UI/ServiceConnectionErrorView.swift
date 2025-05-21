@@ -1,3 +1,6 @@
+// File: ServiceConnectionErrorView.swift
+// Purpose: Defines ServiceConnectionErrorView component for Cantinarr
+
 import SwiftUI
 
 /// Generic error view shown when a service can't be reached.

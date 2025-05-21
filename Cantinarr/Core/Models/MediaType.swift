@@ -1,3 +1,6 @@
+// File: MediaType.swift
+// Purpose: Defines MediaType component for Cantinarr
+
 import Foundation
 
 /// A subset of TMDB media types recognised by the app.

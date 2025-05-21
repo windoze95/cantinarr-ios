@@ -1,3 +1,6 @@
+// File: OverseerrUsersExtras.swift
+// Purpose: Defines OverseerrUsersExtras component for Cantinarr
+
 import SwiftUI
 
 // MARK: – Horizontal scroll row

@@ -1,3 +1,6 @@
+// File: OverseerrUsersViewModel.swift
+// Purpose: Defines OverseerrUsersViewModel component for Cantinarr
+
 import AuthenticationServices
 import Combine
 import SwiftUI
@@ -203,7 +206,8 @@ class OverseerrUsersViewModel: ObservableObject {
 
     // ─────────────────────────────────────────────
     func loadMedia(reset: Bool = false) async {
-        // This loads "Discover" results, filtered by active keywords if present.
+        // Load "Discover" results, applying any active keyword filters.
+        // Skip if a request is already underway.
         guard !isLoading else { return }
         if reset {
             loader.reset()
@@ -211,8 +215,11 @@ class OverseerrUsersViewModel: ObservableObject {
             clearConnectionError()
         }
 
+        // Begin the next page fetch. `beginLoading` returns false when there are
+        // no more pages to load or another load is active.
         guard loader.beginLoading() else { return }
         isLoading = true
+        // Ensure counters and state are updated no matter how we exit.
         defer { isLoading = false; loader.endLoading(next: loader.totalPages) }
 
         let pids = Array(selectedProviders)
@@ -224,6 +231,7 @@ class OverseerrUsersViewModel: ObservableObject {
             let responsePage: Int
             let responseTotalPages: Int
 
+            // Call the appropriate API based on the selected media type
             switch selectedMedia {
             case .movie:
                 let rawResp = try await service.fetchMovies(
@@ -258,6 +266,7 @@ class OverseerrUsersViewModel: ObservableObject {
                 loader.cancelLoading(); return
             }
 
+            // Merge the new page results with existing content
             if loader.page == 1 { results = fetchedItems }
             else { results.append(contentsOf: fetchedItems) }
             loader.endLoading(next: responseTotalPages)
@@ -308,7 +317,8 @@ class OverseerrUsersViewModel: ObservableObject {
     }
 
     private func searchMedia(reset: Bool = false) async {
-        // This performs a text search, IGNORING active keywords.
+        // Perform a text search that ignores keyword filters.
+        // Bail out if another request is already running.
         guard !isLoading else { return }
         if reset {
             loader.reset()
@@ -316,12 +326,15 @@ class OverseerrUsersViewModel: ObservableObject {
             clearConnectionError()
         }
 
+        // Guard ensures we don't fetch past the last page
         guard loader.beginLoading() else { return }
         isLoading = true
         defer { isLoading = false; loader.endLoading(next: loader.totalPages) }
 
         do {
+            // Query Overseerr for matching movies/TV shows
             let resp = try await service.search(query: searchQuery, page: loader.page)
+            // Drop any search results that aren't movies or TV
             let items = resp.results.compactMap { raw -> MediaItem? in
                 guard let kind = raw.mediaType, kind == .movie || kind == .tv else { return nil }
                 return MediaItem(
@@ -351,6 +364,7 @@ class OverseerrUsersViewModel: ObservableObject {
     // MARK: – Keyword Fetching & Filtering - (Unchanged from previous correct version)
 
     private func fetchKeywordSuggestions(for query: String) async {
+        // Kick off a keyword autocomplete query
         isLoadingKeywords = true
         var keywordFetchError: String? = nil
         do {
@@ -364,6 +378,7 @@ class OverseerrUsersViewModel: ObservableObject {
             print("🔴 Keyword search error: \(error.localizedDescription)")
         }
         isLoadingKeywords = false
+        // Surface any error only if another error isn't already shown
         if connectionError == nil && keywordFetchError != nil {
             connectionError = keywordFetchError
         }
@@ -372,8 +387,9 @@ class OverseerrUsersViewModel: ObservableObject {
     // MARK: – Keyword Activation
 
     func activate(keyword k: OverseerrAPIService.Keyword) {
+        // Ignore if already active
         guard !activeKeywordIDs.contains(k.id) else { return }
-        // Activating a keyword takes precedence over search.
+        // Activating a keyword takes precedence over any text search
         searchQuery = "" // Clear search field binding
         activeKeywordIDs.insert(k.id)
         // Avoid duplicate display names if somehow added twice
@@ -391,6 +407,7 @@ class OverseerrUsersViewModel: ObservableObject {
     }
 
     func remove(keywordID: Int) {
+        // Remove keyword from both the ID set and display list
         activeKeywordIDs.remove(keywordID)
         activeKeywords.removeAll { $0.id == keywordID }
         // If search is active, removing keyword doesn't change search results immediately.
@@ -403,6 +420,7 @@ class OverseerrUsersViewModel: ObservableObject {
     private func filterUsableKeywords(
         _ raw: [OverseerrAPIService.Keyword]
     ) async -> [OverseerrAPIService.Keyword] {
+        // Probe each keyword in parallel by attempting a quick discover search.
         await withTaskGroup(of: OverseerrAPIService.Keyword?.self) { group in
             for kw in raw {
                 group.addTask { [weak self] in
@@ -434,6 +452,7 @@ class OverseerrUsersViewModel: ObservableObject {
             for await maybe in group {
                 if let kw = maybe { usable.append(kw) }
             }
+            // Sort alphabetically for stable presentation
             return usable.sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
         }
     }

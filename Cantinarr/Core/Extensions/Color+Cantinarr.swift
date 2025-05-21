@@ -1,3 +1,6 @@
+// File: Color+Cantinarr.swift
+// Purpose: Defines Color+Cantinarr component for Cantinarr
+
 import SwiftUI
 
 // Define custom colors for the app theme.

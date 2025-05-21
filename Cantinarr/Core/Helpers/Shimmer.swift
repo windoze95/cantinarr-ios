@@ -1,3 +1,6 @@
+// File: Shimmer.swift
+// Purpose: Defines Shimmer component for Cantinarr
+
 import SwiftUI
 
 /// A simple shimmer overlay you can apply to any View.

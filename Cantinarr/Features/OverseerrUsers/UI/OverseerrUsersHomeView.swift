@@ -1,3 +1,6 @@
+// File: OverseerrUsersHomeView.swift
+// Purpose: Defines OverseerrUsersHomeView component for Cantinarr
+
 import AuthenticationServices
 import Combine
 import SwiftUI

@@ -1,3 +1,6 @@
+// File: EnvironmentsStore.swift
+// Purpose: Defines EnvironmentsStore component for Cantinarr
+
 import Combine
 import Foundation
 import SwiftUI

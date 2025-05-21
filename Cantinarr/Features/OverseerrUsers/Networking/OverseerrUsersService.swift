@@ -1,3 +1,6 @@
+// File: OverseerrUsersService.swift
+// Purpose: Defines OverseerrUsersService component for Cantinarr
+
 import Foundation
 
 @MainActor

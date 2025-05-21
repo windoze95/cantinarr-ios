@@ -1,3 +1,6 @@
+// File: RadarrMovieDetailViewModel.swift
+// Purpose: Defines RadarrMovieDetailViewModel component for Cantinarr
+
 import Combine
 import SwiftUI
 
@@ -23,12 +26,14 @@ class RadarrMovieDetailViewModel: ObservableObject {
     }
 
     func loadMovieDetails() async {
+        // Avoid overlapping loads
         guard !isLoading else { return }
         isLoading = true
         error = nil
         commandStatusMessage = nil
 
         do {
+            // Fetch movie details from Radarr
             let fetchedMovie = try await radarrService.getMovie(id: movieId)
             movie = fetchedMovie
             await fetchQualityProfileName(id: fetchedMovie.qualityProfileId)
@@ -42,7 +47,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
 
     private func fetchQualityProfileName(id: Int) async {
         do {
-            // This could be optimized if profiles are fetched globally once
+            // Lookup the quality profile by ID. In a real app this could be cached.
             let profiles = try await radarrService.getQualityProfiles()
             qualityProfileName = profiles.first(where: { $0.id == id })?.name ?? "Unknown Profile (\(id))"
         } catch {

@@ -1,3 +1,6 @@
+// File: ReportIssueSheet.swift
+// Purpose: Defines ReportIssueSheet component for Cantinarr
+
 import SwiftUI
 
 /// Placeholder sheet used to report problems with a media item.
