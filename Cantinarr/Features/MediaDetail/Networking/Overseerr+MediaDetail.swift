@@ -1,3 +1,6 @@
+// File: Overseerr+MediaDetail.swift
+// Purpose: Defines Overseerr+MediaDetail component for Cantinarr
+
 import Foundation
 
 extension OverseerrAPIService {

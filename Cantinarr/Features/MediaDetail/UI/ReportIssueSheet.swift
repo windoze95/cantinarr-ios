@@ -1,3 +1,6 @@
+// File: ReportIssueSheet.swift
+// Purpose: Defines ReportIssueSheet component for Cantinarr
+
 import SwiftUI
 
 struct ReportIssueSheet: View {

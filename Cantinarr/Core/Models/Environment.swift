@@ -1,3 +1,6 @@
+// File: Environment.swift
+// Purpose: Defines Environment component for Cantinarr
+
 import Foundation
 
 /// A logical grouping of services – comparable to an NZB360 “Server”.

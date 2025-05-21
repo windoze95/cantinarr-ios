@@ -1,3 +1,6 @@
+// File: CantinarrApp.swift
+// Purpose: Defines CantinarrApp component for Cantinarr
+
 import SwiftUI
 
 @main

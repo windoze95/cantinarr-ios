@@ -1,3 +1,6 @@
+// File: UserSession.swift
+// Purpose: Defines UserSession component for Cantinarr
+
 import Foundation
 
 enum UserRole {

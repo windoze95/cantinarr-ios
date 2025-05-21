@@ -1,3 +1,6 @@
+// File: ServiceEditorView.swift
+// Purpose: Defines ServiceEditorView component for Cantinarr
+
 import SwiftUI
 
 /// Sheet for configuring a single ServiceInstance inside an Environment.

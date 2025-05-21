@@ -1,3 +1,6 @@
+// File: KeychainHelper.swift
+// Purpose: Defines KeychainHelper component for Cantinarr
+
 import Foundation
 import Security
 

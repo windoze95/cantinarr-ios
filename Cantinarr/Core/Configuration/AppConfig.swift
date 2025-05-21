@@ -1,3 +1,6 @@
+// File: AppConfig.swift
+// Purpose: Defines AppConfig component for Cantinarr
+
 import UIKit
 
 //  Centralised tunable constants.

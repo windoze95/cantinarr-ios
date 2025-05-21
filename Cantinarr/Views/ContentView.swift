@@ -1,3 +1,6 @@
+// File: ContentView.swift
+// Purpose: Defines ContentView component for Cantinarr
+
 import SwiftUI
 
 struct ContentView: View {

@@ -1,3 +1,6 @@
+// File: OverseerrSettings.swift
+// Purpose: Defines OverseerrSettings component for Cantinarr
+
 import Foundation
 
 /// Service‑specific configuration blob for an Overseerr instance.

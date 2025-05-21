@@ -1,3 +1,6 @@
+// File: EnvironmentDraft.swift
+// Purpose: Defines EnvironmentDraft component for Cantinarr
+
 import Foundation
 
 /// Mutable wrapper used only inside the Settings editor UI

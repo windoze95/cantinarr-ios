@@ -1,3 +1,6 @@
+// File: OverseerrAPIService.swift
+// Purpose: Defines OverseerrAPIService component for Cantinarr
+
 import Combine
 import Foundation
 import WebKit

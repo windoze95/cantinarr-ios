@@ -1,3 +1,6 @@
+// File: RadarrModels.swift
+// Purpose: Defines RadarrModels component for Cantinarr
+
 import Foundation
 
 // MARK: - Movie

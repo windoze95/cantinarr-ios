@@ -1,3 +1,6 @@
+// File: WebView.swift
+// Purpose: Defines WebView component for Cantinarr
+
 import SwiftUI
 import WebKit
 

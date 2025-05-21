@@ -1,3 +1,6 @@
+// File: MediaDetailViewModel.swift
+// Purpose: Defines MediaDetailViewModel component for Cantinarr
+
 import SwiftUI
 
 @MainActor

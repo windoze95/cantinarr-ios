@@ -1,3 +1,6 @@
+// File: SearchBarView.swift
+// Purpose: Defines SearchBarView component for Cantinarr
+
 import SwiftUI
 import UIKit
 

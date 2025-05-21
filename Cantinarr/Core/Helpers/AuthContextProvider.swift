@@ -1,3 +1,6 @@
+// File: AuthContextProvider.swift
+// Purpose: Defines AuthContextProvider component for Cantinarr
+
 import AuthenticationServices
 import UIKit
 

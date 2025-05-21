@@ -1,3 +1,6 @@
+// File: SettingsViewModel.swift
+// Purpose: Defines SettingsViewModel component for Cantinarr
+
 import Combine
 import SwiftUI
 
