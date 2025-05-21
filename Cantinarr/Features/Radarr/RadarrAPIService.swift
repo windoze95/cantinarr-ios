@@ -2,6 +2,7 @@ import Combine // Import Combine for ObservableObject
 import Foundation
 
 @MainActor
+/// Networking layer for communicating with a Radarr instance.
 class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
     private let settings: RadarrSettings
     private let baseURL: URL

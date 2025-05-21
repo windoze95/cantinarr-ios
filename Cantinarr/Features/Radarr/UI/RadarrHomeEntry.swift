@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Entry point that hosts all Radarr-related tabs.
 struct RadarrHomeEntry: View {
     let settings: RadarrSettings
     var openSettingsSheetForCurrentService: () -> Void

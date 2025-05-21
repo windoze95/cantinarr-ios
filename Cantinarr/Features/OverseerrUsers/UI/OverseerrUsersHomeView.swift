@@ -2,6 +2,7 @@ import AuthenticationServices
 import Combine
 import SwiftUI
 
+/// Displays trending media and search for authenticated Overseerr users.
 struct OverseerrUsersHomeView: View {
     // dependencies
     @EnvironmentObject private var envStore: EnvironmentsStore

@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Generic error view shown when a service can't be reached.
 struct ServiceConnectionErrorView: View {
     let serviceName: String
     let errorMessage: String

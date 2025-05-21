@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Entrypoint view that loads ``RootShellView``.
 struct ContentView: View {
     var body: some View {
         RootShellView()
