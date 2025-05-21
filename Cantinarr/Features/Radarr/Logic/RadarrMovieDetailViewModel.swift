@@ -15,12 +15,12 @@ class RadarrMovieDetailViewModel: ObservableObject {
     @Published var commandStatusMessage: String? // For feedback on actions like search
     @Published var showCommandStatusAlert: Bool = false
 
-    private let radarrService: RadarrAPIService
+    private let radarrService: RadarrServiceType
     let movieId: Int
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(movieId: Int, radarrService: RadarrAPIService) {
+    init(movieId: Int, radarrService: RadarrServiceType) {
         self.movieId = movieId
         self.radarrService = radarrService
     }

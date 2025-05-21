@@ -21,7 +21,7 @@ struct MediaDetailView: View {
 
     init(id: Int,
          mediaType: MediaType,
-         service: OverseerrAPIService,
+         service: OverseerrServiceType,
          userSession: UserSession)
     {
         _vm = StateObject(

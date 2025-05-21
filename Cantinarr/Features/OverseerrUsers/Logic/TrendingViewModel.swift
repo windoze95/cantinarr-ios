@@ -9,7 +9,7 @@ final class TrendingViewModel: ObservableObject {
     typealias MediaItem = OverseerrUsersViewModel.MediaItem // reuse struct
 
     // Dependencies
-    private let service: OverseerrAPIService
+    private let service: OverseerrServiceType
 
     // Paging helper
     private var loader = PagedLoader()
@@ -21,7 +21,7 @@ final class TrendingViewModel: ObservableObject {
 
     // MARK: – Init
 
-    init(service: OverseerrAPIService) {
+    init(service: OverseerrServiceType) {
         self.service = service
     }
 

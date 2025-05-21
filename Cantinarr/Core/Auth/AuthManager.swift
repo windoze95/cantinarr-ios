@@ -22,10 +22,10 @@ actor AuthManager {
 
     // MARK: – Config injected once at app launch
 
-    private var service: OverseerrAPIService!
+    private var service: OverseerrServiceType!
 
     /// Call once from `App.bootstrap` after you know which Overseerr you're talking to.
-    func configure(service: OverseerrAPIService) {
+    func configure(service: OverseerrServiceType) {
         self.service = service
         lastProbe = nil
         Task { await probeSession() }

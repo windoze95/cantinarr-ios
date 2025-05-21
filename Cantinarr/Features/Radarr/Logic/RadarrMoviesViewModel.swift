@@ -12,11 +12,11 @@ class RadarrMoviesViewModel: ObservableObject {
     @Published var connectionError: String? = nil
     @Published var qualityProfiles: [Int: String] = [:] // [ID: Name]
 
-    let service: RadarrAPIService
+    let service: RadarrServiceType
     private var pageLoader =
         PagedLoader() // If Radarr movie list is paginated server-side (often it's not, but good for consistency)
 
-    init(service: RadarrAPIService) {
+    init(service: RadarrServiceType) {
         self.service = service
     }
 
