@@ -22,12 +22,12 @@ final class MediaDetailViewModel: ObservableObject {
     @Published var showTrailerPlayer: Bool = false
 
     //    private let id: Int
-    private let service: OverseerrAPIService
+    private let service: OverseerrServiceType
     private let userSession: UserSession
 
     init(id: Int,
          mediaType: MediaType,
-         service: OverseerrAPIService,
+         service: OverseerrServiceType,
          userSession: UserSession)
     {
         self.id = id
