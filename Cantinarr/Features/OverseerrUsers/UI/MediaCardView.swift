@@ -1,3 +1,6 @@
+// File: MediaCardView.swift
+// Purpose: Defines MediaCardView component for Cantinarr
+
 import NukeUI
 import SwiftUI
 

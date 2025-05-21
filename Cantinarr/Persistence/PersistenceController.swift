@@ -1,3 +1,6 @@
+// File: PersistenceController.swift
+// Purpose: Defines PersistenceController component for Cantinarr
+
 import CoreData
 
 /// Minimal CoreData stack used by the app.

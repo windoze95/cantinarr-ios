@@ -1,3 +1,6 @@
+// File: RadarrMoviesView.swift
+// Purpose: Defines RadarrMoviesView component for Cantinarr
+
 import SwiftUI
 
 /// Lists movies available in Radarr.

@@ -1,3 +1,6 @@
+// File: RadarrMoviesViewModel.swift
+// Purpose: Defines RadarrMoviesViewModel component for Cantinarr
+
 import Combine
 import SwiftUI
 

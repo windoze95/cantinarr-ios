@@ -1,3 +1,6 @@
+// File: RadarrMovieListItemView.swift
+// Purpose: Defines RadarrMovieListItemView component for Cantinarr
+
 import NukeUI
 import SwiftUI
 

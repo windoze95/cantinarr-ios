@@ -1,3 +1,6 @@
+// File: EnvironmentEditorView.swift
+// Purpose: Defines EnvironmentEditorView component for Cantinarr
+
 import SwiftUI
 
 /// Sheet used from `SettingsHomeView` to create / rename / delete an Environment.

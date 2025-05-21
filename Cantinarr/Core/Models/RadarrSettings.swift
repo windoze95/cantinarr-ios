@@ -1,3 +1,6 @@
+// File: RadarrSettings.swift
+// Purpose: Defines RadarrSettings component for Cantinarr
+
 import Foundation
 
 /// Configuration for a Radarr server instance.

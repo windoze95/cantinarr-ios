@@ -1,3 +1,6 @@
+// File: RadarrHomeEntry.swift
+// Purpose: Defines RadarrHomeEntry component for Cantinarr
+
 import SwiftUI
 
 /// Entry point that hosts all Radarr-related tabs.

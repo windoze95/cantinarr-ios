@@ -1,3 +1,6 @@
+// File: PagedLoader.swift
+// Purpose: Defines PagedLoader component for Cantinarr
+
 //  Encapsulates generic paging counters + guard logic.
 
 import SwiftUI
