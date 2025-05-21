@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Main application entry point.
 @main
 struct CantinarrApp: App {
     // If you still need Core Data elsewhere, you can keep this.

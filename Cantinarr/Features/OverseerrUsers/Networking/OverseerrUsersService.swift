@@ -1,6 +1,7 @@
 import Foundation
 
 @MainActor
+/// Abstraction for services that expose Overseerr's user‑facing API.
 protocol OverseerrUsersService {
     // Check login state
     func isAuthenticated() async -> Bool

@@ -2,6 +2,7 @@ import Foundation
 
 // MARK: - Movie
 
+/// Primary movie representation returned by Radarr's API.
 struct RadarrMovie: Codable, Identifiable, Hashable {
     let id: Int
     let title: String

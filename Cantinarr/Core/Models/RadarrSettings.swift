@@ -1,5 +1,6 @@
 import Foundation
 
+/// Configuration for a Radarr server instance.
 struct RadarrSettings: Codable {
     var host: String // e.g., "radarr.example.com" or "192.168.1.100"
     var port: String? // e.g., "7878"

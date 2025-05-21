@@ -316,11 +316,13 @@ struct TrailerPlayerView: View {
 }
 
 extension UINavigationController: UIGestureRecognizerDelegate {
+    /// Enables the interactive pop gesture after the navigation controller loads.
     override open func viewDidLoad() {
         super.viewDidLoad()
         interactivePopGestureRecognizer?.delegate = self
     }
 
+    /// Allows the swipe‑to‑go‑back gesture only when the stack has more than one view.
     public func gestureRecognizerShouldBegin(_: UIGestureRecognizer) -> Bool {
         return viewControllers.count > 1
     }
