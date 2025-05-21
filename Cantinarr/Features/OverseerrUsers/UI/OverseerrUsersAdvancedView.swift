@@ -1,3 +1,6 @@
+// File: OverseerrUsersAdvancedView.swift
+// Purpose: Defines OverseerrUsersAdvancedView component for Cantinarr
+
 import AuthenticationServices
 import SwiftUI
 

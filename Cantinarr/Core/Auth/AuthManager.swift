@@ -1,3 +1,6 @@
+// File: AuthManager.swift
+// Purpose: Defines AuthManager component for Cantinarr
+
 import Combine
 import Foundation
 

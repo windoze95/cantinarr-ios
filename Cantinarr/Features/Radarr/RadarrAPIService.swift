@@ -1,3 +1,6 @@
+// File: RadarrAPIService.swift
+// Purpose: Defines RadarrAPIService component for Cantinarr
+
 import Combine // Import Combine for ObservableObject
 import Foundation
 
@@ -106,6 +109,7 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
     private func performRequest<T: Decodable>(endpoint: String, method: String = "GET",
                                               body: Data? = nil) async throws -> T
     {
+        // Build the request for the given endpoint
         let url = baseURL.appendingPathComponent(endpoint)
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -118,12 +122,15 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
 
+        // Hit the network
         let (data, response) = try await session.data(for: request)
 
+        // Validate HTTP response
         guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.cannotParseResponse)
         }
 
+        // Translate non‑2xx responses into descriptive errors
         if !(200 ... 299).contains(httpResponse.statusCode) {
             if let errorDetailArray = try? jsonDecoder.decode([RadarrErrorDetail].self, from: data),
                let firstError = errorDetailArray.first
@@ -150,8 +157,10 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
         }
 
         do {
+            // Attempt to decode the payload using the shared decoder
             return try jsonDecoder.decode(T.self, from: data)
         } catch {
+            // Log the raw payload to aid debugging
             print("🔴 Radarr decoding error for endpoint \(endpoint): \(error)")
             if let rawDataString = String(data: data, encoding: .utf8) {
                 print("🔴 Raw data: \(rawDataString)")

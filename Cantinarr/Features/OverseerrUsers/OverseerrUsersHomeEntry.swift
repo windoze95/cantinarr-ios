@@ -1,3 +1,6 @@
+// File: OverseerrUsersHomeEntry.swift
+// Purpose: Defines OverseerrUsersHomeEntry component for Cantinarr
+
 import Combine // Import Combine
 import SwiftUI
 

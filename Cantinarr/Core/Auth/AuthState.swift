@@ -1,3 +1,6 @@
+// File: AuthState.swift
+// Purpose: Defines AuthState component for Cantinarr
+
 import Foundation
 import SwiftUI
 

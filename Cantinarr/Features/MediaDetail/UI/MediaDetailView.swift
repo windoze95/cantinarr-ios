@@ -1,3 +1,6 @@
+// File: MediaDetailView.swift
+// Purpose: Defines MediaDetailView component for Cantinarr
+
 import NukeUI
 import SwiftUI
 

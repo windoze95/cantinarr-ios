@@ -1,3 +1,6 @@
+// File: MediaType.swift
+// Purpose: Defines MediaType component for Cantinarr
+
 import Foundation
 
 enum MediaType: String, Codable, CaseIterable, Identifiable {

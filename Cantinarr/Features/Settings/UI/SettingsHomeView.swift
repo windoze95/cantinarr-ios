@@ -1,3 +1,6 @@
+// File: SettingsHomeView.swift
+// Purpose: Defines SettingsHomeView component for Cantinarr
+
 import SwiftUI
 
 struct SettingsHomeView: View {

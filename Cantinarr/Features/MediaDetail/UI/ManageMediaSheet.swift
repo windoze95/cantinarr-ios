@@ -1,3 +1,6 @@
+// File: ManageMediaSheet.swift
+// Purpose: Defines ManageMediaSheet component for Cantinarr
+
 import SwiftUI
 
 struct ManageMediaSheet: View {

@@ -1,3 +1,6 @@
+// File: ServiceConnectionErrorView.swift
+// Purpose: Defines ServiceConnectionErrorView component for Cantinarr
+
 import SwiftUI
 
 struct ServiceConnectionErrorView: View {

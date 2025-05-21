@@ -1,3 +1,6 @@
+// File: TrendingViewModel.swift
+// Purpose: Defines TrendingViewModel component for Cantinarr
+
 import SwiftUI
 
 @MainActor
@@ -41,16 +44,21 @@ final class TrendingViewModel: ObservableObject {
     // MARK: – Internals
 
     private func fetchNextPage() async {
+        // Guard against multiple simultaneous loads and end when no more pages
         guard loader.beginLoading() else { return }
         isLoading = true
+        // Ensure loading flag is cleared even if we early‑return
         defer { isLoading = false }
 
         do {
+            // Ask the service for the next trending page. Provider filter is
+            // empty here which means "all" providers.
             let resp = try await service.fetchTrending(
-                providerIds: [], // all providers
+                providerIds: [],
                 page: loader.page
             )
 
+            // Map raw DTOs into display models used by the view
             let mapped = resp.results.map {
                 MediaItem(id: $0.id,
                           title: $0.title ?? $0.name ?? "Untitled",
@@ -58,8 +66,10 @@ final class TrendingViewModel: ObservableObject {
                           mediaType: $0.mediaType)
             }
             items += mapped
+            // Update paging counters with totalPages from the API
             loader.endLoading(next: resp.totalPages)
-            if loader.page == 2 { // If first page loaded successfully
+            // Clear any stale error message once we have data
+            if loader.page == 2 {
                 connectionError = nil
             }
         } catch is AuthError { // More specific: catch AuthError

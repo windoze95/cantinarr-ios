@@ -1,3 +1,6 @@
+// File: MediaAvailability.swift
+// Purpose: Defines MediaAvailability component for Cantinarr
+
 import SwiftUI
 
 enum MediaAvailability: Int, Codable {
