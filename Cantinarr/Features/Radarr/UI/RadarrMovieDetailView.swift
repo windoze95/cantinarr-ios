@@ -8,6 +8,7 @@ private struct TaglineHeightKeyRadarr: PreferenceKey {
     }
 }
 
+/// Displays detailed information about a single Radarr movie.
 struct RadarrMovieDetailView: View {
     @StateObject private var viewModel: RadarrMovieDetailViewModel
     @Environment(\.dismiss) private var dismiss

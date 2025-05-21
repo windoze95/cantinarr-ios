@@ -2,6 +2,8 @@ import Combine
 import SwiftUI
 
 @MainActor
+/// View model for ``RadarrMovieDetailView`` responsible for loading and
+/// mutating a single movie.
 class RadarrMovieDetailViewModel: ObservableObject {
     @Published var movie: RadarrMovie?
     @Published var qualityProfileName: String?

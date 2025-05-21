@@ -3,6 +3,7 @@ import Combine
 import SwiftUI
 
 @MainActor
+/// Main view model driving Overseerr's user interface.
 class OverseerrUsersViewModel: ObservableObject {
     // ─────────────────────────────────────────────
 

@@ -1,5 +1,6 @@
 import CoreData
 
+/// Minimal CoreData stack used by the app.
 struct PersistenceController {
     static let shared = PersistenceController()
 
