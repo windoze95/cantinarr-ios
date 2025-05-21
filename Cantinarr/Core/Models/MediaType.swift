@@ -1,5 +1,6 @@
 import Foundation
 
+/// A subset of TMDB media types recognised by the app.
 enum MediaType: String, Codable, CaseIterable, Identifiable {
     case movie
     case tv

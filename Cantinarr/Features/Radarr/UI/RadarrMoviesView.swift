@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Lists movies available in Radarr.
 struct RadarrMoviesView: View {
     @StateObject var viewModel: RadarrMoviesViewModel
 

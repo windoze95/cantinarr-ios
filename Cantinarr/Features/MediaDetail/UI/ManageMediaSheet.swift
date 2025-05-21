@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Placeholder sheet for future media management actions.
 struct ManageMediaSheet: View {
     let mediaID: Int
     @Environment(\.dismiss) private var dismiss

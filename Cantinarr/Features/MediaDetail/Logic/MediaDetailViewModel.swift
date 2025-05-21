@@ -2,6 +2,7 @@ import SwiftUI
 
 @MainActor
 final class MediaDetailViewModel: ObservableObject {
+    /// The Overseerr/TMDB identifier of the media currently displayed.
     public private(set) var id: Int
     @Published private(set) var mediaType: MediaType
     @Published private(set) var availability: MediaAvailability = .unknown

@@ -1,6 +1,7 @@
 import AuthenticationServices
 import SwiftUI
 
+/// Advanced search interface for Overseerr including keyword filters.
 struct OverseerrUsersAdvancedView: View {
     @EnvironmentObject private var envStore: EnvironmentsStore
     @StateObject private var vm: OverseerrUsersViewModel

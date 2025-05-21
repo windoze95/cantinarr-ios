@@ -1,6 +1,7 @@
 import NukeUI
 import SwiftUI
 
+/// Row in the movies list showing title, runtime and quality.
 struct RadarrMovieListItemView: View {
     let movie: RadarrMovie
     let qualityProfileName: String?

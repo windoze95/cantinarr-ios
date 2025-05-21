@@ -1,6 +1,7 @@
 import SwiftUI
 import WebKit
 
+/// A lightweight wrapper around ``WKWebView`` for SwiftUI usage.
 struct WebView: UIViewRepresentable {
     let url: URL
 

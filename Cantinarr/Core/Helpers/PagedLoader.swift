@@ -3,6 +3,7 @@
 import SwiftUI
 
 @MainActor
+/// Utility that tracks paging state for infinite‑scroll style lists.
 struct PagedLoader {
     private(set) var page = 1
     private(set) var totalPages = 1
