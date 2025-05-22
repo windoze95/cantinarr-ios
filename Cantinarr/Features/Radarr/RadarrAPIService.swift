@@ -361,3 +361,5 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
         }
     }
 }
+
+extension RadarrAPIService: RadarrServiceType {}
