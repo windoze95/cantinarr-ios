@@ -11,10 +11,7 @@ extension OverseerrAPIService {
         let endpoint = isMovie ? "watchproviders/movies" : "watchproviders/tv"
         var comps = URLComponents(url: baseURL.appendingPathComponent(endpoint), resolvingAgainstBaseURL: false)!
         comps.queryItems = [.init(name: "watchRegion", value: Locale.current.regionCode ?? "US")]
-        let (d, resp) = try await data(for: URLRequest(url: comps.url!))
-        guard let http = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-        if http.statusCode == 401 || http.statusCode == 403 { throw AuthError.notAuthenticated }
-        guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+        let (d, _) = try await data(for: URLRequest(url: comps.url!))
         return try jsonDecoder.decode([WatchProvider].self, from: d)
     }
 
@@ -28,10 +25,7 @@ extension OverseerrAPIService {
         guard !query.isEmpty else { return [] }
         var comps = URLComponents(url: baseURL.appendingPathComponent("search/keyword"), resolvingAgainstBaseURL: false)!
         comps.queryItems = [.init(name: "query", value: query)]
-        let (data, resp) = try await data(for: URLRequest(url: comps.url!))
-        guard let http = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-        if http.statusCode == 401 || http.statusCode == 403 { throw AuthError.notAuthenticated }
-        guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+        let (data, _) = try await data(for: URLRequest(url: comps.url!))
         let wrapper = try jsonDecoder.decode(DiscoverResponse<Keyword>.self, from: data)
         return wrapper.results
     }
@@ -88,8 +82,7 @@ extension OverseerrAPIService {
             .init(name: "query", value: query),
             .init(name: "page", value: "\(page)")
         ]
-        let (data, resp) = try await data(for: URLRequest(url: comps.url!))
-        guard (resp as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+        let (data, _) = try await data(for: URLRequest(url: comps.url!))
         return try jsonDecoder.decode(DiscoverResponse<SearchItem>.self, from: data)
     }
 
@@ -108,10 +101,7 @@ extension OverseerrAPIService {
         }
         comps.queryItems = q
 
-        let (d, resp) = try await data(for: URLRequest(url: comps.url!))
-        guard let http = resp as? HTTPURLResponse else { throw URLError(.badServerResponse) }
-        if http.statusCode == 401 || http.statusCode == 403 { throw AuthError.notAuthenticated }
-        guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+        let (d, _) = try await data(for: URLRequest(url: comps.url!))
         return try jsonDecoder.decode(DiscoverResponse<T>.self, from: d)
     }
 
