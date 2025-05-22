@@ -191,7 +191,7 @@ class OverseerrUsersViewModel: ObservableObject {
             if case .authenticated = authState, results.isEmpty && searchQuery.isEmpty && activeKeywordIDs.isEmpty {
                 await loadMedia(reset: true)
             }
-        } catch is AuthError {
+        } catch is OverseerrError {
             recoverFromAuthFailure()
         } catch {
             print("🔴 Provider load error: \(error.localizedDescription)")
@@ -272,7 +272,7 @@ class OverseerrUsersViewModel: ObservableObject {
             loader.endLoading(next: responseTotalPages)
 
             if !watchProviders.isEmpty { clearConnectionError() }
-        } catch is AuthError {
+        } catch is OverseerrError {
             loader.cancelLoading(); recoverFromAuthFailure()
         } catch {
             print("🔴 Media load error (\(selectedMedia)): \(error.localizedDescription)")
@@ -350,7 +350,7 @@ class OverseerrUsersViewModel: ObservableObject {
             loader.endLoading(next: resp.totalPages)
 
             if !watchProviders.isEmpty { clearConnectionError() }
-        } catch is AuthError {
+        } catch is OverseerrError {
             loader.cancelLoading(); recoverFromAuthFailure()
         } catch {
             print("🔴 Search error: \(error.localizedDescription)")
@@ -370,7 +370,7 @@ class OverseerrUsersViewModel: ObservableObject {
         do {
             let raw = try await service.keywordSearch(query: query)
             keywordSuggestions = await filterUsableKeywords(raw)
-        } catch is AuthError {
+        } catch is OverseerrError {
             // Handled by recoverFromAuthFailure
         } catch {
             keywordSuggestions = []
@@ -440,7 +440,7 @@ class OverseerrUsersViewModel: ObservableObject {
                             page: 1
                         )
                         if !tv.results.isEmpty { return kw }
-                    } catch is AuthError {
+                    } catch is OverseerrError {
                         await self.recoverFromAuthFailure()
                     } catch {
                         print("⚠️ Error probing keyword \(kw.name): \(error.localizedDescription)")
@@ -479,8 +479,8 @@ class OverseerrUsersViewModel: ObservableObject {
                 mediaType: .movie
             ) }
             movieRecLoader.endLoading(next: resp.totalPages)
-        } catch is AuthError {
-            recoverFromAuthFailure(); movieFetchError = AuthError.notAuthenticated
+        } catch is OverseerrError {
+            recoverFromAuthFailure(); movieFetchError = OverseerrError.notAuthenticated
         } catch {
             movieFetchError = error; print("🔴 Movie recommendations error: \(error.localizedDescription)")
             movieRecs = []; movieRecLoader.reset()
@@ -493,8 +493,8 @@ class OverseerrUsersViewModel: ObservableObject {
             tvRecs = resp.results
                 .map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
             tvRecLoader.endLoading(next: resp.totalPages)
-        } catch is AuthError {
-            recoverFromAuthFailure(); tvFetchError = AuthError.notAuthenticated
+        } catch is OverseerrError {
+            recoverFromAuthFailure(); tvFetchError = OverseerrError.notAuthenticated
         } catch {
             tvFetchError = error; print("🔴 TV recommendations error: \(error.localizedDescription)")
             tvRecs = []; tvRecLoader.reset()
@@ -502,17 +502,17 @@ class OverseerrUsersViewModel: ObservableObject {
         isLoadingTvRecs = false
 
         // Error Reporting
-        if let mvErr = movieFetchError, !(mvErr is AuthError),
-           let tvErr = tvFetchError, !(tvErr is AuthError)
+        if let mvErr = movieFetchError, !(mvErr is OverseerrError),
+           let tvErr = tvFetchError, !(tvErr is OverseerrError)
         {
             connectionError = "Failed to load recommendations."
         } else if connectionError == nil && (movieFetchError != nil || tvFetchError != nil) {
             if let mvErr = movieFetchError,
-               !(mvErr is AuthError)
+               !(mvErr is OverseerrError)
             {
                 connectionError = "Failed to load movie recommendations. \(mvErr.localizedDescription)"
             } else if let tvErr = tvFetchError,
-                      !(tvErr is AuthError)
+                      !(tvErr is OverseerrError)
             {
                 connectionError = "Failed to load TV recommendations. \(tvErr.localizedDescription)"
             }
@@ -555,7 +555,7 @@ class OverseerrUsersViewModel: ObservableObject {
                 ) }
                 movieRecs.append(contentsOf: more)
                 movieRecLoader.endLoading(next: resp.totalPages)
-            } catch is AuthError {
+            } catch is OverseerrError {
                 movieRecLoader.cancelLoading(); recoverFromAuthFailure()
             } catch {
                 movieRecLoader
@@ -585,7 +585,7 @@ class OverseerrUsersViewModel: ObservableObject {
                 ) }
                 tvRecs.append(contentsOf: more)
                 tvRecLoader.endLoading(next: resp.totalPages)
-            } catch is AuthError {
+            } catch is OverseerrError {
                 tvRecLoader.cancelLoading(); recoverFromAuthFailure()
             } catch {
                 tvRecLoader

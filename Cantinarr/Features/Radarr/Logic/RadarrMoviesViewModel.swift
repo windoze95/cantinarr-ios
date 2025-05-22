@@ -32,7 +32,7 @@ class RadarrMoviesViewModel: ObservableObject {
 
         do {
             movies = try await service.getMovies()
-        } catch let RadarrAPIService.RadarrError.apiError(message, statusCode) {
+        } catch let APIServiceError.apiError(message: message, statusCode: statusCode) {
             self.connectionError = "Radarr API Error (\(statusCode)): \(message)"
         } catch {
             connectionError = "Failed to load movies: \(error.localizedDescription)"

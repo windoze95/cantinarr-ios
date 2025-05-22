@@ -37,7 +37,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
             let fetchedMovie = try await radarrService.getMovie(id: movieId)
             movie = fetchedMovie
             await fetchQualityProfileName(id: fetchedMovie.qualityProfileId)
-        } catch let RadarrAPIService.RadarrError.apiError(message, statusCode) {
+        } catch let APIServiceError.apiError(message: message, statusCode: statusCode) {
             self.error = "Radarr API Error (\(statusCode)): \(message)"
         } catch {
             self.error = "Failed to load movie details: \(error.localizedDescription)"

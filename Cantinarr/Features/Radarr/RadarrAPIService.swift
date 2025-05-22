@@ -128,7 +128,7 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
 
         // Validate HTTP response
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.cannotParseResponse)
+            throw APIServiceError.invalidResponse
         }
 
         // Translate non‑2xx responses into descriptive errors
@@ -136,22 +136,22 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
             if let errorDetailArray = try? jsonDecoder.decode([RadarrErrorDetail].self, from: data),
                let firstError = errorDetailArray.first
             {
-                throw RadarrError.apiError(
+                throw APIServiceError.apiError(
                     message: firstError.resolvedErrorMessage ?? "Radarr API Error \(httpResponse.statusCode)",
                     statusCode: httpResponse.statusCode
                 )
             } else if let singleErrorDetail = try? jsonDecoder.decode(RadarrErrorDetail.self, from: data) {
-                throw RadarrError.apiError(
+                throw APIServiceError.apiError(
                     message: singleErrorDetail.resolvedErrorMessage ?? "Radarr API Error \(httpResponse.statusCode)",
                     statusCode: httpResponse.statusCode
                 )
             } else if let errorString = String(data: data, encoding: .utf8), !errorString.isEmpty {
-                throw RadarrError.apiError(
+                throw APIServiceError.apiError(
                     message: "Radarr API Error \(httpResponse.statusCode): \(errorString)",
                     statusCode: httpResponse.statusCode
                 )
             }
-            throw RadarrError.apiError(
+            throw APIServiceError.apiError(
                 message: "Radarr API Error \(httpResponse.statusCode)",
                 statusCode: httpResponse.statusCode
             )
@@ -185,12 +185,10 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
     }
 
     enum RadarrError: Error, LocalizedError {
-        case apiError(message: String, statusCode: Int)
         case invalidParameters
 
         var errorDescription: String? {
             switch self {
-            case let .apiError(message, _): return message
             case .invalidParameters: return "Invalid parameters provided for Radarr API request."
             }
         }
@@ -294,7 +292,7 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
 
         let (_, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, (200 ... 299).contains(httpResponse.statusCode) else {
-            throw RadarrError.apiError(
+            throw APIServiceError.apiError(
                 message: "Failed to delete movie. Status: \((response as? HTTPURLResponse)?.statusCode ?? 0)",
                 statusCode: (response as? HTTPURLResponse)?.statusCode ?? 0
             )

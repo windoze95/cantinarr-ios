@@ -8,8 +8,25 @@ import WebKit
 /// Shared cookie store so that WKWebView and URLSession share authentication cookies.
 private let sharedDataStore = WKWebsiteDataStore.default()
 
-enum AuthError: Error {
+/// Errors specific to Overseerr API interactions.
+enum OverseerrError: Error, LocalizedError {
     case notAuthenticated
+    case apiError(message: String, statusCode: Int)
+    case invalidResponse
+    case network(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .notAuthenticated:
+            return "Authentication required."
+        case let .apiError(message, _):
+            return message
+        case .invalidResponse:
+            return "Invalid response from server."
+        case let .network(error):
+            return error.localizedDescription
+        }
+    }
 }
 
 struct User: Codable { // This struct should match the /auth/me response
@@ -80,19 +97,31 @@ class OverseerrAPIService {
     @discardableResult
     func data(for req: URLRequest) async throws -> (Data, HTTPURLResponse) {
         // hit the network through the dedicated session
-        let (data, response) = try await session.data(for: req, delegate: nil)
+        do {
+            let (data, response) = try await session.data(for: req, delegate: nil)
 
-        // validate HTTP
-        guard let http = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        // translate auth errors so callers & AuthManager can react
-        if http.statusCode == 401 || http.statusCode == 403 {
-            await AuthManager.shared.recoverFromAuthFailure()
-            throw AuthError.notAuthenticated
-        }
+            guard let http = response as? HTTPURLResponse else {
+                throw OverseerrError.invalidResponse
+            }
 
-        return (data, http)
+            if http.statusCode == 401 || http.statusCode == 403 {
+                await AuthManager.shared.recoverFromAuthFailure()
+                throw OverseerrError.notAuthenticated
+            }
+
+            guard (200 ... 299).contains(http.statusCode) else {
+                throw OverseerrError.apiError(
+                    message: HTTPURLResponse.localizedString(forStatusCode: http.statusCode),
+                    statusCode: http.statusCode
+                )
+            }
+
+            return (data, http)
+        } catch let error as OverseerrError {
+            throw error
+        } catch {
+            throw OverseerrError.network(error)
+        }
     }
 
 }

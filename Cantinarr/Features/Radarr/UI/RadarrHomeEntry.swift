@@ -36,7 +36,7 @@ struct RadarrHomeEntry: View {
         do {
             // Use the stored instance for the check
             _ = try await radarrServiceInstance.getSystemStatus()
-        } catch let RadarrAPIService.RadarrError.apiError(message, statusCode) {
+        } catch let APIServiceError.apiError(message: message, statusCode: statusCode) {
             self.initialConnectionError = "Radarr API Error (\(statusCode)): \(message)"
         } catch {
             initialConnectionError = "Could not connect to Radarr: \(error.localizedDescription)"

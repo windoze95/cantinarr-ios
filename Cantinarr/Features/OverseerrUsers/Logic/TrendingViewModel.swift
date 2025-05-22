@@ -73,11 +73,11 @@ final class TrendingViewModel: ObservableObject {
             if loader.page == 2 {
                 connectionError = nil
             }
-        } catch is AuthError { // More specific: catch AuthError
+        } catch is OverseerrError { // More specific: catch OverseerrError
             // Auth errors are primarily handled by OverseerrUsersViewModel's authState
             // and AuthManager. This VM doesn't need to set connectionError for this.
             loader.cancelLoading()
-            print("Trending fetch failed due to AuthError.")
+            print("Trending fetch failed due to OverseerrError.")
         } catch {
             loader.cancelLoading()
             // Only set error if items are empty, otherwise it might be a pagination error

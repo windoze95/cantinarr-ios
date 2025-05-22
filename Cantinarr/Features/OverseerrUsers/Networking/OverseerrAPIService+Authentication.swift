@@ -18,13 +18,7 @@ extension OverseerrAPIService {
 
     func fetchCurrentUser() async throws -> User {
         let request = URLRequest(url: baseURL.appendingPathComponent("auth/me"))
-        let (data, resp) = try await data(for: request)
-        guard resp.statusCode == 200 else {
-            throw URLError(
-                .badServerResponse,
-                userInfo: [NSLocalizedDescriptionKey: "Failed to fetch current user. Status: \(resp.statusCode)"]
-            )
-        }
+        let (data, _) = try await data(for: request)
         return try jsonDecoder.decode(User.self, from: data)
     }
 
@@ -38,12 +32,7 @@ extension OverseerrAPIService {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpBody = Data()
 
-        let (data, resp) = try await data(for: request)
-        guard let http = resp as? HTTPURLResponse, http.statusCode == 200 else {
-            let body = String(data: data, encoding: .utf8) ?? "(empty)"
-            print("🛑 /api/v1/auth/plex returned status \((resp as? HTTPURLResponse)?.statusCode ?? -1):\n\(body)")
-            throw URLError(.badServerResponse)
-        }
+        let (data, _) = try await data(for: request)
 
         struct Redirect: Decodable { let url: String }
         let redirect = try JSONDecoder().decode(Redirect.self, from: data)
@@ -61,9 +50,6 @@ extension OverseerrAPIService {
         let body = ["authToken": plexToken]
         req.httpBody = try JSONEncoder().encode(body)
 
-        let (_, resp) = try await data(for: req)
-        guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
-            throw URLError(.userAuthenticationRequired)
-        }
+        _ = try await data(for: req)
     }
 }
