@@ -15,12 +15,12 @@ class RadarrMovieDetailViewModel: ObservableObject {
     @Published var commandStatusMessage: String? // For feedback on actions like search
     @Published var showCommandStatusAlert: Bool = false
 
-    private let radarrService: RadarrAPIService
+    private let radarrService: RadarrServiceType
     let movieId: Int
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(movieId: Int, radarrService: RadarrAPIService) {
+    init(movieId: Int, radarrService: RadarrServiceType) {
         self.movieId = movieId
         self.radarrService = radarrService
     }
@@ -91,7 +91,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
         do {
             // When sending movieToUpdate to radarrService.updateMovie,
             // ensure it's the complete, correct payload Radarr expects for an update.
-            let updatedMovie = try await radarrService.updateMovie(movieToUpdate)
+            let updatedMovie = try await radarrService.updateMovie(movieToUpdate, moveFiles: false)
             movie = updatedMovie
             commandStatusMessage = movieToUpdate.monitored ? "Movie is now monitored." : "Movie is no longer monitored."
             showCommandStatusAlert = true
@@ -139,7 +139,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
     func deleteMovie(alsoDeleteFiles: Bool) async {
         guard let movieToDelete = movie else { return }
         do {
-            try await radarrService.deleteMovie(movieToDelete.id, deleteFiles: alsoDeleteFiles)
+            try await radarrService.deleteMovie(movieToDelete.id, deleteFiles: alsoDeleteFiles, addImportExclusion: false)
             commandStatusMessage = "Movie deleted successfully."
             showCommandStatusAlert = true
             // After deletion, the view should probably be dismissed or state cleared

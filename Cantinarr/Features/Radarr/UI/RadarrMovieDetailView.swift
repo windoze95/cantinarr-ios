@@ -18,7 +18,7 @@ struct RadarrMovieDetailView: View {
     @State private var taglineHeight: CGFloat = .zero // For dynamic header height calculation
     @State private var showDeleteConfirmation = false
 
-    init(movieId: Int, radarrService: RadarrAPIService) {
+    init(movieId: Int, radarrService: RadarrServiceType) {
         _viewModel = StateObject(wrappedValue: RadarrMovieDetailViewModel(
             movieId: movieId,
             radarrService: radarrService

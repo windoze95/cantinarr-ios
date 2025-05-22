@@ -401,3 +401,5 @@ extension OverseerrAPIService {
 
 // Make OverseerrAPIService satisfy OverseerrUsersService
 extension OverseerrAPIService: OverseerrUsersService {}
+
+extension OverseerrAPIService: OverseerrServiceType {}

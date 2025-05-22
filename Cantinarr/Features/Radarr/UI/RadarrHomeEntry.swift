@@ -8,10 +8,10 @@ struct RadarrHomeEntry: View {
     let settings: RadarrSettings
     var openSettingsSheetForCurrentService: () -> Void
 
-    // The RadarrAPIService instance itself doesn't need to be a @StateObject
-    // if it doesn't have @Published properties that this view directly observes.
-    // It's created once and passed to ViewModels that ARE @StateObjects.
-    private let radarrServiceInstance: RadarrAPIService
+    // The Radarr service instance doesn't need to be a @StateObject if it doesn't
+    // have @Published properties that this view observes. It's created once and
+    // passed to ViewModels that ARE @StateObjects.
+    private let radarrServiceInstance: RadarrServiceType
 
     @State private var initialConnectionError: String? = nil
     @State private var isLoadingInitialCheck: Bool = true
