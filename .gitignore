@@ -10,6 +10,21 @@ xcuserdata/
 # Ignore the redundant Package.resolved that Xcode puts in xcshareddata/swiftpm
 **/xcshareddata/swiftpm/Package.resolved
 
+# More user-specific Xcode files
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcsettings    # WorkspaceSettings.xcsettings, etc.
+
+# Build artifacts
+build/
+DerivedData/
+*.xcarchive
+
+# SwiftPM metadata (safe to ignore if it shows up)
+.swiftpm/
+
 ## Obj-C/Swift specific
 *.hmap
 
