@@ -77,8 +77,7 @@ extension OverseerrAPIService {
     // MARK: - Helpers
     private func fetchJSON<T: Decodable>(_ endpoint: String) async throws -> T {
         let url = baseURL.appendingPathComponent(endpoint)
-        let (data, resp) = try await data(for: URLRequest(url: url))
-        guard resp.statusCode == 200 else { throw URLError(.badServerResponse) }
+        let (data, _) = try await data(for: URLRequest(url: url))
         return try jsonDecoder.decode(T.self, from: data)
     }
 
@@ -87,7 +86,6 @@ extension OverseerrAPIService {
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
-        let (_, resp) = try await data(for: req)
-        guard resp.statusCode == 200 else { throw URLError(.badServerResponse) }
+        _ = try await data(for: req)
     }
 }
