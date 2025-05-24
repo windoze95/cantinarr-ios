@@ -652,10 +652,16 @@ class OverseerrUsersViewModel: ObservableObject {
             do {
                 let pin = try await fetchPlexPIN()
                 let plexURL = buildPlexOAuthURL(code: pin.code)
-                let web = ASWebAuthenticationSession(url: plexURL, callbackURLScheme: nil) { callbackURL, error in
-                    print(
-                        "ASWebAuthenticationSession completed. URL: \(callbackURL?.absoluteString ?? "nil"), Error: \(error?.localizedDescription ?? "nil")"
-                    )
+                let web = ASWebAuthenticationSession(url: plexURL, callbackURLScheme: nil) { _, error in
+                    // This callback is expected to fire with a
+                    // `.canceledLogin` error once the user dismisses the
+                    // browser window. Ignore that specific case so the log
+                    // isn't polluted with a benign message.
+                    if let err = error as? ASWebAuthenticationSessionError,
+                       err.code != .canceledLogin
+                    {
+                        print("ASWebAuthenticationSession failed: \(err.localizedDescription)")
+                    }
                 }
                 web.presentationContextProvider = authContext
                 web.prefersEphemeralWebBrowserSession = true
