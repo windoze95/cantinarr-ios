@@ -14,7 +14,7 @@ struct NetworkSelectionView: View {
                 HStack {
                     Text(provider.name) // network name
                     Spacer()
-                    if vm.selectedProviders.contains(provider.id) {
+                    if vm.filters.selectedProviders.contains(provider.id) {
                         Image(systemName: "checkmark") // show checkmark if selected
                             .foregroundColor(.accentColor)
                     }
@@ -22,10 +22,10 @@ struct NetworkSelectionView: View {
                 .contentShape(Rectangle()) // make full row tappable
                 .onTapGesture {
                     // toggle selection
-                    if vm.selectedProviders.contains(provider.id) {
-                        vm.selectedProviders.remove(provider.id)
+                    if vm.filters.selectedProviders.contains(provider.id) {
+                        vm.filters.selectedProviders.remove(provider.id)
                     } else {
-                        vm.selectedProviders.insert(provider.id)
+                        vm.filters.selectedProviders.insert(provider.id)
                     }
                 }
             }

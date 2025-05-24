@@ -220,7 +220,7 @@ struct OverseerrUsersHomeView: View {
     private var searchResultsSection: some View {
         // Filter out suggestions that are already active keywords
         let filteredSuggestions = overseerrUsersVM.keywordSuggestions
-            .filter { !overseerrUsersVM.activeKeywordIDs.contains($0.id) }
+            .filter { !overseerrUsersVM.filters.activeKeywordIDs.contains($0.id) }
 
         Group {
             // Search Results for Movies/TV

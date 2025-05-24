@@ -74,7 +74,7 @@ struct OverseerrUsersAdvancedView: View {
             VStack(alignment: .leading, spacing: 16) {
                 if vm.searchQuery.isEmpty {
                     // Movies / TV picker
-                    Picker("Media", selection: $vm.selectedMedia) {
+                    Picker("Media", selection: $vm.filters.selectedMedia) {
                         ForEach(MediaType.allCases
                             .filter { $0 != .unknown && $0 != .person && $0 != .collection })
                         { mt in
@@ -86,7 +86,7 @@ struct OverseerrUsersAdvancedView: View {
                     .padding(.horizontal)
 
                     // Active keyword pillszzz
-                    if !vm.activeKeywordIDs.isEmpty {
+                    if !vm.filters.activeKeywordIDs.isEmpty {
                         ActiveKeywordsView()
                             .environmentObject(vm)
                             .padding(.top, 4)
@@ -149,7 +149,7 @@ struct OverseerrUsersAdvancedView: View {
                     }
                     // Only suggestions not already active
                     let filteredSuggestions = vm.keywordSuggestions
-                        .filter { !vm.activeKeywordIDs.contains($0.id) }
+                        .filter { !vm.filters.activeKeywordIDs.contains($0.id) }
 
                     if vm.isLoadingKeywords || !filteredSuggestions.isEmpty {
                         Text("Search by Keyword")
