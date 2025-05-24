@@ -38,7 +38,23 @@ final class EnvironmentsStore: ObservableObject {
 
     init() {
         // Load from disk or fall back to sample
-        let envs = (try? Self.load()) ?? Self.sampleData
+        var envs = (try? Self.load()) ?? Self.sampleData
+
+        // Migrate Radarr API keys from stored configuration to Keychain
+        for eIndex in envs.indices {
+            for sIndex in envs[eIndex].services.indices {
+                var svc = envs[eIndex].services[sIndex]
+                if svc.kind == .radarr,
+                   let data = svc.configuration,
+                   let settings = try? JSONDecoder().decode(RadarrSettings.self, from: data),
+                   let sanitized = try? JSONEncoder().encode(settings)
+                {
+                    // 'decode' already saved the API key to Keychain
+                    svc.configuration = sanitized
+                    envs[eIndex].services[sIndex] = svc
+                }
+            }
+        }
 
         // Initial selections
         environments = envs
