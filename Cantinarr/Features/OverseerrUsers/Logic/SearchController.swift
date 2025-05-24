@@ -261,7 +261,13 @@ final class SearchController: ObservableObject {
     }
 
     func loadMoreIfNeeded(current item: MediaItem, within list: [MediaItem]) {
-        let thresholdIndex = list.index(list.endIndex, offsetBy: -AppConfig.prefetchThreshold)
+        guard !list.isEmpty else { return }
+        let thresholdIndex: Int
+        if list.count >= AppConfig.prefetchThreshold {
+            thresholdIndex = list.index(list.endIndex, offsetBy: -AppConfig.prefetchThreshold)
+        } else {
+            thresholdIndex = list.startIndex
+        }
         guard let currentIndex = list.firstIndex(where: { $0.id == item.id }),
               currentIndex >= thresholdIndex else { return }
         Task {
@@ -273,7 +279,13 @@ final class SearchController: ObservableObject {
     func loadMoreMovieRecsIfNeeded(current item: MediaItem) {
         guard let baseID = recBaseID else { return }
         guard movieRecLoader.page <= movieRecLoader.totalPages, !isLoadingMovieRecs else { return }
-        let thresholdIndex = movieRecs.index(movieRecs.endIndex, offsetBy: -AppConfig.prefetchThreshold)
+        guard !movieRecs.isEmpty else { return }
+        let thresholdIndex: Int
+        if movieRecs.count >= AppConfig.prefetchThreshold {
+            thresholdIndex = movieRecs.index(movieRecs.endIndex, offsetBy: -AppConfig.prefetchThreshold)
+        } else {
+            thresholdIndex = movieRecs.startIndex
+        }
         guard let currentIndex = movieRecs.firstIndex(where: { $0.id == item.id }),
               currentIndex >= thresholdIndex else { return }
         guard movieRecLoader.beginLoading() else { return }
@@ -298,7 +310,13 @@ final class SearchController: ObservableObject {
     func loadMoreTvRecsIfNeeded(current item: MediaItem) {
         guard let baseID = recBaseID else { return }
         guard tvRecLoader.page <= tvRecLoader.totalPages, !isLoadingTvRecs else { return }
-        let thresholdIndex = tvRecs.index(tvRecs.endIndex, offsetBy: -AppConfig.prefetchThreshold)
+        guard !tvRecs.isEmpty else { return }
+        let thresholdIndex: Int
+        if tvRecs.count >= AppConfig.prefetchThreshold {
+            thresholdIndex = tvRecs.index(tvRecs.endIndex, offsetBy: -AppConfig.prefetchThreshold)
+        } else {
+            thresholdIndex = tvRecs.startIndex
+        }
         guard let currentIndex = tvRecs.firstIndex(where: { $0.id == item.id }),
               currentIndex >= thresholdIndex else { return }
         guard tvRecLoader.beginLoading() else { return }

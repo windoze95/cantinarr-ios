@@ -35,10 +35,15 @@ final class TrendingViewModel: ObservableObject {
     }
 
     func loadMoreIfNeeded(current item: MediaItem) {
-        guard let idx = items.firstIndex(where: { $0.id == item.id }),
-              idx >= items.index(items.endIndex,
-                                 offsetBy: -AppConfig.prefetchThreshold)
-        else { return }
+        guard !items.isEmpty,
+              let idx = items.firstIndex(where: { $0.id == item.id }) else { return }
+        let thresholdIndex: Int
+        if items.count >= AppConfig.prefetchThreshold {
+            thresholdIndex = items.index(items.endIndex, offsetBy: -AppConfig.prefetchThreshold)
+        } else {
+            thresholdIndex = items.startIndex
+        }
+        guard idx >= thresholdIndex else { return }
         Task { await fetchNextPage() }
     }
 
