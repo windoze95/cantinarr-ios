@@ -6,11 +6,15 @@ import Security
 
 class KeychainHelper {
     /// Save sensitive data (e.g., API keys) to the Keychain.
+    /// Data is stored with `kSecAttrAccessibleAfterFirstUnlock` so it remains
+    /// available after a restart once the user has unlocked the device.
     static func save(key: String, data: Data) -> OSStatus {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
             kSecValueData as String: data,
+            // Explicit accessibility level for stronger security.
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
         ]
         // Remove any existing item before adding new data.
         SecItemDelete(query as CFDictionary)
