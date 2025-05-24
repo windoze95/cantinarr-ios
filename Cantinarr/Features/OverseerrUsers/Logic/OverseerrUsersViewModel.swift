@@ -4,6 +4,7 @@
 import AuthenticationServices
 import Combine
 import SwiftUI
+import WebKit
 
 @MainActor
 /// Main view model driving Overseerr's user interface.
@@ -121,6 +122,18 @@ class OverseerrUsersViewModel: ObservableObject {
         self.settingsKey = settingsKey
 
         loadSavedFilters()
+        if let savedToken = loadTokenFromKeychain() {
+            sessionToken = savedToken
+            Task {
+                do {
+                    try await service.loginWithPlexToken(savedToken)
+                    await OverseerrAuthManager.shared.probeSession()
+                } catch {
+                    print("Failed to restore Plex token: \(error.localizedDescription)")
+                    deleteTokenFromKeychain()
+                }
+            }
+        }
         OverseerrAuthHelper.shared.delegate = self
 
         $searchQuery
@@ -634,6 +647,21 @@ class OverseerrUsersViewModel: ObservableObject {
     private func deleteTokenFromKeychain() {
         KeychainHelper.delete(key: tokenKey)
         sessionToken = nil
+    }
+
+    /// Log out the current user, clearing session cookies and stored token.
+    func logout() {
+        deleteTokenFromKeychain()
+        // Remove all cookies from shared storage
+        let cookieStore = HTTPCookieStorage.shared
+        cookieStore.cookies?.forEach { cookieStore.deleteCookie($0) }
+
+        let wkStore = WKWebsiteDataStore.default().httpCookieStore
+        wkStore.getAllCookies { cookies in
+            for c in cookies { wkStore.delete(c) }
+        }
+
+        Task { await OverseerrAuthManager.shared.probeSession() }
     }
 
     // MARK: – Plex SSO - Unchanged
