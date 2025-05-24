@@ -107,6 +107,7 @@ class OverseerrUsersViewModel: ObservableObject {
     private let authContext = OverseerrAuthContextProvider()
     private var tokenKey: String { "plexAuthToken-\(settingsKey)" }
     private var authCancellable: AnyCancellable?
+    private var plexSSOTask: Task<Void, Never>?
     let keywordActivatedSubject = PassthroughSubject<Void, Never>()
 
     // ─────────────────────────────────────────────
@@ -648,7 +649,8 @@ class OverseerrUsersViewModel: ObservableObject {
     private let productName = "Cantinarr"
 
     func startPlexSSO(host _: String, port _: String?) {
-        Task {
+        plexSSOTask?.cancel()
+        plexSSOTask = Task {
             do {
                 let pin = try await fetchPlexPIN()
                 let plexURL = buildPlexOAuthURL(code: pin.code)
@@ -674,11 +676,21 @@ class OverseerrUsersViewModel: ObservableObject {
                 sessionToken = authToken
 
                 await OverseerrAuthManager.shared.probeSession()
+                plexSSOTask = nil
 
+            } catch is CancellationError {
+                // Task was cancelled – ignore
+                plexSSOTask = nil
             } catch {
+                // If the user completed another login successfully before this
+                // task finished, don't revert the authenticated state.
+                if case .authenticated = OverseerrAuthManager.shared.value {
+                    return
+                }
                 print("🔴 Plex SSO failed: \(error.localizedDescription)")
                 self.connectionError = "Plex login failed. Please try again. (\(error.localizedDescription))"
                 self.authState = .unauthenticated
+                plexSSOTask = nil
             }
         }
     }
@@ -706,6 +718,7 @@ class OverseerrUsersViewModel: ObservableObject {
     private func pollForPlexToken(pinID: Int, code _: String) async throws -> String {
         for _ in 0 ..< 120 {
             try await Task.sleep(nanoseconds: 1_000_000_000)
+            try Task.checkCancellation()
             let url = URL(string: "https://plex.tv/api/v2/pins/\(pinID)")!
             var req = URLRequest(url: url)
             req.setValue("application/json", forHTTPHeaderField: "Accept")
