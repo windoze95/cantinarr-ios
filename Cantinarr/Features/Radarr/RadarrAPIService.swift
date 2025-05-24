@@ -107,11 +107,19 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
         session = URLSession(configuration: config) // Initialize 'session' last
     }
 
-    private func performRequest<T: Decodable>(endpoint: String, method: String = "GET",
-                                              body: Data? = nil) async throws -> T
-    {
+    private func performRequest<T: Decodable>(
+        endpoint: String,
+        method: String = "GET",
+        queryItems: [URLQueryItem] = [],
+        body: Data? = nil
+    ) async throws -> T {
         // Build the request for the given endpoint
-        let url = baseURL.appendingPathComponent(endpoint)
+        var url = baseURL.appendingPathComponent(endpoint)
+        if !queryItems.isEmpty {
+            var comps = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+            comps.queryItems = queryItems
+            url = comps.url!
+        }
         var request = URLRequest(url: url)
         request.httpMethod = method
         // The computed `self.apiKey` is now accessible here because init is complete
@@ -205,7 +213,10 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
     }
 
     func getMovieHistory(movieId: Int) async throws -> [RadarrMovieHistoryRecord] {
-        try await performRequest(endpoint: "history/movie?movieId=\(movieId)")
+        try await performRequest(
+            endpoint: "history/movie",
+            queryItems: [.init(name: "movieId", value: "\(movieId)")]
+        )
     }
 
     func getQualityProfiles() async throws -> [RadarrQualityProfile] {
@@ -279,15 +290,22 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
     func updateMovie(_ movie: RadarrMovie, moveFiles: Bool = false) async throws -> RadarrMovie {
         // Radarr's PUT /movie/{id} expects the full movie object.
         // Ensure the movie object being sent is complete and correct.
-        let endpoint = "movie/\(movie.id)?moveFiles=\(moveFiles)"
         let body = try jsonEncoder.encode(movie)
-        return try await performRequest(endpoint: endpoint, method: "PUT", body: body)
+        return try await performRequest(
+            endpoint: "movie/\(movie.id)",
+            method: "PUT",
+            queryItems: [.init(name: "moveFiles", value: "\(moveFiles)")],
+            body: body
+        )
     }
 
     func deleteMovie(_ movieId: Int, deleteFiles: Bool = false, addImportExclusion: Bool = false) async throws {
-        let endpoint = "movie/\(movieId)?deleteFiles=\(deleteFiles)&addImportListExclusion=\(addImportExclusion)"
-        let url = baseURL.appendingPathComponent(endpoint)
-        var request = URLRequest(url: url)
+        var comps = URLComponents(url: baseURL.appendingPathComponent("movie/\(movieId)"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = [
+            .init(name: "deleteFiles", value: "\(deleteFiles)"),
+            .init(name: "addImportListExclusion", value: "\(addImportExclusion)")
+        ]
+        var request = URLRequest(url: comps.url!)
         request.httpMethod = "DELETE"
 
         let (_, response) = try await session.data(for: request)

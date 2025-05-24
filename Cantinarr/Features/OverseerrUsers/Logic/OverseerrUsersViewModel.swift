@@ -768,13 +768,19 @@ class OverseerrUsersViewModel: ObservableObject {
     }
 
     private func buildPlexOAuthURL(code: String) -> URL {
-        let params = [
-            "clientID": clientID,
-            "code": code,
-            "context[device][product]": productName,
+        var base = URLComponents()
+        base.scheme = "https"
+        base.host = "app.plex.tv"
+        base.path = "/auth"
+
+        var fragComps = URLComponents()
+        fragComps.queryItems = [
+            .init(name: "clientID", value: clientID),
+            .init(name: "code", value: code),
+            .init(name: "context[device][product]", value: productName),
         ]
-        let frag = params.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
-        return URL(string: "https://app.plex.tv/auth#?\(frag)")!
+        base.fragment = "?" + (fragComps.percentEncodedQuery ?? "")
+        return base.url!
     }
 }
 

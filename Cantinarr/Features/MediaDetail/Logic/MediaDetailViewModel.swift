@@ -95,7 +95,15 @@ final class MediaDetailViewModel: ObservableObject {
 
     var youtubeEmbedURL: URL? {
         guard let videoID = trailerVideoID else { return nil }
-        return URL(string: "https://www.youtube.com/embed/\(videoID)?playsinline=1&autoplay=1")
+        var comps = URLComponents()
+        comps.scheme = "https"
+        comps.host = "www.youtube.com"
+        comps.path = "/embed/\(videoID)"
+        comps.queryItems = [
+            .init(name: "playsinline", value: "1"),
+            .init(name: "autoplay", value: "1"),
+        ]
+        return comps.url
     }
 
     // MARK: – user actions
