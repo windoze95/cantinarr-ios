@@ -1,11 +1,11 @@
-// File: AuthState.swift
-// Purpose: Defines AuthState component for Cantinarr
+// File: OverseerrAuthState.swift
+// Purpose: Defines OverseerrAuthState component for Cantinarr
 
 import Foundation
 import SwiftUI
 
 /// Single source of truth for Overseerr session state.
-enum AuthState: Equatable {
+enum OverseerrAuthState: Equatable {
     case unknown // still probing
     case authenticated(expiry: Date?) // expiry lets us pre‑empt logout
     case unauthenticated

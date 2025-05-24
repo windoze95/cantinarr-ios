@@ -261,12 +261,12 @@ struct OverseerrUsersAdvancedView: View {
 // --------------------------------------------------
 //  Plex SSO presentation helper (unchanged)
 // --------------------------------------------------
-class AuthHelper: NSObject, ASWebAuthenticationPresentationContextProviding {
-    static let shared = AuthHelper()
+class OverseerrAuthHelper: NSObject, ASWebAuthenticationPresentationContextProviding {
+    static let shared = OverseerrAuthHelper()
     override private init() {}
 
     private var session: ASWebAuthenticationSession?
-    weak var delegate: PlexSSODelegate?
+    weak var delegate: OverseerrPlexSSODelegate?
 
     func startPlexLogin(url: URL) {
         let s = ASWebAuthenticationSession(

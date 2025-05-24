@@ -64,7 +64,7 @@ class OverseerrUsersViewModel: ObservableObject {
     @Published var movieRecs: [MediaItem] = []
     @Published var tvRecs: [MediaItem] = []
 
-    @Published private(set) var authState: AuthState = .unknown
+    @Published private(set) var authState: OverseerrAuthState = .unknown
     @Published var connectionError: String? = nil
 
     @Published var sessionToken: String? = nil
@@ -85,7 +85,7 @@ class OverseerrUsersViewModel: ObservableObject {
     private func recoverFromAuthFailure() {
         if authState == .unknown { return }
         authState = .unknown
-        Task { await AuthManager.shared.recoverFromAuthFailure() }
+        Task { await OverseerrAuthManager.shared.recoverFromAuthFailure() }
     }
 
     // ─────────────────────────────────────────────
@@ -104,7 +104,7 @@ class OverseerrUsersViewModel: ObservableObject {
     // ─────────────────────────────────────────────
     var service: OverseerrUsersService
     private let settingsKey: String
-    private let authContext = AuthContextProvider()
+    private let authContext = OverseerrAuthContextProvider()
     private var tokenKey: String { "plexAuthToken-\(settingsKey)" }
     private var authCancellable: AnyCancellable?
     let keywordActivatedSubject = PassthroughSubject<Void, Never>()
@@ -120,7 +120,7 @@ class OverseerrUsersViewModel: ObservableObject {
         self.settingsKey = settingsKey
 
         loadSavedFilters()
-        AuthHelper.shared.delegate = self
+        OverseerrAuthHelper.shared.delegate = self
 
         $searchQuery
             .removeDuplicates()
@@ -131,7 +131,7 @@ class OverseerrUsersViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        authCancellable = AuthManager.shared.publisher
+        authCancellable = OverseerrAuthManager.shared.publisher
             .receive(on: RunLoop.main)
             .sink { [weak self] state in
                 guard let self = self else { return }
@@ -150,7 +150,7 @@ class OverseerrUsersViewModel: ObservableObject {
 
     // ─────────────────────────────────────────────
     func onAppear() {
-        Task { await AuthManager.shared.ensureAuthenticated() }
+        Task { await OverseerrAuthManager.shared.ensureAuthenticated() }
     }
 
     private func clearConnectionError() {
@@ -667,7 +667,7 @@ class OverseerrUsersViewModel: ObservableObject {
                 saveTokenToKeychain(authToken)
                 sessionToken = authToken
 
-                await AuthManager.shared.probeSession()
+                await OverseerrAuthManager.shared.probeSession()
 
             } catch {
                 print("🔴 Plex SSO failed: \(error.localizedDescription)")
@@ -731,7 +731,7 @@ class OverseerrUsersViewModel: ObservableObject {
     }
 }
 
-extension OverseerrUsersViewModel: PlexSSODelegate {
+extension OverseerrUsersViewModel: OverseerrPlexSSODelegate {
     func didReceivePlexToken(_ token: String) {
         print("⚠️ Received Plex Token via delegate (Legacy/Unexpected): \(token)")
     }

@@ -105,7 +105,7 @@ class OverseerrAPIService {
             }
 
             if http.statusCode == 401 || http.statusCode == 403 {
-                await AuthManager.shared.recoverFromAuthFailure()
+                await OverseerrAuthManager.shared.recoverFromAuthFailure()
                 throw OverseerrError.notAuthenticated
             }
 
