@@ -24,8 +24,14 @@ struct SettingsHomeView: View {
                             Text(svc.displayName)
                             Spacer()
                             Text(svc.kind.rawValue).foregroundColor(.secondary)
-                            Button("Edit") { editingService = svc }
+                            Button("Edit") {
+                                currentEnvID = env.id
+                                editingService = svc
+                            }
                         }
+                    }
+                    .onDelete { offsets in
+                        vm.deleteService(inEnvironment: env.id, at: offsets)
                     }
                     Button {
                         currentEnvID = env.id
