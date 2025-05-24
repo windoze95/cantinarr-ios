@@ -59,7 +59,24 @@ struct ServiceEditorView: View {
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {
-                    onSave(draft)
+                    var outgoing = draft
+                    if draft.kind == .radarr,
+                       let data = draft.configurationJSON.data(using: .utf8),
+                       let settings = try? JSONDecoder().decode(RadarrSettings.self, from: data)
+                    {
+                        if let apiData = settings.apiKey.data(using: .utf8) {
+                            KeychainHelper.save(
+                                key: RadarrSettings.keychainKey(host: settings.host, port: settings.port),
+                                data: apiData
+                            )
+                        }
+                        if let sanitized = try? JSONEncoder().encode(settings),
+                           let jsonString = String(data: sanitized, encoding: .utf8)
+                        {
+                            outgoing.configurationJSON = jsonString
+                        }
+                    }
+                    onSave(outgoing)
                     dismiss()
                 }
                 .disabled(!(isDisplayNameOK && isJSONValid))
