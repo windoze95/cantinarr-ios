@@ -31,25 +31,52 @@ class OverseerrUsersViewModel: ObservableObject {
     // Filter state handled by `filters`
     @Published var watchProviders: [OverseerrAPIService.WatchProvider] = []
 
-    @Published var results: [MediaItem] = [] // Discover or Search results
-    @Published var keywordSuggestions: [OverseerrAPIService.Keyword] = []
-    @Published var activeKeywords: [OverseerrAPIService.Keyword] = [] // Display state for pills
-    @Published var movieRecs: [MediaItem] = []
-    @Published var tvRecs: [MediaItem] = []
+    lazy var searchController: SearchController = {
+        let controller = SearchController(
+            service: service,
+            filters: filters,
+            keywordActivatedSubject: keywordActivatedSubject,
+            recoverAuth: { [weak self] in self?.recoverFromAuthFailure() },
+            clearConnectionError: { [weak self] in self?.clearConnectionError() },
+            setConnectionError: { [weak self] msg in self?.connectionError = msg },
+            loadDiscover: { [weak self] reset in await self?.loadMedia(reset: reset) }
+        )
+        controller.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+        return controller
+    }()
 
     @Published private(set) var authState: OverseerrAuthState = .unknown
     @Published var connectionError: String? = nil
 
     @Published var sessionToken: String? = nil
-    @Published var searchQuery: String = ""
-    @Published private var recBaseID: Int?
-
-    // Loading states
-    @Published private(set) var isLoading: Bool = false // General loading (Discover/Search)
-    @Published private(set) var isLoadingKeywords = false
-    @Published private(set) var isLoadingMovieRecs = false
-    @Published private(set) var isLoadingTvRecs = false
-    var isLoadingSearch: Bool { isLoading && !searchQuery.isEmpty }
+    @Published private(set) var isLoading: Bool = false // Discover loading
+    var searchQuery: String { get { searchController.searchQuery } set { searchController.searchQuery = newValue } }
+    var results: [MediaItem] {
+        get { searchController.results }
+        set { searchController.results = newValue }
+    }
+    var keywordSuggestions: [OverseerrAPIService.Keyword] {
+        get { searchController.keywordSuggestions }
+        set { searchController.keywordSuggestions = newValue }
+    }
+    var activeKeywords: [OverseerrAPIService.Keyword] {
+        get { searchController.activeKeywords }
+        set { searchController.activeKeywords = newValue }
+    }
+    var movieRecs: [MediaItem] {
+        get { searchController.movieRecs }
+        set { searchController.movieRecs = newValue }
+    }
+    var tvRecs: [MediaItem] {
+        get { searchController.tvRecs }
+        set { searchController.tvRecs = newValue }
+    }
+    var isLoadingSearch: Bool { searchController.isLoadingSearch }
+    var isLoadingKeywords: Bool { searchController.isLoadingKeywords }
+    var isLoadingMovieRecs: Bool { searchController.isLoadingMovieRecs }
+    var isLoadingTvRecs: Bool { searchController.isLoadingTvRecs }
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -67,8 +94,6 @@ class OverseerrUsersViewModel: ObservableObject {
 
     // ─────────────────────────────────────────────
     private var loader = PagedLoader()
-    private var movieRecLoader = PagedLoader()
-    private var tvRecLoader = PagedLoader()
 
     // ─────────────────────────────────────────────
 
@@ -113,15 +138,6 @@ class OverseerrUsersViewModel: ObservableObject {
             }
         }
         OverseerrAuthHelper.shared.delegate = self
-
-        $searchQuery
-            .removeDuplicates()
-            .debounce(for: .seconds(AppConfig.debounceInterval), scheduler: RunLoop.main)
-            .sink { [weak self] text in
-                guard let self = self else { return }
-                Task { await self.handleSearchChange(text) }
-            }
-            .store(in: &cancellables)
 
         filters.$selectedMedia
             .removeDuplicates()
@@ -174,14 +190,15 @@ class OverseerrUsersViewModel: ObservableObject {
     }
 
     func clearSearchResultsAndRecs() {
-        results.removeAll()
-        keywordSuggestions.removeAll()
-        movieRecs.removeAll()
-        tvRecs.removeAll()
-        recBaseID = nil
-        loader.reset()
-        movieRecLoader.reset()
-        tvRecLoader.reset()
+        searchController.clearSearchResultsAndRecs()
+    }
+
+    func activate(keyword k: OverseerrAPIService.Keyword) {
+        searchController.activate(keyword: k)
+    }
+
+    func remove(keywordID: Int) {
+        searchController.remove(keywordID: keywordID)
     }
 
     // ─────────────────────────────────────────────
@@ -303,310 +320,18 @@ class OverseerrUsersViewModel: ObservableObject {
     // MARK: – Search Handling
 
     // ─────────────────────────────────────────────
-    private func handleSearchChange(_ text: String) async {
-        if text.isEmpty {
-            // Search cleared. Reload the Discover view, respecting active keywords.
-            // Don't clear keywords here.
-            clearSearchResultsAndRecs() // Clear previous search results/recs
-            await loadMedia(reset: true) // Reload discover (will use active keywords if present)
-            return
-        }
-
-        // --- Start New Text Search ---
-        // Text search is active. Keywords remain *in memory* but search results take display precedence.
-        clearConnectionError()
-        clearSearchResultsAndRecs() // Clear old results/recs
-
-        // Perform text search (ignores keywords)
-        await searchMedia(reset: true)
-
-        guard connectionError == nil else { return } // Stop if search failed
-
-        // Fetch keyword suggestions for the text
-        await fetchKeywordSuggestions(for: text)
-
-        // Fetch recommendations based on the first search result
-        if let firstResultItem = results.first {
-            await fetchRecommendations(for: firstResultItem.id, mediaType: firstResultItem.mediaType)
-        }
-    }
-
-    private func searchMedia(reset: Bool = false) async {
-        // Perform a text search that ignores keyword filters.
-        // Bail out if another request is already running.
-        guard !isLoading else { return }
-        if reset {
-            loader.reset()
-            results.removeAll() // Clear previous results (could be search or discover)
-            clearConnectionError()
-        }
-
-        // Guard ensures we don't fetch past the last page
-        guard loader.beginLoading() else { return }
-        isLoading = true
-        defer { isLoading = false; loader.endLoading(next: loader.totalPages) }
-
-        do {
-            // Query Overseerr for matching movies/TV shows
-            let resp = try await service.search(query: searchQuery, page: loader.page)
-            // Drop any search results that aren't movies or TV
-            let items = resp.results.compactMap { raw -> MediaItem? in
-                guard let kind = raw.mediaType, kind == .movie || kind == .tv else { return nil }
-                return MediaItem(
-                    id: raw.id,
-                    title: raw.title ?? raw.name ?? "Untitled",
-                    posterPath: raw.posterPath,
-                    mediaType: kind
-                )
-            }
-
-            if loader.page == 1 { results = items }
-            else { results.append(contentsOf: items) }
-            loader.endLoading(next: resp.totalPages)
-
-            if !watchProviders.isEmpty { clearConnectionError() }
-        } catch is OverseerrError {
-            loader.cancelLoading(); recoverFromAuthFailure()
-        } catch {
-            print("🔴 Search error: \(error.localizedDescription)")
-            loader.cancelLoading()
-            if loader.page == 1 || results.isEmpty {
-                connectionError = "Search failed. \(error.localizedDescription)"
-            }
-        }
-    }
-
-    // MARK: – Keyword Fetching & Filtering - (Unchanged from previous correct version)
-
-    private func fetchKeywordSuggestions(for query: String) async {
-        // Kick off a keyword autocomplete query
-        isLoadingKeywords = true
-        var keywordFetchError: String? = nil
-        do {
-            let raw = try await service.keywordSearch(query: query)
-            keywordSuggestions = await filterUsableKeywords(raw)
-        } catch is OverseerrError {
-            // Handled by recoverFromAuthFailure
-        } catch {
-            keywordSuggestions = []
-            keywordFetchError = "Failed to load keyword suggestions. \(error.localizedDescription)"
-            print("🔴 Keyword search error: \(error.localizedDescription)")
-        }
-        isLoadingKeywords = false
-        // Surface any error only if another error isn't already shown
-        if connectionError == nil && keywordFetchError != nil {
-            connectionError = keywordFetchError
-        }
-    }
-
-    // MARK: – Keyword Activation
-
-    func activate(keyword k: OverseerrAPIService.Keyword) {
-        // Ignore if already active
-        guard !filters.activeKeywordIDs.contains(k.id) else { return }
-        // Activating a keyword takes precedence over any text search
-        searchQuery = "" // Clear search field binding
-        filters.activeKeywordIDs.insert(k.id)
-        // Avoid duplicate display names if somehow added twice
-        if !activeKeywords.contains(where: { $0.id == k.id }) {
-            activeKeywords.append(k)
-            activeKeywords.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-        }
-        clearSearchResultsAndRecs() // Clear previous results
-//        // Signal the UI to switch to the Advanced tab
-//        onKeywordActivated?() // <<< CALL THE CALLBACK
-        // ** Send signal via subject instead of calling callback **
-        keywordActivatedSubject.send()
-        // Load discover results filtered by the new keyword set
-        Task { await loadMedia(reset: true) }
-    }
-
-    func remove(keywordID: Int) {
-        // Remove keyword from both the ID set and display list
-        filters.activeKeywordIDs.remove(keywordID)
-        activeKeywords.removeAll { $0.id == keywordID }
-        // If search is active, removing keyword doesn't change search results immediately.
-        // If search is *not* active, reload the discover view with updated keywords.
-        if searchQuery.isEmpty {
-            Task { await loadMedia(reset: true) }
-        }
-    }
-
-    private func filterUsableKeywords(
-        _ raw: [OverseerrAPIService.Keyword]
-    ) async -> [OverseerrAPIService.Keyword] {
-        // Probe each keyword in parallel by attempting a quick discover search.
-        await withTaskGroup(of: OverseerrAPIService.Keyword?.self) { group in
-            for kw in raw {
-                group.addTask { [weak self] in
-                    guard let self = self else { return nil }
-                    do {
-                        let movies = try await self.service.fetchMovies(
-                            providerIds: [],
-                            genreIds: [],
-                            keywordIds: [kw.id],
-                            page: 1
-                        )
-                        if !movies.results.isEmpty { return kw }
-                        let tv = try await self.service.fetchTV(
-                            providerIds: [],
-                            genreIds: [],
-                            keywordIds: [kw.id],
-                            page: 1
-                        )
-                        if !tv.results.isEmpty { return kw }
-                    } catch is OverseerrError {
-                        await self.recoverFromAuthFailure()
-                    } catch {
-                        print("⚠️ Error probing keyword \(kw.name): \(error.localizedDescription)")
-                    }
-                    return nil
-                }
-            }
-            var usable: [OverseerrAPIService.Keyword] = []
-            for await maybe in group {
-                if let kw = maybe { usable.append(kw) }
-            }
-            // Sort alphabetically for stable presentation
-            return usable.sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
-        }
-    }
-
-    // MARK: – Recommendation Fetching - (Unchanged from previous correct version)
-
-    private func fetchRecommendations(for baseItemId: Int, mediaType _: MediaType) async {
-        recBaseID = baseItemId
-        movieRecLoader.reset(); tvRecLoader.reset()
-        movieRecs.removeAll(); tvRecs.removeAll()
-
-        isLoadingMovieRecs = true
-        isLoadingTvRecs = true
-        var movieFetchError: Error?
-        var tvFetchError: Error?
-
-        // Fetch Movie Recs
-        do {
-            let resp = try await service.movieRecommendations(for: baseItemId, page: movieRecLoader.page)
-            movieRecs = resp.results.map { MediaItem(
-                id: $0.id,
-                title: $0.title,
-                posterPath: $0.posterPath,
-                mediaType: .movie
-            ) }
-            movieRecLoader.endLoading(next: resp.totalPages)
-        } catch is OverseerrError {
-            recoverFromAuthFailure(); movieFetchError = OverseerrError.notAuthenticated
-        } catch {
-            movieFetchError = error; print("🔴 Movie recommendations error: \(error.localizedDescription)")
-            movieRecs = []; movieRecLoader.reset()
-        }
-        isLoadingMovieRecs = false
-
-        // Fetch TV Recs
-        do {
-            let resp = try await service.tvRecommendations(for: baseItemId, page: tvRecLoader.page)
-            tvRecs = resp.results
-                .map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
-            tvRecLoader.endLoading(next: resp.totalPages)
-        } catch is OverseerrError {
-            recoverFromAuthFailure(); tvFetchError = OverseerrError.notAuthenticated
-        } catch {
-            tvFetchError = error; print("🔴 TV recommendations error: \(error.localizedDescription)")
-            tvRecs = []; tvRecLoader.reset()
-        }
-        isLoadingTvRecs = false
-
-        // Error Reporting
-        if let mvErr = movieFetchError, !(mvErr is OverseerrError),
-           let tvErr = tvFetchError, !(tvErr is OverseerrError)
-        {
-            connectionError = "Failed to load recommendations."
-        } else if connectionError == nil && (movieFetchError != nil || tvFetchError != nil) {
-            if let mvErr = movieFetchError,
-               !(mvErr is OverseerrError)
-            {
-                connectionError = "Failed to load movie recommendations. \(mvErr.localizedDescription)"
-            } else if let tvErr = tvFetchError,
-                      !(tvErr is OverseerrError)
-            {
-                connectionError = "Failed to load TV recommendations. \(tvErr.localizedDescription)"
-            }
-        } else if connectionError == nil && movieFetchError == nil && tvFetchError == nil {
-            clearConnectionError()
-        }
-    }
-
     // MARK: – Pagination Logic (Discover/Search, Recs) - (Unchanged from previous correct version)
 
     func loadMoreIfNeeded(current item: MediaItem, within list: [MediaItem]) {
-        let thresholdIndex = list.index(list.endIndex, offsetBy: -AppConfig.prefetchThreshold)
-        guard let currentIndex = list.firstIndex(where: { $0.id == item.id }),
-              currentIndex >= thresholdIndex else { return }
-
-        Task {
-            if !searchQuery.isEmpty { await searchMedia() }
-            else { await loadMedia() }
-        }
+        searchController.loadMoreIfNeeded(current: item, within: list)
     }
 
     func loadMoreMovieRecsIfNeeded(current item: MediaItem) {
-        guard let baseID = recBaseID else { return }
-        guard movieRecLoader.page <= movieRecLoader.totalPages, !isLoadingMovieRecs else { return }
-        let thresholdIndex = movieRecs.index(movieRecs.endIndex, offsetBy: -AppConfig.prefetchThreshold)
-        guard let currentIndex = movieRecs.firstIndex(where: { $0.id == item.id }),
-              currentIndex >= thresholdIndex else { return }
-        guard movieRecLoader.beginLoading() else { return }
-
-        isLoadingMovieRecs = true
-        Task {
-            defer { isLoadingMovieRecs = false; movieRecLoader.endLoading(next: movieRecLoader.totalPages) }
-            do {
-                let resp = try await service.movieRecommendations(for: baseID, page: movieRecLoader.page)
-                let more = resp.results.map { MediaItem(
-                    id: $0.id,
-                    title: $0.title,
-                    posterPath: $0.posterPath,
-                    mediaType: .movie
-                ) }
-                movieRecs.append(contentsOf: more)
-                movieRecLoader.endLoading(next: resp.totalPages)
-            } catch is OverseerrError {
-                movieRecLoader.cancelLoading(); recoverFromAuthFailure()
-            } catch {
-                movieRecLoader
-                    .cancelLoading(); print("🔴 Error loading more movie recommendations: \(error.localizedDescription)")
-            }
-        }
+        searchController.loadMoreMovieRecsIfNeeded(current: item)
     }
 
     func loadMoreTvRecsIfNeeded(current item: MediaItem) {
-        guard let baseID = recBaseID else { return }
-        guard tvRecLoader.page <= tvRecLoader.totalPages, !isLoadingTvRecs else { return }
-        let thresholdIndex = tvRecs.index(tvRecs.endIndex, offsetBy: -AppConfig.prefetchThreshold)
-        guard let currentIndex = tvRecs.firstIndex(where: { $0.id == item.id }),
-              currentIndex >= thresholdIndex else { return }
-        guard tvRecLoader.beginLoading() else { return }
-
-        isLoadingTvRecs = true
-        Task {
-            defer { isLoadingTvRecs = false; tvRecLoader.endLoading(next: tvRecLoader.totalPages) }
-            do {
-                let resp = try await service.tvRecommendations(for: baseID, page: tvRecLoader.page)
-                let more = resp.results.map { MediaItem(
-                    id: $0.id,
-                    title: $0.name,
-                    posterPath: $0.posterPath,
-                    mediaType: .tv
-                ) }
-                tvRecs.append(contentsOf: more)
-                tvRecLoader.endLoading(next: resp.totalPages)
-            } catch is OverseerrError {
-                tvRecLoader.cancelLoading(); recoverFromAuthFailure()
-            } catch {
-                tvRecLoader
-                    .cancelLoading(); print("🔴 Error loading more TV recommendations: \(error.localizedDescription)")
-            }
-        }
+        searchController.loadMoreTvRecsIfNeeded(current: item)
     }
 
     // MARK: – Persistence handled by FilterManager
