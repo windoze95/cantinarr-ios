@@ -12,7 +12,7 @@ enum OverseerrTab {
 
 /// Thin wrapper that creates the two view‑models and injects them.
 /// Manages switching between Home and Advanced views for Overseerr via a TabView.
-/// Also handles displaying connection errors for the selected service **based on AuthState**.
+/// Also handles displaying connection errors for the selected service **based on OverseerrAuthState**.
 struct OverseerrUsersHomeEntry: View {
     let settings: OverseerrSettings
     // State to manage the selected tab

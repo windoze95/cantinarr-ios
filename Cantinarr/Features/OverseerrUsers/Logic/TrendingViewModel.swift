@@ -75,7 +75,7 @@ final class TrendingViewModel: ObservableObject {
             }
         } catch is OverseerrError { // More specific: catch OverseerrError
             // Auth errors are primarily handled by OverseerrUsersViewModel's authState
-            // and AuthManager. This VM doesn't need to set connectionError for this.
+            // and OverseerrAuthManager. This VM doesn't need to set connectionError for this.
             loader.cancelLoading()
             print("Trending fetch failed due to OverseerrError.")
         } catch {

@@ -1,24 +1,24 @@
-// File: AuthManager.swift
-// Purpose: Defines AuthManager component for Cantinarr
+// File: OverseerrAuthManager.swift
+// Purpose: Defines OverseerrAuthManager component for Cantinarr
 
 import Combine
 import Foundation
 
 /// Actor = thread‑safe without extra locks.
-actor AuthManager {
+actor OverseerrAuthManager {
     // MARK: – Public singleton
 
-    static let shared = AuthManager()
+    static let shared = OverseerrAuthManager()
     private init() {}
 
     // MARK: – Published state
 
-    nonisolated let subject = CurrentValueSubject<AuthState, Never>(.unknown)
-    nonisolated var publisher: AnyPublisher<AuthState, Never> {
+    nonisolated let subject = CurrentValueSubject<OverseerrAuthState, Never>(.unknown)
+    nonisolated var publisher: AnyPublisher<OverseerrAuthState, Never> {
         subject.eraseToAnyPublisher()
     }
 
-    nonisolated var value: AuthState { subject.value }
+    nonisolated var value: OverseerrAuthState { subject.value }
 
     // MARK: – Config injected once at app launch
 

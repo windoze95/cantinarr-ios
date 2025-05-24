@@ -13,13 +13,13 @@ struct CantinarrApp: App {
     @StateObject private var userSession = UserSession()
 
     init() {
-        // Bootstrap AuthManager once.
+        // Bootstrap OverseerrAuthManager once.
         // The demo environment always has at least one service:
         if let demoSvc = EnvironmentsStore().selectedServiceInstance?
             .decode(OverseerrSettings.self)
         {
             let svc = OverseerrAPIService(settings: demoSvc)
-            Task { await AuthManager.shared.configure(service: svc) }
+            Task { await OverseerrAuthManager.shared.configure(service: svc) }
         }
     }
 
