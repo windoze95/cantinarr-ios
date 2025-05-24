@@ -647,15 +647,27 @@ class OverseerrUsersViewModel: ObservableObject {
 
     private let productName = "Cantinarr"
 
+    private var plexSSOTask: Task<Void, Never>?
+
     func startPlexSSO(host _: String, port _: String?) {
-        Task {
+        plexSSOTask?.cancel()
+        plexSSOTask = Task { [weak self] in
+            guard let self = self else { return }
             do {
                 let pin = try await fetchPlexPIN()
                 let plexURL = buildPlexOAuthURL(code: pin.code)
-                let web = ASWebAuthenticationSession(url: plexURL, callbackURLScheme: nil) { callbackURL, error in
-                    print(
-                        "ASWebAuthenticationSession completed. URL: \(callbackURL?.absoluteString ?? "nil"), Error: \(error?.localizedDescription ?? "nil")"
-                    )
+                let web = ASWebAuthenticationSession(url: plexURL, callbackURLScheme: nil) { [weak self] _, error in
+                    guard let self = self else { return }
+                    // This callback fires with `.canceledLogin` when the user dismisses the
+                    // browser window. Cancel the running SSO task so we don't continue polling
+                    // for a token unnecessarily.
+                    if let err = error as? ASWebAuthenticationSessionError {
+                        if err.code == .canceledLogin {
+                            self.plexSSOTask?.cancel()
+                            return
+                        }
+                        print("ASWebAuthenticationSession failed: \(err.localizedDescription)")
+                    }
                 }
                 web.presentationContextProvider = authContext
                 web.prefersEphemeralWebBrowserSession = true
@@ -669,11 +681,15 @@ class OverseerrUsersViewModel: ObservableObject {
 
                 await OverseerrAuthManager.shared.probeSession()
 
+            } catch is CancellationError {
+                // User cancelled the login flow; nothing else to do.
+                self.authState = .unauthenticated
             } catch {
                 print("🔴 Plex SSO failed: \(error.localizedDescription)")
                 self.connectionError = "Plex login failed. Please try again. (\(error.localizedDescription))"
                 self.authState = .unauthenticated
             }
+            self.plexSSOTask = nil
         }
     }
 
