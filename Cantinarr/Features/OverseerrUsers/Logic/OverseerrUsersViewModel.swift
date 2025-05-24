@@ -21,46 +21,18 @@ class OverseerrUsersViewModel: ObservableObject {
         let mediaType: MediaType
     }
 
-    private struct SavedFilters: Codable {
-        let mediaType: MediaType
-        let providerIds: [Int]
-        let genreIds: [Int]
-    }
+    @Published var filters: FilterManager
 
     // ─────────────────────────────────────────────
 
     // MARK: – Published state
 
     // ─────────────────────────────────────────────
-    @Published var selectedMedia: MediaType = .movie {
-        didSet {
-            guard oldValue != selectedMedia else { return }
-            saveFilters()
-            // Reload discover media based on the new type, respecting keywords if active
-            Task { await loadMedia(reset: true) }
-        }
-    }
-
+    // Filter state handled by `filters`
     @Published var watchProviders: [OverseerrAPIService.WatchProvider] = []
-    @Published var selectedProviders: Set<Int> = [] {
-        didSet {
-            guard oldValue != selectedProviders else { return }
-            saveFilters()
-            Task { await loadMedia(reset: true) }
-        }
-    }
-
-    @Published var selectedGenres: Set<Int> = [] {
-        didSet {
-            guard oldValue != selectedGenres else { return }
-            saveFilters()
-            Task { await loadMedia(reset: true) }
-        }
-    }
 
     @Published var results: [MediaItem] = [] // Discover or Search results
     @Published var keywordSuggestions: [OverseerrAPIService.Keyword] = []
-    @Published var activeKeywordIDs: Set<Int> = [] // Filter state
     @Published var activeKeywords: [OverseerrAPIService.Keyword] = [] // Display state for pills
     @Published var movieRecs: [MediaItem] = []
     @Published var tvRecs: [MediaItem] = []
@@ -120,13 +92,14 @@ class OverseerrUsersViewModel: ObservableObject {
         // Added callback
         self.service = service
         self.settingsKey = settingsKey
+        self.filters = FilterManager(settingsKey: settingsKey)
         self.plexSSOHandler = PlexSSOHandler(
             service: service,
             settingsKey: settingsKey,
             authContext: authContext
         )
 
-        loadSavedFilters()
+        filters.load()
         if let savedToken = plexSSOHandler.loadTokenFromKeychain() {
             sessionToken = savedToken
             Task {
@@ -147,6 +120,30 @@ class OverseerrUsersViewModel: ObservableObject {
             .sink { [weak self] text in
                 guard let self = self else { return }
                 Task { await self.handleSearchChange(text) }
+            }
+            .store(in: &cancellables)
+
+        filters.$selectedMedia
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] _ in
+                Task { await self?.loadMedia(reset: true) }
+            }
+            .store(in: &cancellables)
+
+        filters.$selectedProviders
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] _ in
+                Task { await self?.loadMedia(reset: true) }
+            }
+            .store(in: &cancellables)
+
+        filters.$selectedGenres
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] _ in
+                Task { await self?.loadMedia(reset: true) }
             }
             .store(in: &cancellables)
 
@@ -202,12 +199,11 @@ class OverseerrUsersViewModel: ObservableObject {
             watchProviders = unique
                 .sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
 
-            if selectedProviders.isEmpty && !watchProviders.isEmpty {
-                selectedProviders = Set(watchProviders.map(\.id))
-                saveFilters()
+            if filters.selectedProviders.isEmpty && !watchProviders.isEmpty {
+                filters.selectedProviders = Set(watchProviders.map(\.id))
             }
             clearConnectionError()
-            if case .authenticated = authState, results.isEmpty && searchQuery.isEmpty && activeKeywordIDs.isEmpty {
+            if case .authenticated = authState, results.isEmpty && searchQuery.isEmpty && filters.activeKeywordIDs.isEmpty {
                 await loadMedia(reset: true)
             }
         } catch is OverseerrError {
@@ -241,9 +237,9 @@ class OverseerrUsersViewModel: ObservableObject {
         // Ensure counters and state are updated no matter how we exit.
         defer { isLoading = false; loader.endLoading(next: loader.totalPages) }
 
-        let pids = Array(selectedProviders)
-        let gids = Array(selectedGenres)
-        let kwds = Array(activeKeywordIDs) // Use active keywords here
+        let pids = Array(filters.selectedProviders)
+        let gids = Array(filters.selectedGenres)
+        let kwds = Array(filters.activeKeywordIDs) // Use active keywords here
 
         do {
             let fetchedItems: [MediaItem]
@@ -251,7 +247,7 @@ class OverseerrUsersViewModel: ObservableObject {
             let responseTotalPages: Int
 
             // Call the appropriate API based on the selected media type
-            switch selectedMedia {
+            switch filters.selectedMedia {
             case .movie:
                 let rawResp = try await service.fetchMovies(
                     providerIds: pids,
@@ -281,7 +277,7 @@ class OverseerrUsersViewModel: ObservableObject {
                 ) }
                 responsePage = rawResp.page; responseTotalPages = rawResp.totalPages
             case .person, .collection, .unknown:
-                print("⚠️ Unsupported media type for discover: \(selectedMedia)")
+                print("⚠️ Unsupported media type for discover: \(filters.selectedMedia)")
                 loader.cancelLoading(); return
             }
 
@@ -294,10 +290,10 @@ class OverseerrUsersViewModel: ObservableObject {
         } catch is OverseerrError {
             loader.cancelLoading(); recoverFromAuthFailure()
         } catch {
-            print("🔴 Media load error (\(selectedMedia)): \(error.localizedDescription)")
+            print("🔴 Media load error (\(filters.selectedMedia)): \(error.localizedDescription)")
             loader.cancelLoading()
             if loader.page == 1 || results.isEmpty {
-                connectionError = "Failed to load \(selectedMedia.displayName). \(error.localizedDescription)"
+                connectionError = "Failed to load \(filters.selectedMedia.displayName). \(error.localizedDescription)"
             }
         }
     }
@@ -407,10 +403,10 @@ class OverseerrUsersViewModel: ObservableObject {
 
     func activate(keyword k: OverseerrAPIService.Keyword) {
         // Ignore if already active
-        guard !activeKeywordIDs.contains(k.id) else { return }
+        guard !filters.activeKeywordIDs.contains(k.id) else { return }
         // Activating a keyword takes precedence over any text search
         searchQuery = "" // Clear search field binding
-        activeKeywordIDs.insert(k.id)
+        filters.activeKeywordIDs.insert(k.id)
         // Avoid duplicate display names if somehow added twice
         if !activeKeywords.contains(where: { $0.id == k.id }) {
             activeKeywords.append(k)
@@ -427,7 +423,7 @@ class OverseerrUsersViewModel: ObservableObject {
 
     func remove(keywordID: Int) {
         // Remove keyword from both the ID set and display list
-        activeKeywordIDs.remove(keywordID)
+        filters.activeKeywordIDs.remove(keywordID)
         activeKeywords.removeAll { $0.id == keywordID }
         // If search is active, removing keyword doesn't change search results immediately.
         // If search is *not* active, reload the discover view with updated keywords.
@@ -613,28 +609,7 @@ class OverseerrUsersViewModel: ObservableObject {
         }
     }
 
-    // MARK: – Persistence (Filters, Token) - Unchanged
-
-    private func loadSavedFilters() {
-        let key = "discoverFilters-\(settingsKey)"
-        guard let data = UserDefaults.standard.data(forKey: key),
-              let saved = try? JSONDecoder().decode(SavedFilters.self, from: data)
-        else { return }
-        _selectedMedia = Published(initialValue: saved.mediaType)
-        _selectedProviders = Published(initialValue: Set(saved.providerIds))
-        _selectedGenres = Published(initialValue: Set(saved.genreIds))
-    }
-
-    private func saveFilters() {
-        let saved = SavedFilters(
-            mediaType: selectedMedia,
-            providerIds: Array(selectedProviders),
-            genreIds: Array(selectedGenres)
-        )
-        if let data = try? JSONEncoder().encode(saved) {
-            UserDefaults.standard.set(data, forKey: "discoverFilters-\(settingsKey)")
-        }
-    }
+    // MARK: – Persistence handled by FilterManager
 
     /// Log out the current user, clearing session cookies and stored token.
     func logout() {
