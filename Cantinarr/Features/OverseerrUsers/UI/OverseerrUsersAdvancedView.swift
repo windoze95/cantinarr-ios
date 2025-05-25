@@ -234,14 +234,12 @@ struct OverseerrUsersAdvancedView: View {
             HStack(spacing: 12) {
                 SearchBarView(text: $searchText, focus: $searchFieldFocused)
                     .onChange(of: searchText) { _, newValue in
-                        if !newValue.isEmpty {
-                            // 1) clear out stale cards immediately
-                            vm.results.removeAll()
-                            vm.keywordSuggestions.removeAll()
-                            // 2) show shimmer immediately
-                            isSearchLoadingLocal = true
+                        if !newValue.isEmpty && vm.searchQuery.isEmpty {
+                            // Clear stale results before starting a new search
+                            vm.clearSearchResultsAndRecs()
                         }
                         vm.searchQuery = newValue // This will be observed by OverseerrUsersHomeEntry
+                        isSearchLoadingLocal = !newValue.isEmpty
                     }
                     .onChange(of: vm.isLoadingSearch) { loading in
                         // when real search finishes, stop local shimmer
