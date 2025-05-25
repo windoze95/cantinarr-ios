@@ -236,8 +236,7 @@ struct OverseerrUsersAdvancedView: View {
                     .onChange(of: searchText) { _, newValue in
                         if !newValue.isEmpty {
                             // 1) clear out stale cards immediately
-                            vm.results.removeAll()
-                            vm.keywordSuggestions.removeAll()
+                            vm.clearSearchResultsAndRecs()
                             // 2) show shimmer immediately
                             isSearchLoadingLocal = true
                         }
