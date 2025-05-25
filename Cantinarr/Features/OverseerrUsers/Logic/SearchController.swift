@@ -220,8 +220,14 @@ final class SearchController: ObservableObject {
             let resp = try await service.movieRecommendations(for: baseItemId, page: movieRecLoader.page)
             movieRecs = resp.results.map { MediaItem(id: $0.id, title: $0.title, posterPath: $0.posterPath, mediaType: .movie) }
             movieRecLoader.endLoading(next: resp.totalPages)
-        } catch is OverseerrError {
-            recoverAuth(); movieFetchError = OverseerrError.notAuthenticated
+        } catch let err as OverseerrError {
+            movieFetchError = err
+            if case .notAuthenticated = err {
+                recoverAuth()
+            } else {
+                print("🔴 Movie recommendations error: \(err.localizedDescription)")
+                movieRecs = []; movieRecLoader.reset()
+            }
         } catch {
             movieFetchError = error
             print("🔴 Movie recommendations error: \(error.localizedDescription)")
@@ -233,8 +239,14 @@ final class SearchController: ObservableObject {
             let resp = try await service.tvRecommendations(for: baseItemId, page: tvRecLoader.page)
             tvRecs = resp.results.map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
             tvRecLoader.endLoading(next: resp.totalPages)
-        } catch is OverseerrError {
-            recoverAuth(); tvFetchError = OverseerrError.notAuthenticated
+        } catch let err as OverseerrError {
+            tvFetchError = err
+            if case .notAuthenticated = err {
+                recoverAuth()
+            } else {
+                print("🔴 TV recommendations error: \(err.localizedDescription)")
+                tvRecs = []; tvRecLoader.reset()
+            }
         } catch {
             tvFetchError = error
             print("🔴 TV recommendations error: \(error.localizedDescription)")
