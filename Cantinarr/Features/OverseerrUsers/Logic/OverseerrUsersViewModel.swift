@@ -53,23 +53,23 @@ class OverseerrUsersViewModel: ObservableObject {
     @Published var sessionToken: String? = nil
     @Published private(set) var isLoading: Bool = false // Discover loading
     var searchQuery: String { get { searchController.searchQuery } set { searchController.searchQuery = newValue } }
-    var results: [MediaItem] {
+    private(set) var results: [MediaItem] {
         get { searchController.results }
         set { searchController.results = newValue }
     }
-    var keywordSuggestions: [OverseerrAPIService.Keyword] {
+    private(set) var keywordSuggestions: [OverseerrAPIService.Keyword] {
         get { searchController.keywordSuggestions }
         set { searchController.keywordSuggestions = newValue }
     }
-    var activeKeywords: [OverseerrAPIService.Keyword] {
+    private(set) var activeKeywords: [OverseerrAPIService.Keyword] {
         get { searchController.activeKeywords }
         set { searchController.activeKeywords = newValue }
     }
-    var movieRecs: [MediaItem] {
+    private(set) var movieRecs: [MediaItem] {
         get { searchController.movieRecs }
         set { searchController.movieRecs = newValue }
     }
-    var tvRecs: [MediaItem] {
+    private(set) var tvRecs: [MediaItem] {
         get { searchController.tvRecs }
         set { searchController.tvRecs = newValue }
     }
@@ -117,14 +117,13 @@ class OverseerrUsersViewModel: ObservableObject {
         // Added callback
         self.service = service
         self.settingsKey = settingsKey
-        self.filters = FilterManager(settingsKey: settingsKey)
+        self.filters = FilterManager()
         self.plexSSOHandler = PlexSSOHandler(
             service: service,
             settingsKey: settingsKey,
             authContext: authContext
         )
 
-        filters.load()
         if let savedToken = plexSSOHandler.loadTokenFromKeychain() {
             sessionToken = savedToken
             Task {
