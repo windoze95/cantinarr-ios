@@ -4,14 +4,6 @@
 import NukeUI
 import SwiftUI
 
-// helper to pass the tagline’s runtime height up the view tree
-private struct TaglineHeightKey: PreferenceKey {
-    static var defaultValue: CGFloat = .zero
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
 struct MediaDetailView: View {
     @StateObject private var vm: MediaDetailViewModel
     @Environment(\.dismiss) private var dismiss
@@ -79,20 +71,16 @@ struct MediaDetailView: View {
 
                 // CONTENT
                 VStack(alignment: .leading, spacing: 16) {
-                    // measured once, then stays constant
-                    Text(vm.tagline ?? "")
-                        .font(.title3.italic())
-                        .opacity(0.8)
-                        .background(GeometryReader { tgGeo in
-                            Color.clear
-                                .preference(key: TaglineHeightKey.self,
-                                            value: tgGeo.size.height)
-                        })
+                    if !vm.tagline.isEmpty {
+                        MediaTaglineView(tagline: vm.tagline)
+                    }
 
-                    Text(vm.overview).font(.body)
+                    MediaOverviewView(overview: vm.overview)
 
                     if vm.mediaType != .movie {
-                        seasonGrid
+                        SeasonGridView(seasons: vm.seasons) {
+                            Task { try? await vm.request() }
+                        }
                     }
                 }
                 .frame(maxWidth: safeWidth, alignment: .leading)
@@ -106,6 +94,7 @@ struct MediaDetailView: View {
                    isPresented: .constant(vm.error != nil),
                    actions: { Button("Dismiss") { vm.error = nil } },
                    message: { Text(vm.error ?? "") })
+            .sheet(isPresented: $showReport) { ReportIssueSheet(vm: vm) }
         }
         // remove any nav-bar
         .toolbar(.hidden, for: .navigationBar)
@@ -114,159 +103,22 @@ struct MediaDetailView: View {
         .ignoresSafeArea(edges: .top)
     }
 
-    // MARK: – header (unchanged except the removed fixed height)
+    // MARK: – header
 
     @ViewBuilder private var header: some View {
-        ZStack(alignment: .bottomLeading) {
-            // gradient bottom fade
-            LinearGradient(
-                colors: [Color.black.opacity(0.6), Color.clear],
-                startPoint: .bottom, endPoint: .top
-            )
-            // poster + meta
-            HStack(alignment: .bottom, spacing: 16) {
-                if let p = vm.posterURL {
-                    LazyImage(url: p) { state in
-                        state.image?.resizable()
-                            .scaledToFill()
-                            .frame(width: 120, height: 180)
-                            .cornerRadius(12)
-                            .shadow(radius: 5)
-                    }
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(vm.title)
-                        .font(.title.weight(.semibold))
-                        .lineLimit(3) // ← wrap to two lines max
-                        .truncationMode(.tail) //   and add … if it’s still too long
-                    Label(vm.availability.label, systemImage: "circle.fill")
-                        .font(.caption)
-                        .foregroundColor(.white)
-                        .padding(6)
-                        .background(vm.availability.tint)
-                        .cornerRadius(6)
-                    buttonRow
-                }
-                Spacer()
-            }
-            .padding()
-        }
-        // 3️⃣ NEW — backdrop is decoration, so it can’t stretch the layout
-        .background {
-            if let url = vm.backdropURL {
-                LazyImage(url: url) { state in
-                    state.image?
-                        .resizable()
-                        .scaledToFill() // may overflow horizontally…
-                        .overlay(Color.black.opacity(0.25))
-                }
-            }
-        }
-        .clipped()
-    }
-
-    /// Primary + secondary CTA row
-    @ViewBuilder private var buttonRow: some View {
-        VStack(alignment: .center, spacing: 10) { // VStack for two rows
-            // First Row: Trailer and Request (if applicable)
-            HStack(spacing: 12) {
-                // "Watch Trailer" button - always shown
-                watchTrailerBtn
-                    .frame(maxWidth: .infinity)
-            }
-            // "Report" button - shown if at least partially available
-            if vm.availability == .available || vm.availability == .partiallyAvailable {
-                reportBtn
-            }
-        }
-    }
-
-    // MARK: – buttons
-
-    private var watchTrailerBtn: some View {
-        Button {
-            if vm.trailerVideoID != nil {
-                vm.showTrailerPlayer = true
-            } else {
-                // Fallback: If no video ID, open YouTube search for the title + "trailer"
-                // Ensure title is not empty
-                guard !vm.title.isEmpty,
-                      let query = "\(vm.title) trailer".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-                      let url = URL(string: "https://www.youtube.com/results?search_query=\(query)")
-                else {
-                    print("⚠️ Could not form YouTube search URL for title: \(vm.title)")
-                    return
-                }
-                UIApplication.shared.open(url)
-            }
-        } label: {
-            Label("Watch Trailer", systemImage: "video")
-        }
-        .buttonStyle(.bordered)
-        .sheet(isPresented: $vm.showTrailerPlayer) {
-            if let embedURL = vm.youtubeEmbedURL {
-                TrailerPlayerView(url: embedURL)
-            } else {
-                // Fallback if URL is somehow nil when sheet is shown (should be rare)
-                VStack {
-                    Text("Trailer is unavailable at the moment.")
-                    Button("Dismiss") { vm.showTrailerPlayer = false }
-                        .padding()
-                }
-            }
-        }
-    }
-
-    private var reportBtn: some View {
-        Button {
-            showReport.toggle()
-        } label: {
-            Image(systemName: "exclamationmark.triangle.fill")
-        }
-        .buttonStyle(.bordered)
-        .tint(.yellow)
-        .sheet(isPresented: $showReport) { ReportIssueSheet(vm: vm) }
-    }
-
-    private var settingsBtn: some View {
-        Button {
-            showManage.toggle()
-        } label: {
-            Image(systemName: "gearshape.fill")
-        }
-        .buttonStyle(.bordered)
-        .sheet(isPresented: $showManage) { ManageMediaSheet(mediaID: vm.id) }
+        MediaHeaderView(
+            posterURL: vm.posterURL,
+            backdropURL: vm.backdropURL,
+            title: vm.title,
+            availability: vm.availability,
+            trailerVideoID: vm.trailerVideoID,
+            youtubeEmbedURL: vm.youtubeEmbedURL,
+            showTrailerPlayer: $vm.showTrailerPlayer,
+            showReport: $showReport
+        )
     }
 
     @State private var showReport = false
-    @State private var showManage = false
-
-    // Only show season grid for TV shows
-    @ViewBuilder private var seasonGrid: some View {
-        if vm.mediaType == .tv { // Check mediaType
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)]) {
-                ForEach(vm.seasons) { s in
-                    VStack(spacing: 4) {
-                        Text("Season \(s.seasonNumber)")
-                        Text("\(s.episodeCount) eps").font(.caption).foregroundColor(.secondary)
-                        Label(s.mediaInfo?.status.label ?? "–", systemImage: "circle.fill")
-                            .font(.caption2)
-                            .foregroundColor(.white)
-                            .padding(4)
-                            .background(s.mediaInfo?.status.tint ?? .gray)
-                            .cornerRadius(4)
-                    }
-                    .padding(8)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-                    .onTapGesture {
-                        if s.mediaInfo?.status != .available {
-                            Task { try? await vm.request() } // This might need more specific request logic for seasons
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     private var closeButton: some View {
         Button { dismiss() } label: {
