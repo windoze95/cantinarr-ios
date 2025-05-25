@@ -44,6 +44,31 @@ class OverseerrUsersViewModel: ObservableObject {
         controller.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+        controller.$results
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .assign(to: \OverseerrUsersViewModel.results, on: self)
+            .store(in: &cancellables)
+        controller.$keywordSuggestions
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .assign(to: \OverseerrUsersViewModel.keywordSuggestions, on: self)
+            .store(in: &cancellables)
+        controller.$activeKeywords
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .assign(to: \OverseerrUsersViewModel.activeKeywords, on: self)
+            .store(in: &cancellables)
+        controller.$movieRecs
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .assign(to: \OverseerrUsersViewModel.movieRecs, on: self)
+            .store(in: &cancellables)
+        controller.$tvRecs
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .assign(to: \OverseerrUsersViewModel.tvRecs, on: self)
+            .store(in: &cancellables)
         return controller
     }()
 
@@ -52,27 +77,15 @@ class OverseerrUsersViewModel: ObservableObject {
 
     @Published var sessionToken: String? = nil
     @Published private(set) var isLoading: Bool = false // Discover loading
-    var searchQuery: String { get { searchController.searchQuery } set { searchController.searchQuery = newValue } }
-    var results: [MediaItem] {
-        get { searchController.results }
-        set { searchController.results = newValue }
+    var searchQuery: String {
+        get { searchController.searchQuery }
+        set { searchController.searchQuery = newValue }
     }
-    var keywordSuggestions: [OverseerrAPIService.Keyword] {
-        get { searchController.keywordSuggestions }
-        set { searchController.keywordSuggestions = newValue }
-    }
-    var activeKeywords: [OverseerrAPIService.Keyword] {
-        get { searchController.activeKeywords }
-        set { searchController.activeKeywords = newValue }
-    }
-    var movieRecs: [MediaItem] {
-        get { searchController.movieRecs }
-        set { searchController.movieRecs = newValue }
-    }
-    var tvRecs: [MediaItem] {
-        get { searchController.tvRecs }
-        set { searchController.tvRecs = newValue }
-    }
+    @Published private(set) var results: [MediaItem] = []
+    @Published private(set) var keywordSuggestions: [OverseerrAPIService.Keyword] = []
+    @Published private(set) var activeKeywords: [OverseerrAPIService.Keyword] = []
+    @Published private(set) var movieRecs: [MediaItem] = []
+    @Published private(set) var tvRecs: [MediaItem] = []
     var isLoadingSearch: Bool { searchController.isLoadingSearch }
     var isLoadingKeywords: Bool { searchController.isLoadingKeywords }
     var isLoadingMovieRecs: Bool { searchController.isLoadingMovieRecs }
@@ -243,7 +256,7 @@ class OverseerrUsersViewModel: ObservableObject {
         guard !isLoading else { return }
         if reset {
             loader.reset()
-            results.removeAll() // Clear previous results (could be search or discover)
+            searchController.results.removeAll() // Clear previous results (could be search or discover)
             clearConnectionError()
         }
 
@@ -299,8 +312,8 @@ class OverseerrUsersViewModel: ObservableObject {
             }
 
             // Merge the new page results with existing content
-            if loader.page == 1 { results = fetchedItems }
-            else { results.append(contentsOf: fetchedItems) }
+            if loader.page == 1 { searchController.results = fetchedItems }
+            else { searchController.results.append(contentsOf: fetchedItems) }
             loader.endLoading(next: responseTotalPages)
 
             if !watchProviders.isEmpty { clearConnectionError() }

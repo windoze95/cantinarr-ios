@@ -6,22 +6,33 @@ import Combine
 
 @MainActor
 final class FilterManager: ObservableObject {
-    @Published var selectedMedia: MediaType = .movie {
-        didSet { if oldValue != selectedMedia { save() } }
-    }
-    @Published var selectedProviders: Set<Int> = [] {
-        didSet { if oldValue != selectedProviders { save() } }
-    }
-    @Published var selectedGenres: Set<Int> = [] {
-        didSet { if oldValue != selectedGenres { save() } }
-    }
+    @Published var selectedMedia: MediaType = .movie
+    @Published var selectedProviders: Set<Int> = []
+    @Published var selectedGenres: Set<Int> = []
     @Published var activeKeywordIDs: Set<Int> = []
+
+    private var cancellables = Set<AnyCancellable>()
 
     private let settingsKey: String
     private var storageKey: String { "discoverFilters-\(settingsKey)" }
 
     init(settingsKey: String) {
         self.settingsKey = settingsKey
+
+        $selectedMedia
+            .dropFirst()
+            .sink { [weak self] _ in self?.save() }
+            .store(in: &cancellables)
+
+        $selectedProviders
+            .dropFirst()
+            .sink { [weak self] _ in self?.save() }
+            .store(in: &cancellables)
+
+        $selectedGenres
+            .dropFirst()
+            .sink { [weak self] _ in self?.save() }
+            .store(in: &cancellables)
     }
 
     func load() {
