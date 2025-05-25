@@ -174,46 +174,13 @@ struct OverseerrUsersHomeView: View {
 
     @ViewBuilder
     private var trendingSection: some View {
-        // Display trending connection error if present
-        if let error = vm.connectionError {
-            VStack {
-                Image(systemName: "antenna.radiowaves.left.and.right.slash").font(.largeTitle)
-                    .foregroundColor(.orange) // Changed Icon
-                Text("Cannot Load Trending").font(.headline).padding(.bottom, 2) // Changed Text
-                Text(error).font(.caption).multilineTextAlignment(.center).padding(.horizontal)
-                Button("Retry") { Task { await vm.bootstrap() } }
-                    .buttonStyle(.bordered).padding(.top, 5)
-            }
-            .frame(maxWidth: .infinity, minHeight: 200, alignment: .center)
-            .padding()
-
-        } else if vm.items.isEmpty && vm.isLoading {
-            // Show shimmer only if items are empty and loading
-            Text("Trending").font(.title2).padding(.horizontal).opacity(0) // Placeholder title for spacing
-            HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                .frame(height: 200) // Consistent height
-        } else if !vm.items.isEmpty {
-            // Show trending items
-            Text("Trending")
-                .font(.title2)
-                .padding(.horizontal)
-
-            HorizontalMediaRow(
-                items: vm.items,
-                isLoading: vm.isLoading
-            ) { item in
-                vm.loadMoreIfNeeded(current: item)
-            }
-        } else {
-            // Empty state for trending (after load, if no items and no error)
-            Text("Trending")
-                .font(.title2)
-                .padding(.horizontal)
-            Text("No trending items found.")
-                .foregroundColor(.secondary)
-                .padding()
-                .frame(maxWidth: .infinity, minHeight: 100, alignment: .center) // Smaller height for empty message
-        }
+        TrendingDisplayView(
+            items: vm.items,
+            isLoading: vm.isLoading,
+            connectionError: vm.connectionError,
+            loadMore: { item in vm.loadMoreIfNeeded(current: item) },
+            retry: { Task { await vm.bootstrap() } }
+        )
     }
 
     @ViewBuilder
@@ -222,108 +189,236 @@ struct OverseerrUsersHomeView: View {
         let filteredSuggestions = overseerrUsersVM.keywordSuggestions
             .filter { !overseerrUsersVM.filters.activeKeywordIDs.contains($0.id) }
 
-        Group {
-            // Search Results for Movies/TV
-            if (isSearchLoadingLocal || overseerrUsersVM.isLoadingSearch) && overseerrUsersVM.results.isEmpty {
-                // Shimmer for search results when loading and no results yet
-                Text("Search Results").font(.headline).padding(.horizontal).opacity(0) // Placeholder title for spacing
+
+        SearchResultsRowView(
+            results: overseerrUsersVM.results,
+            isLoading: overseerrUsersVM.isLoadingSearch,
+            showLocalLoading: isSearchLoadingLocal,
+            searchText: searchText,
+            loadMore: { item in
+                overseerrUsersVM.loadMoreIfNeeded(current: item,
+                                                  within: overseerrUsersVM.results)
+            }
+        )
+
+        KeywordSuggestionsRowView(
+            keywords: filteredSuggestions,
+            isLoading: overseerrUsersVM.isLoadingKeywords
+        ) { kw in
+            overseerrUsersVM.activate(keyword: kw)
+            searchFieldFocused = false
+            UIApplication.shared.endEditing()
+        }
+
+        // ** Recommendations Section **
+        VStack(alignment: .leading, spacing: 16) { // Group recommendations
+            // Movie Recommendations
+            if overseerrUsersVM.isLoadingMovieRecs && overseerrUsersVM.movieRecs.isEmpty {
+                Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
                 HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                    .frame(height: 200) // Consistent height
-            } else if !isSearchLoadingLocal && !overseerrUsersVM.isLoadingSearch && overseerrUsersVM.results
-                .isEmpty && !searchText.isEmpty
-            {
-                // No results found message only if search wasn't empty and not loading
-                HStack {
-                    Spacer()
-                    VStack(spacing: 4) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.largeTitle)
-                            .foregroundColor(.secondary)
-                        Text("No results found for \"\(searchText)\"")
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    Spacer()
-                }
-                .frame(height: 160) // Give it some space
-                .padding(.horizontal)
-            } else if !overseerrUsersVM.results.isEmpty {
-                // Display actual search results
-                Text("Search Results")
-                    .font(.headline)
-                    .padding(.horizontal)
-
+                    .frame(height: 200)
+            } else if !overseerrUsersVM.movieRecs.isEmpty {
+                Text("Movies You Might Like")
+                    .font(.headline).padding(.horizontal)
                 HorizontalMediaRow(
-                    items: overseerrUsersVM.results,
-                    isLoading: overseerrUsersVM.isLoadingSearch // Pass loading state
+                    items: overseerrUsersVM.movieRecs,
+                    isLoading: overseerrUsersVM.isLoadingMovieRecs
                 ) { item in
-                    overseerrUsersVM.loadMoreIfNeeded(current: item,
-                                                      within: overseerrUsersVM.results)
+                    overseerrUsersVM.loadMoreMovieRecsIfNeeded(current: item)
                 }
             }
 
-            // Keyword Suggestions (Handles its own loading/empty state)
-            if overseerrUsersVM.isLoadingKeywords {
-                Text("Search by Keyword").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(0 ..< 5, id: \.self) { _ in
-                            RoundedRectangle(cornerRadius: 16).fill(Color.gray.opacity(0.3))
-                                .frame(width: 100, height: 32).shimmer()
-                        }
-                    }
-                    .padding(.horizontal)
+            // TV Recommendations
+            if overseerrUsersVM.isLoadingTvRecs && overseerrUsersVM.tvRecs.isEmpty {
+                Text("Shows You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
+                HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                    .frame(height: 200)
+            } else if !overseerrUsersVM.tvRecs.isEmpty {
+                Text("Shows You Might Like")
+                    .font(.headline).padding(.horizontal)
+                HorizontalMediaRow(
+                    items: overseerrUsersVM.tvRecs,
+                    isLoading: overseerrUsersVM.isLoadingTvRecs
+                ) { item in
+                    overseerrUsersVM.loadMoreTvRecsIfNeeded(current: item)
                 }
-                .frame(height: 40)
-            } else if !filteredSuggestions.isEmpty {
-                Text("Search by Keyword")
+            }
+        }
+        .padding(.bottom) // Add padding at the end of the scroll content if recs are shown
+    }
+}
+
+// MARK: - Subviews
+
+private struct TrendingDisplayView: View {
+    let items: [OverseerrUsersViewModel.MediaItem]
+    let isLoading: Bool
+    let connectionError: String?
+    let loadMore: (OverseerrUsersViewModel.MediaItem) -> Void
+    let retry: () -> Void
+
+    var body: some View {
+        if let error = connectionError {
+            VStack {
+                Image(systemName: "antenna.radiowaves.left.and.right.slash")
+                    .font(.largeTitle)
+                    .foregroundColor(.orange)
+                Text("Cannot Load Trending")
                     .font(.headline)
+                    .padding(.bottom, 2)
+                Text(error)
+                    .font(.caption)
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal)
-
-                KeywordSuggestionRow(keywords: filteredSuggestions) { kw in
-                    // Activating a keyword will clear searchText via overseerrUsersVM.searchQuery's .onChange
-                    // and potentially trigger a view switch in OverseerrUsersHomeEntry
-                    overseerrUsersVM.activate(keyword: kw)
-                    searchFieldFocused = false // Dismiss keyboard
-                    UIApplication.shared.endEditing()
-                }
+                Button("Retry", action: retry)
+                    .buttonStyle(.bordered)
+                    .padding(.top, 5)
             }
-
-            // ** Recommendations Section **
-            VStack(alignment: .leading, spacing: 16) { // Group recommendations
-                // Movie Recommendations
-                if overseerrUsersVM.isLoadingMovieRecs && overseerrUsersVM.movieRecs.isEmpty {
-                    Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                    HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                        .frame(height: 200)
-                } else if !overseerrUsersVM.movieRecs.isEmpty {
-                    Text("Movies You Might Like")
-                        .font(.headline).padding(.horizontal)
-                    HorizontalMediaRow(
-                        items: overseerrUsersVM.movieRecs,
-                        isLoading: overseerrUsersVM.isLoadingMovieRecs
-                    ) { item in
-                        overseerrUsersVM.loadMoreMovieRecsIfNeeded(current: item)
-                    }
-                }
-
-                // TV Recommendations
-                if overseerrUsersVM.isLoadingTvRecs && overseerrUsersVM.tvRecs.isEmpty {
-                    Text("Shows You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                    HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                        .frame(height: 200)
-                } else if !overseerrUsersVM.tvRecs.isEmpty {
-                    Text("Shows You Might Like")
-                        .font(.headline).padding(.horizontal)
-                    HorizontalMediaRow(
-                        items: overseerrUsersVM.tvRecs,
-                        isLoading: overseerrUsersVM.isLoadingTvRecs
-                    ) { item in
-                        overseerrUsersVM.loadMoreTvRecsIfNeeded(current: item)
-                    }
-                }
+            .frame(maxWidth: .infinity, minHeight: 200, alignment: .center)
+            .padding()
+        } else if items.isEmpty && isLoading {
+            Text("Trending")
+                .font(.title2)
+                .padding(.horizontal)
+                .opacity(0)
+            HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                .frame(height: 200)
+        } else if !items.isEmpty {
+            Text("Trending")
+                .font(.title2)
+                .padding(.horizontal)
+            HorizontalMediaRow(items: items, isLoading: isLoading) { item in
+                loadMore(item)
             }
-            .padding(.bottom) // Add padding at the end of the scroll content if recs are shown
+        } else {
+            Text("Trending")
+                .font(.title2)
+                .padding(.horizontal)
+            Text("No trending items found.")
+                .foregroundColor(.secondary)
+                .padding()
+                .frame(maxWidth: .infinity, minHeight: 100, alignment: .center)
         }
     }
 }
+
+private struct SearchResultsRowView: View {
+    let results: [OverseerrUsersViewModel.MediaItem]
+    let isLoading: Bool
+    let showLocalLoading: Bool
+    let searchText: String
+    let loadMore: (OverseerrUsersViewModel.MediaItem) -> Void
+
+    var body: some View {
+        if (showLocalLoading || isLoading) && results.isEmpty {
+            Text("Search Results")
+                .font(.headline)
+                .padding(.horizontal)
+                .opacity(0)
+            HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                .frame(height: 200)
+        } else if !showLocalLoading && !isLoading && results.isEmpty && !searchText.isEmpty {
+            HStack {
+                Spacer()
+                VStack(spacing: 4) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.largeTitle)
+                        .foregroundColor(.secondary)
+                    Text("No results found for \"\(searchText)\"")
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                Spacer()
+            }
+            .frame(height: 160)
+            .padding(.horizontal)
+        } else if !results.isEmpty {
+            Text("Search Results")
+                .font(.headline)
+                .padding(.horizontal)
+            HorizontalMediaRow(items: results, isLoading: isLoading) { item in
+                loadMore(item)
+            }
+        }
+    }
+}
+
+private struct KeywordSuggestionsRowView: View {
+    let keywords: [OverseerrAPIService.Keyword]
+    let isLoading: Bool
+    let choose: (OverseerrAPIService.Keyword) -> Void
+
+    var body: some View {
+        if isLoading {
+            Text("Search by Keyword")
+                .font(.headline)
+                .padding(.horizontal)
+                .opacity(0)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(0 ..< 5, id: \.self) { _ in
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 100, height: 32)
+                            .shimmer()
+                    }
+                }
+                .padding(.horizontal)
+            }
+            .frame(height: 40)
+        } else if !keywords.isEmpty {
+            Text("Search by Keyword")
+                .font(.headline)
+                .padding(.horizontal)
+            KeywordSuggestionRow(keywords: keywords, choose: choose)
+        }
+    }
+}
+
+#if DEBUG
+struct TrendingDisplayView_Previews: PreviewProvider {
+    static let sampleItem = OverseerrUsersViewModel.MediaItem(id: 1, title: "Sample", posterPath: nil, mediaType: .movie)
+    static var previews: some View {
+        Group {
+            TrendingDisplayView(items: [], isLoading: true, connectionError: nil, loadMore: { _ in }, retry: {})
+                .previewDisplayName("Loading")
+            TrendingDisplayView(items: [], isLoading: false, connectionError: nil, loadMore: { _ in }, retry: {})
+                .previewDisplayName("Empty")
+            TrendingDisplayView(items: [sampleItem, sampleItem], isLoading: false, connectionError: nil, loadMore: { _ in }, retry: {})
+                .previewDisplayName("Populated")
+        }
+        .previewLayout(.sizeThatFits)
+    }
+}
+
+struct SearchResultsRowView_Previews: PreviewProvider {
+    static let sampleItem = TrendingDisplayView_Previews.sampleItem
+    static var previews: some View {
+        Group {
+            SearchResultsRowView(results: [], isLoading: true, showLocalLoading: false, searchText: "Avengers", loadMore: { _ in })
+                .previewDisplayName("Loading")
+            SearchResultsRowView(results: [], isLoading: false, showLocalLoading: false, searchText: "Avengers", loadMore: { _ in })
+                .previewDisplayName("Empty")
+            SearchResultsRowView(results: [sampleItem], isLoading: false, showLocalLoading: false, searchText: "Avengers", loadMore: { _ in })
+                .previewDisplayName("Populated")
+        }
+        .previewLayout(.sizeThatFits)
+    }
+}
+
+struct KeywordSuggestionsRowView_Previews: PreviewProvider {
+    static let sampleKeyword = OverseerrAPIService.Keyword(id: 1, name: "Action")
+    static var previews: some View {
+        Group {
+            KeywordSuggestionsRowView(keywords: [], isLoading: true, choose: { _ in })
+                .previewDisplayName("Loading")
+            KeywordSuggestionsRowView(keywords: [], isLoading: false, choose: { _ in })
+                .previewDisplayName("Empty")
+            KeywordSuggestionsRowView(keywords: [sampleKeyword, sampleKeyword], isLoading: false, choose: { _ in })
+                .previewDisplayName("Populated")
+        }
+        .previewLayout(.sizeThatFits)
+    }
+}
+#endif
+
