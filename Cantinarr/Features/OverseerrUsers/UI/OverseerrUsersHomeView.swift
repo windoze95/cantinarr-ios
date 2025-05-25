@@ -211,41 +211,40 @@ struct OverseerrUsersHomeView: View {
         }
 
         // ** Recommendations Section **
-            VStack(alignment: .leading, spacing: 16) { // Group recommendations
-                // Movie Recommendations
-                if overseerrUsersVM.isLoadingMovieRecs && overseerrUsersVM.movieRecs.isEmpty {
-                    Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                    HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                        .frame(height: 200)
-                } else if !overseerrUsersVM.movieRecs.isEmpty {
-                    Text("Movies You Might Like")
-                        .font(.headline).padding(.horizontal)
-                    HorizontalMediaRow(
-                        items: overseerrUsersVM.movieRecs,
-                        isLoading: overseerrUsersVM.isLoadingMovieRecs
-                    ) { item in
-                        overseerrUsersVM.loadMoreMovieRecsIfNeeded(current: item)
-                    }
-                }
-
-                // TV Recommendations
-                if overseerrUsersVM.isLoadingTvRecs && overseerrUsersVM.tvRecs.isEmpty {
-                    Text("Shows You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                    HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                        .frame(height: 200)
-                } else if !overseerrUsersVM.tvRecs.isEmpty {
-                    Text("Shows You Might Like")
-                        .font(.headline).padding(.horizontal)
-                    HorizontalMediaRow(
-                        items: overseerrUsersVM.tvRecs,
-                        isLoading: overseerrUsersVM.isLoadingTvRecs
-                    ) { item in
-                        overseerrUsersVM.loadMoreTvRecsIfNeeded(current: item)
-                    }
+        VStack(alignment: .leading, spacing: 16) { // Group recommendations
+            // Movie Recommendations
+            if overseerrUsersVM.isLoadingMovieRecs && overseerrUsersVM.movieRecs.isEmpty {
+                Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
+                HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                    .frame(height: 200)
+            } else if !overseerrUsersVM.movieRecs.isEmpty {
+                Text("Movies You Might Like")
+                    .font(.headline).padding(.horizontal)
+                HorizontalMediaRow(
+                    items: overseerrUsersVM.movieRecs,
+                    isLoading: overseerrUsersVM.isLoadingMovieRecs
+                ) { item in
+                    overseerrUsersVM.loadMoreMovieRecsIfNeeded(current: item)
                 }
             }
-            .padding(.bottom) // Add padding at the end of the scroll content if recs are shown
+
+            // TV Recommendations
+            if overseerrUsersVM.isLoadingTvRecs && overseerrUsersVM.tvRecs.isEmpty {
+                Text("Shows You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
+                HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                    .frame(height: 200)
+            } else if !overseerrUsersVM.tvRecs.isEmpty {
+                Text("Shows You Might Like")
+                    .font(.headline).padding(.horizontal)
+                HorizontalMediaRow(
+                    items: overseerrUsersVM.tvRecs,
+                    isLoading: overseerrUsersVM.isLoadingTvRecs
+                ) { item in
+                    overseerrUsersVM.loadMoreTvRecsIfNeeded(current: item)
+                }
+            }
         }
+        .padding(.bottom) // Add padding at the end of the scroll content if recs are shown
     }
 }
 
