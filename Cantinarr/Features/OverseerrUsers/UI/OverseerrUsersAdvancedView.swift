@@ -73,190 +73,296 @@ struct OverseerrUsersAdvancedView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 if vm.searchQuery.isEmpty {
-                    // Movies / TV picker
                     Picker("Media", selection: $vm.filters.selectedMedia) {
                         ForEach(MediaType.allCases
-                            .filter { $0 != .unknown && $0 != .person && $0 != .collection })
-                        { mt in
-                            // Filtered for relevant types
+                            .filter { $0 != .unknown && $0 != .person && $0 != .collection }) { mt in
                             Text(mt.displayName).tag(mt)
                         }
                     }
                     .pickerStyle(.segmented)
                     .padding(.horizontal)
 
-                    // Active keyword pillszzz
-                    if !vm.filters.activeKeywordIDs.isEmpty {
-                        ActiveKeywordsView()
-                            .environmentObject(vm)
-                            .padding(.top, 4)
+                    if !vm.activeKeywords.isEmpty {
+                        ActiveKeywordsRow(
+                            keywords: vm.activeKeywords,
+                            remove: { vm.remove(keywordID: $0) }
+                        )
+                        .padding(.top, 4)
                     }
 
-                    // Results grid
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)]) {
-                        ForEach(vm.results) { item in
-                            MediaCardView(id: item.id,
-                                          mediaType: item.mediaType,
-                                          title: item.title,
-                                          posterPath: item.posterPath)
-                                .onAppear {
-                                    vm.loadMoreIfNeeded(current: item, within: vm.results)
-                                }
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom) // keeps last row from sitting against the screen edge
-                } else { // Search query is not empty
-                    Text("Search Results")
-                        .font(.headline)
-                        .padding(.horizontal)
+                    SearchResultsSection(
+                        isQueryEmpty: true,
+                        results: vm.results,
+                        isLoadingSearch: vm.isLoadingSearch,
+                        isSearchLoadingLocal: isSearchLoadingLocal,
+                        loadMore: { vm.loadMoreIfNeeded(current: $0, within: vm.results) }
+                    )
+                } else {
+                    SearchResultsSection(
+                        isQueryEmpty: false,
+                        results: vm.results,
+                        isLoadingSearch: vm.isLoadingSearch,
+                        isSearchLoadingLocal: isSearchLoadingLocal,
+                        loadMore: { vm.loadMoreIfNeeded(current: $0, within: vm.results) }
+                    )
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        // 1️⃣ While local OR real loading and no results → shimmer
-                        if (isSearchLoadingLocal || vm.isLoadingSearch)
-                            && vm.results.isEmpty
-                        {
-                            HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                                .frame(height: 180)
-
-                            // 2️⃣ When fully done loading and still no results → “no results”
-                        } else if !isSearchLoadingLocal
-                            && !vm.isLoadingSearch
-                            && vm.results.isEmpty
-                        {
-                            HStack {
-                                Spacer()
-                                VStack(spacing: 4) {
-                                    Image(systemName: "magnifyingglass")
-                                        .font(.largeTitle)
-                                        .foregroundColor(.secondary)
-                                    Text("No results found")
-                                        .foregroundColor(.secondary)
-                                }
-                                Spacer()
-                            }
-                            .frame(height: 160)
-
-                            // 3️⃣ Otherwise → show the real results row
-                        } else {
-                            HorizontalMediaRow(
-                                items: vm.results,
-                                isLoading: vm.isLoadingSearch
-                            ) { item in
-                                vm.loadMoreIfNeeded(current: item, within: vm.results)
-                            }
-                        }
-                    }
-                    // Only suggestions not already active
-                    let filteredSuggestions = vm.keywordSuggestions
-                        .filter { !vm.filters.activeKeywordIDs.contains($0.id) }
-
-                    if vm.isLoadingKeywords || !filteredSuggestions.isEmpty {
-                        Text("Search by Keyword")
-                            .font(.headline)
-                            .padding(.horizontal)
-
-                        if vm.isLoadingKeywords {
-                            // shimmer placeholders while loading
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    ForEach(0 ..< 5, id: \.self) { _ in
-                                        // pill placeholder
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .fill(Color.gray.opacity(0.3))
-                                            .frame(width: 100, height: 32)
-                                            .shimmer()
-                                    }
-                                }
-                                .padding(.horizontal)
-                            }
-                        } else if !filteredSuggestions.isEmpty {
-                            KeywordSuggestionRow(keywords: filteredSuggestions) { kw in
-                                // Clear the UI search field and dismiss keyboard
+                    let filtered = vm.keywordSuggestions.filter { !vm.filters.activeKeywordIDs.contains($0.id) }
+                    if vm.isLoadingKeywords || !filtered.isEmpty {
+                        KeywordFilterListView(
+                            activeKeywords: [],
+                            removeKeyword: { _ in },
+                            suggestions: filtered,
+                            isLoadingSuggestions: vm.isLoadingKeywords,
+                            chooseSuggestion: { kw in
                                 searchText = ""
                                 searchFieldFocused = false
-
-                                vm
-                                    .activate(keyword: kw) // This will also trigger view switch if conditions met in
-                                // HomeEntry
+                                vm.activate(keyword: kw)
                             }
-                        }
+                        )
                     }
 
-                    // Movie recommendations
-                    if !vm.movieRecs.isEmpty {
-                        Text("Movies you might like")
-                            .font(.headline).padding(.horizontal)
-                        HorizontalMediaRow(
-                            items: vm.movieRecs,
-                            isLoading: vm.isLoadingMovieRecs
-                        ) { item in
-                            vm.loadMoreMovieRecsIfNeeded(current: item)
-                        }
-                    }
-
-                    // TV recommendations
-                    if !vm.tvRecs.isEmpty {
-                        Text("Shows you might like")
-                            .font(.headline).padding(.horizontal)
-                        HorizontalMediaRow(
-                            items: vm.tvRecs,
-                            isLoading: vm.isLoadingTvRecs
-                        ) { item in
-                            vm.loadMoreTvRecsIfNeeded(current: item)
-                        }
-                        .padding(.bottom) // keeps last row from sitting against the screen edge
-                    }
+                    RecommendationRowsView(
+                        movieRecs: vm.movieRecs,
+                        tvRecs: vm.tvRecs,
+                        isLoadingMovie: vm.isLoadingMovieRecs,
+                        isLoadingTv: vm.isLoadingTvRecs,
+                        loadMoreMovie: vm.loadMoreMovieRecsIfNeeded,
+                        loadMoreTv: vm.loadMoreTvRecsIfNeeded
+                    )
+                    .padding(.bottom, !vm.tvRecs.isEmpty ? 0 : 0)
                 }
             }
-            .padding(.top, 8) // space below the pinned search bar
+            .padding(.top, 8)
         }
-        .scrollDismissesKeyboard(.immediately) // hides as soon as you drag
-        .simultaneousGesture( // hides on any tap *without*
-            TapGesture() // stealing the tap from cells
+        .scrollDismissesKeyboard(.immediately)
+        .simultaneousGesture(
+            TapGesture()
                 .onEnded {
                     searchFieldFocused = false
-                    UIApplication.shared.endEditing() // force-hide keyboard
+                    UIApplication.shared.endEditing()
                 }
         )
-        // any tap on the content area will clear focus
         .background(
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture {
                     searchFieldFocused = false
-                    UIApplication.shared.endEditing() // force-hide keyboard
+                    UIApplication.shared.endEditing()
                 }
         )
-
-        // 🔒 Sticky search bar
         .safeAreaInset(edge: .top) {
             HStack(spacing: 12) {
                 SearchBarView(text: $searchText, focus: $searchFieldFocused)
                     .onChange(of: searchText) { _, newValue in
                         if !newValue.isEmpty {
-                            // 1) clear out stale cards immediately
                             vm.clearSearchResultsAndRecs()
-                            // 2) show shimmer immediately
                             isSearchLoadingLocal = true
                         }
-                        vm.searchQuery = newValue // This will be observed by OverseerrUsersHomeEntry
+                        vm.searchQuery = newValue
                     }
                     .onChange(of: vm.isLoadingSearch) { loading in
-                        // when real search finishes, stop local shimmer
                         if !loading {
                             isSearchLoadingLocal = false
                         }
                     }
             }
             .padding()
-            .background(.ultraThinMaterial) // .regularMaterial or .ultraThinMaterial
+            .background(.ultraThinMaterial)
         }
-        .navigationBarTitleDisplayMode(.inline) // compact nav bar, no big title
-        .navigationBarBackButtonHidden(true) // Important: hide default back button
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+    }
+// MARK: - Subviews
+
+private struct ActiveKeywordsRow: View {
+    let keywords: [OverseerrAPIService.Keyword]
+    let remove: (Int) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(keywords, id: \.id) { kw in
+                    HStack(spacing: 4) {
+                        Text(kw.name).font(.caption)
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                            .onTapGesture { remove(kw.id) }
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(Color.accentColor.opacity(0.25)))
+                    .foregroundColor(Color.accentColor)
+                }
+            }
+            .padding(.horizontal)
+            .frame(height: 32)
+        }
     }
 }
 
+private struct SearchResultsSection: View {
+    let isQueryEmpty: Bool
+    let results: [OverseerrUsersViewModel.MediaItem]
+    let isLoadingSearch: Bool
+    let isSearchLoadingLocal: Bool
+    let loadMore: (OverseerrUsersViewModel.MediaItem) -> Void
+
+    var body: some View {
+        Group {
+            if isQueryEmpty {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)]) {
+                    ForEach(results) { item in
+                        MediaCardView(id: item.id,
+                                      mediaType: item.mediaType,
+                                      title: item.title,
+                                      posterPath: item.posterPath)
+                            .onAppear { loadMore(item) }
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.bottom)
+            } else {
+                Text("Search Results")
+                    .font(.headline)
+                    .padding(.horizontal)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    if (isSearchLoadingLocal || isLoadingSearch) && results.isEmpty {
+                        HorizontalMediaRow(items: [], isLoading: true) { _ in }
+                            .frame(height: 180)
+                    } else if !isSearchLoadingLocal && !isLoadingSearch && results.isEmpty {
+                        HStack {
+                            Spacer()
+                            VStack(spacing: 4) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.largeTitle)
+                                    .foregroundColor(.secondary)
+                                Text("No results found")
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .frame(height: 160)
+                    } else {
+                        HorizontalMediaRow(
+                            items: results,
+                            isLoading: isLoadingSearch
+                        ) { item in
+                            loadMore(item)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct KeywordFilterListView: View {
+    let activeKeywords: [OverseerrAPIService.Keyword]
+    let removeKeyword: (Int) -> Void
+    let suggestions: [OverseerrAPIService.Keyword]
+    let isLoadingSuggestions: Bool
+    let chooseSuggestion: (OverseerrAPIService.Keyword) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if !activeKeywords.isEmpty {
+                ActiveKeywordsRow(keywords: activeKeywords, remove: removeKeyword)
+            }
+            if isLoadingSuggestions || !suggestions.isEmpty {
+                Text("Search by Keyword")
+                    .font(.headline)
+                    .padding(.horizontal)
+                if isLoadingSuggestions {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(0 ..< 5, id: \.self) { _ in
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(width: 100, height: 32)
+                                    .shimmer()
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                } else if !suggestions.isEmpty {
+                    KeywordSuggestionRow(keywords: suggestions, choose: chooseSuggestion)
+                }
+            }
+        }
+    }
+}
+
+private struct RecommendationRowsView: View {
+    let movieRecs: [OverseerrUsersViewModel.MediaItem]
+    let tvRecs: [OverseerrUsersViewModel.MediaItem]
+    let isLoadingMovie: Bool
+    let isLoadingTv: Bool
+    let loadMoreMovie: (OverseerrUsersViewModel.MediaItem) -> Void
+    let loadMoreTv: (OverseerrUsersViewModel.MediaItem) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if !movieRecs.isEmpty {
+                Text("Movies you might like")
+                    .font(.headline)
+                    .padding(.horizontal)
+                HorizontalMediaRow(
+                    items: movieRecs,
+                    isLoading: isLoadingMovie
+                ) { item in
+                    loadMoreMovie(item)
+                }
+            }
+            if !tvRecs.isEmpty {
+                Text("Shows you might like")
+                    .font(.headline)
+                    .padding(.horizontal)
+                HorizontalMediaRow(
+                    items: tvRecs,
+                    isLoading: isLoadingTv
+                ) { item in
+                    loadMoreTv(item)
+                }
+            }
+        }
+    }
+}
+
+#if DEBUG
+struct SearchResultsSection_Previews: PreviewProvider {
+    static let sampleItem = OverseerrUsersViewModel.MediaItem(id: 1, title: "Sample", posterPath: nil, mediaType: .movie)
+    static var previews: some View {
+        Group {
+            SearchResultsSection(isQueryEmpty: false,
+                                results: [],
+                                isLoadingSearch: true,
+                                isSearchLoadingLocal: true,
+                                loadMore: { _ in })
+                .previewDisplayName("Loading")
+            SearchResultsSection(isQueryEmpty: false,
+                                results: [],
+                                isLoadingSearch: false,
+                                isSearchLoadingLocal: false,
+                                loadMore: { _ in })
+                .previewDisplayName("Empty")
+            SearchResultsSection(isQueryEmpty: false,
+                                results: [sampleItem, sampleItem],
+                                isLoadingSearch: false,
+                                isSearchLoadingLocal: false,
+                                loadMore: { _ in })
+                .previewDisplayName("Results")
+            SearchResultsSection(isQueryEmpty: true,
+                                results: [sampleItem, sampleItem],
+                                isLoadingSearch: false,
+                                isSearchLoadingLocal: false,
+                                loadMore: { _ in })
+                .previewDisplayName("Grid Results")
+        }
+        .previewLayout(.sizeThatFits)
+    }
+}
+#endif
 // --------------------------------------------------
 //  Plex SSO presentation helper (unchanged)
 // --------------------------------------------------
