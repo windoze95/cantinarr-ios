@@ -16,7 +16,6 @@ struct RadarrMovieDetailView: View {
     @StateObject private var viewModel: RadarrMovieDetailViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var taglineHeight: CGFloat = .zero // For dynamic header height calculation
-    @State private var showDeleteConfirmation = false
 
     init(movieId: Int, radarrService: RadarrServiceType) {
         _viewModel = StateObject(wrappedValue: RadarrMovieDetailViewModel(
@@ -69,8 +68,13 @@ struct RadarrMovieDetailView: View {
                     let headerMin = max(44, safeWidth - 200)
 
                     ShrinkOnScrollHeaderRadarr(maxHeight: headerMax, minHeight: headerMin) {
-                        movieHeader(movie: movie)
-                            .frame(width: safeWidth, alignment: .leading)
+                        MovieHeaderView(
+                            movie: movie,
+                            runtimeText: viewModel.formattedRuntime,
+                            availabilityText: viewModel.availabilityStatusText,
+                            availabilityColor: viewModel.availabilityStatusColor
+                        )
+                        .frame(width: safeWidth, alignment: .leading)
                     }
                     .frame(width: safeWidth, alignment: .leading)
                     .clipped()
@@ -87,11 +91,22 @@ struct RadarrMovieDetailView: View {
 
                         Divider()
 
-                        movieDetailsSection(movie: movie)
+                        MovieDetailsSection(
+                            movie: movie,
+                            qualityProfileName: viewModel.qualityProfileName,
+                            formattedSizeOnDisk: viewModel.formattedSizeOnDisk,
+                            openIMDb: viewModel.openIMDb,
+                            openTMDb: viewModel.openTMDb
+                        )
 
                         Divider().padding(.vertical, 8)
 
-                        actionButtonsSection(movie: movie)
+                        ActionButtonsSection(
+                            movie: movie,
+                            toggleMonitoring: { await viewModel.toggleMonitoring() },
+                            triggerSearch: { await viewModel.triggerMovieSearch() },
+                            deleteMovie: { await viewModel.deleteMovie(alsoDeleteFiles: $0) }
+                        )
                     }
                     .padding() // Horizontal and some vertical padding for the content below header
                     .frame(maxWidth: safeWidth, alignment: .leading)
@@ -124,137 +139,6 @@ struct RadarrMovieDetailView: View {
         .ignoresSafeArea(edges: .top)
     }
 
-    @ViewBuilder
-    private func movieHeader(movie: RadarrMovie) -> some View {
-        ZStack(alignment: .bottomLeading) {
-            // Gradient from bottom, less strong than fanart overlay
-            LinearGradient(colors: [Color.black.opacity(0.5), Color.clear], startPoint: .bottom, endPoint: .center)
-
-            HStack(alignment: .bottom, spacing: 16) {
-                LazyImage(url: movie.posterURL) { state in
-                    state.image?.resizable().scaledToFill()
-                        .frame(width: 120, height: 180).cornerRadius(12).shadow(radius: 5)
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(movie.title)
-                        .font(.title2.weight(.bold))
-                        .lineLimit(3)
-                        .foregroundColor(.white)
-
-                    HStack {
-                        Text(String(movie.year))
-                        Text("•")
-                        Text(viewModel.formattedRuntime)
-                    }
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
-
-                    HStack(spacing: 6) {
-                        Circle().fill(viewModel.availabilityStatusColor).frame(width: 10, height: 10)
-                        Text(viewModel.availabilityStatusText)
-                            .font(.caption.weight(.medium))
-                            .foregroundColor(.white)
-                    }
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 8)
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(6)
-                }
-                Spacer()
-            }
-            .padding()
-        }
-        .background { // Background for the header itself, fanart is part of main blurredBackground
-            if let url = movie.fanartURL { // Show a less blurred fanart within header bounds
-                LazyImage(url: url) { state in
-                    state.image?.resizable().scaledToFill()
-                        .overlay(Color.black.opacity(0.3)) // Slight dimming for header text
-                }
-            }
-        }
-        .clipped()
-    }
-
-    @ViewBuilder
-    private func movieDetailsSection(movie: RadarrMovie) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            DetailRow(label: "Status", value: movie.status.capitalized)
-            if let profileName = viewModel.qualityProfileName {
-                DetailRow(label: "Quality Profile", value: profileName)
-            }
-            if movie.hasFile {
-                DetailRow(label: "Size on Disk", value: viewModel.formattedSizeOnDisk)
-            }
-            if let path = movie.path, !path.isEmpty {
-                DetailRow(label: "Path", value: path, lineLimit: 3)
-            }
-
-            HStack {
-                if movie.imdbId != nil {
-                    Button("IMDb") { viewModel.openIMDb() }
-                        .buttonStyle(.bordered)
-                }
-                if movie.tmdbId != nil {
-                    Button("TMDb") { viewModel.openTMDb() }
-                        .buttonStyle(.bordered)
-                }
-            }
-            .padding(.top, 5)
-        }
-    }
-
-    @ViewBuilder
-    private func actionButtonsSection(movie: RadarrMovie) -> some View {
-        VStack(spacing: 12) {
-            // Monitor/Unmonitor Button
-            Button { Task { await viewModel.toggleMonitoring() } } label: {
-                Label(movie.monitored ? "Unmonitor Movie" : "Monitor Movie",
-                      systemImage: movie.monitored ? "bookmark.slash.fill" : "bookmark.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(movie.monitored ? .orange : .blue)
-
-            // Search Button (if monitored and not downloaded)
-            if movie.monitored && !movie.hasFile {
-                Button { Task { await viewModel.triggerMovieSearch() } } label: {
-                    Label("Search for Movie", systemImage: "magnifyingglass")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-            }
-
-            // TODO: Add Edit button (placeholder for now)
-            // Button("Edit Movie Details") { /* Navigate to an edit screen */ }
-            // .buttonStyle(.bordered)
-            // .frame(maxWidth: .infinity)
-
-            // Delete Button
-            Button(role: .destructive) {
-                showDeleteConfirmation = true
-            } label: {
-                Label("Delete Movie", systemImage: "trash.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .confirmationDialog("Delete \(movie.title)?",
-                                isPresented: $showDeleteConfirmation,
-                                titleVisibility: .visible)
-            {
-                Button("Delete Movie and Files", role: .destructive) {
-                    Task { await viewModel.deleteMovie(alsoDeleteFiles: true) }
-                }
-                Button("Delete from Radarr (Keep Files)", role: .destructive) {
-                    Task { await viewModel.deleteMovie(alsoDeleteFiles: false) }
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This action cannot be undone. Choose an option for file deletion.")
-            }
-        }
-    }
-
     private var closeButton: some View {
         Button { dismiss() } label: {
             Image(systemName: "xmark.circle.fill")
@@ -264,19 +148,6 @@ struct RadarrMovieDetailView: View {
                 .shadow(radius: 3)
         }
         .padding()
-    }
-
-    private struct DetailRow: View {
-        let label: String
-        let value: String
-        var lineLimit: Int = 1
-
-        var body: some View {
-            VStack(alignment: .leading) {
-                Text(label).font(.caption).foregroundColor(.secondary)
-                Text(value).font(.callout).lineLimit(lineLimit)
-            }
-        }
     }
 
     // ShrinkOnScrollHeader adapted for this view
