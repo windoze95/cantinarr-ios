@@ -30,10 +30,10 @@ struct LoadingCardView: View {
 }
 
 #if DEBUG
-private struct LoadingCardView_Previews: PreviewProvider {
-    static var previews: some View {
-        LoadingCardView()
-            .previewLayout(.sizeThatFits)
+    private struct LoadingCardView_Previews: PreviewProvider {
+        static var previews: some View {
+            LoadingCardView()
+                .previewLayout(.sizeThatFits)
+        }
     }
-}
 #endif

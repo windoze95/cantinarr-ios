@@ -214,7 +214,7 @@ struct OverseerrUsersHomeView: View {
             // Movie Recommendations
             if overseerrUsersVM.isLoadingMovieRecs && overseerrUsersVM.movieRecs.isEmpty {
                 Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) {
+                HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                     MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
                         .frame(width: 110)
                 } placeholder: {
@@ -242,7 +242,7 @@ struct OverseerrUsersHomeView: View {
             // TV Recommendations
             if overseerrUsersVM.isLoadingTvRecs && overseerrUsersVM.tvRecs.isEmpty {
                 Text("Shows You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) {
+                HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                     MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
                         .frame(width: 110)
                 } placeholder: {
@@ -304,7 +304,7 @@ private struct TrendingDisplayView: View {
                 .font(.title2)
                 .padding(.horizontal)
                 .opacity(0)
-            HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) {
+            HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                 MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
                     .frame(width: 110)
             } placeholder: {
@@ -351,7 +351,7 @@ private struct SearchResultsRowView: View {
                 .font(.headline)
                 .padding(.horizontal)
                 .opacity(0)
-            HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) {
+            HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                 MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
                     .frame(width: 110)
             } placeholder: {

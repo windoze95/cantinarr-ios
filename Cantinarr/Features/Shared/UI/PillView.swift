@@ -28,10 +28,10 @@ extension PillView where Item == String {
 }
 
 #if DEBUG
-private struct PillView_Previews: PreviewProvider {
-    static var previews: some View {
-        PillView(text: "Example")
-            .previewLayout(.sizeThatFits)
+    private struct PillView_Previews: PreviewProvider {
+        static var previews: some View {
+            PillView(text: "Example")
+                .previewLayout(.sizeThatFits)
+        }
     }
-}
 #endif

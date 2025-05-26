@@ -12,7 +12,8 @@ struct HorizontalItemRow<Item: Identifiable, ItemView: View, PlaceholderView: Vi
          isLoading: Bool,
          onAppear: @escaping (Item) -> Void,
          @ViewBuilder content: @escaping (Item) -> ItemView,
-         @ViewBuilder placeholder: @escaping () -> PlaceholderView) {
+         @ViewBuilder placeholder: @escaping () -> PlaceholderView)
+    {
         self.items = items
         self.isLoading = isLoading
         self.onAppear = onAppear
@@ -25,7 +26,8 @@ extension HorizontalItemRow where PlaceholderView == EmptyView {
     init(items: [Item],
          isLoading: Bool,
          onAppear: @escaping (Item) -> Void,
-         @ViewBuilder content: @escaping (Item) -> ItemView) {
+         @ViewBuilder content: @escaping (Item) -> ItemView)
+    {
         self.init(items: items,
                   isLoading: isLoading,
                   onAppear: onAppear,
@@ -58,22 +60,26 @@ extension HorizontalItemRow {
 }
 
 #if DEBUG
-private struct HorizontalItemRow_Previews: PreviewProvider {
-    struct ExampleItem: Identifiable { let id: Int; let title: String }
-    static var previews: some View {
-        HorizontalItemRow(items: [ExampleItem(id: 1, title: "One"), ExampleItem(id: 2, title: "Two")], isLoading: true, onAppear: { _ in }) { item in
-            Text(item.title)
-                .frame(width: 100, height: 80)
-                .background(Color.blue.opacity(0.2))
-                .cornerRadius(8)
-        } placeholder: {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 100, height: 80)
-                .shimmer()
+    private struct HorizontalItemRow_Previews: PreviewProvider {
+        struct ExampleItem: Identifiable { let id: Int; let title: String }
+        static var previews: some View {
+            HorizontalItemRow(
+                items: [ExampleItem(id: 1, title: "One"), ExampleItem(id: 2, title: "Two")],
+                isLoading: true,
+                onAppear: { _ in }
+            ) { item in
+                Text(item.title)
+                    .frame(width: 100, height: 80)
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(8)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 100, height: 80)
+                    .shimmer()
+            }
+            .frame(height: 100)
+            .previewLayout(.sizeThatFits)
         }
-        .frame(height: 100)
-        .previewLayout(.sizeThatFits)
     }
-}
 #endif

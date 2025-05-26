@@ -231,7 +231,7 @@ private struct SearchResultsSection: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     if (isSearchLoadingLocal || isLoadingSearch) && results.isEmpty {
-                        HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) {
+                        HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                             MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
                                 .frame(width: 110)
                         } placeholder: {
