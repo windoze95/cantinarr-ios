@@ -86,7 +86,10 @@ final class EnvironmentsStore: ObservableObject {
     // MARK:  – Convenience
 
     var selectedEnvironment: ServerEnvironment {
-        environments.first { $0.id == selectedEnvironmentID }!
+        guard let env = environments.first(where: { $0.id == selectedEnvironmentID }) else {
+            fatalError("selectedEnvironmentID not found in environments")
+        }
+        return env
     }
 
     var selectedServiceInstance: ServiceInstance? {
