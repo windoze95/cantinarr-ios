@@ -4,8 +4,8 @@
 import Combine // Import Combine for ObservableObject
 import Foundation
 
-@MainActor
 /// Networking layer for communicating with a Radarr instance.
+@MainActor
 class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
     private let settings: RadarrSettings
     private let baseURL: URL
@@ -300,10 +300,13 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
     }
 
     func deleteMovie(_ movieId: Int, deleteFiles: Bool = false, addImportExclusion: Bool = false) async throws {
-        var comps = URLComponents(url: baseURL.appendingPathComponent("movie/\(movieId)"), resolvingAgainstBaseURL: false)!
+        var comps = URLComponents(
+            url: baseURL.appendingPathComponent("movie/\(movieId)"),
+            resolvingAgainstBaseURL: false
+        )!
         comps.queryItems = [
             .init(name: "deleteFiles", value: "\(deleteFiles)"),
-            .init(name: "addImportListExclusion", value: "\(addImportExclusion)")
+            .init(name: "addImportListExclusion", value: "\(addImportExclusion)"),
         ]
         var request = URLRequest(url: comps.url!)
         request.httpMethod = "DELETE"

@@ -4,9 +4,9 @@
 import Combine
 import SwiftUI
 
-@MainActor
 /// View model for ``RadarrMovieDetailView`` responsible for loading and
 /// mutating a single movie.
+@MainActor
 class RadarrMovieDetailViewModel: ObservableObject {
     @Published var movie: RadarrMovie?
     @Published var qualityProfileName: String?
@@ -139,7 +139,11 @@ class RadarrMovieDetailViewModel: ObservableObject {
     func deleteMovie(alsoDeleteFiles: Bool) async {
         guard let movieToDelete = movie else { return }
         do {
-            try await radarrService.deleteMovie(movieToDelete.id, deleteFiles: alsoDeleteFiles, addImportExclusion: false)
+            try await radarrService.deleteMovie(
+                movieToDelete.id,
+                deleteFiles: alsoDeleteFiles,
+                addImportExclusion: false
+            )
             commandStatusMessage = "Movie deleted successfully."
             showCommandStatusAlert = true
             // After deletion, the view should probably be dismissed or state cleared

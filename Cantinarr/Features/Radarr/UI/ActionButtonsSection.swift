@@ -38,7 +38,8 @@ struct ActionButtonsSection: View {
             .buttonStyle(.borderedProminent)
             .confirmationDialog("Delete \(movie.title)?",
                                 isPresented: $showDeleteConfirmation,
-                                titleVisibility: .visible) {
+                                titleVisibility: .visible)
+            {
                 Button("Delete Movie and Files", role: .destructive) {
                     Task { await deleteMovie(true) }
                 }
@@ -54,46 +55,46 @@ struct ActionButtonsSection: View {
 }
 
 #if DEBUG
-struct ActionButtonsSection_Previews: PreviewProvider {
-    static var sampleMovie: RadarrMovie {
-        RadarrMovie(
-            id: 1,
-            title: "Sample Movie",
-            originalTitle: nil,
-            sortTitle: "Sample Movie",
-            sizeOnDisk: 5_000_000_000,
-            status: "released",
-            overview: "A sample movie overview.",
-            inCinemas: nil,
-            physicalRelease: nil,
-            digitalRelease: nil,
-            images: [],
-            website: nil,
-            year: 2023,
-            hasFile: false,
-            path: "/movies/sample",
-            qualityProfileId: 1,
-            monitored: true,
-            minimumAvailability: "released",
-            runtime: 120,
-            cleanTitle: nil,
-            imdbId: "tt1234567",
-            tmdbId: 100,
-            titleSlug: nil,
-            folderName: nil,
-            movieFile: nil
-        )
-    }
+    struct ActionButtonsSection_Previews: PreviewProvider {
+        static var sampleMovie: RadarrMovie {
+            RadarrMovie(
+                id: 1,
+                title: "Sample Movie",
+                originalTitle: nil,
+                sortTitle: "Sample Movie",
+                sizeOnDisk: 5_000_000_000,
+                status: "released",
+                overview: "A sample movie overview.",
+                inCinemas: nil,
+                physicalRelease: nil,
+                digitalRelease: nil,
+                images: [],
+                website: nil,
+                year: 2023,
+                hasFile: false,
+                path: "/movies/sample",
+                qualityProfileId: 1,
+                monitored: true,
+                minimumAvailability: "released",
+                runtime: 120,
+                cleanTitle: nil,
+                imdbId: "tt1234567",
+                tmdbId: 100,
+                titleSlug: nil,
+                folderName: nil,
+                movieFile: nil
+            )
+        }
 
-    static var previews: some View {
-        ActionButtonsSection(
-            movie: sampleMovie,
-            toggleMonitoring: {},
-            triggerSearch: {},
-            deleteMovie: { _ in }
-        )
-        .padding()
-        .previewLayout(.sizeThatFits)
+        static var previews: some View {
+            ActionButtonsSection(
+                movie: sampleMovie,
+                toggleMonitoring: {},
+                triggerSearch: {},
+                deleteMovie: { _ in }
+            )
+            .padding()
+            .previewLayout(.sizeThatFits)
+        }
     }
-}
 #endif

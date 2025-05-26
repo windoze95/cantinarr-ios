@@ -36,13 +36,17 @@ struct SeasonGridView: View {
 }
 
 #if DEBUG
-struct SeasonGridView_Previews: PreviewProvider {
-    static var previews: some View {
-        let mockSeason = OverseerrAPIService.Season(id: 1, seasonNumber: 1, episodeCount: 8, mediaInfo: .init(status: .available, plexUrl: nil))
-        SeasonGridView(seasons: [mockSeason], requestAction: {})
-            .padding()
-            .previewLayout(.sizeThatFits)
+    struct SeasonGridView_Previews: PreviewProvider {
+        static var previews: some View {
+            let mockSeason = OverseerrAPIService.Season(
+                id: 1,
+                seasonNumber: 1,
+                episodeCount: 8,
+                mediaInfo: .init(status: .available, plexUrl: nil)
+            )
+            SeasonGridView(seasons: [mockSeason], requestAction: {})
+                .padding()
+                .previewLayout(.sizeThatFits)
+        }
     }
-}
 #endif
-

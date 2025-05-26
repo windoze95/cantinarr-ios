@@ -50,47 +50,47 @@ struct MovieDetailsSection: View {
 }
 
 #if DEBUG
-struct MovieDetailsSection_Previews: PreviewProvider {
-    static var sampleMovie: RadarrMovie {
-        RadarrMovie(
-            id: 1,
-            title: "Sample Movie",
-            originalTitle: nil,
-            sortTitle: "Sample Movie",
-            sizeOnDisk: 5_000_000_000,
-            status: "released",
-            overview: "A sample movie overview.",
-            inCinemas: nil,
-            physicalRelease: nil,
-            digitalRelease: nil,
-            images: [],
-            website: nil,
-            year: 2023,
-            hasFile: true,
-            path: "/movies/sample",
-            qualityProfileId: 1,
-            monitored: true,
-            minimumAvailability: "released",
-            runtime: 120,
-            cleanTitle: nil,
-            imdbId: "tt1234567",
-            tmdbId: 100,
-            titleSlug: nil,
-            folderName: nil,
-            movieFile: nil
-        )
-    }
+    struct MovieDetailsSection_Previews: PreviewProvider {
+        static var sampleMovie: RadarrMovie {
+            RadarrMovie(
+                id: 1,
+                title: "Sample Movie",
+                originalTitle: nil,
+                sortTitle: "Sample Movie",
+                sizeOnDisk: 5_000_000_000,
+                status: "released",
+                overview: "A sample movie overview.",
+                inCinemas: nil,
+                physicalRelease: nil,
+                digitalRelease: nil,
+                images: [],
+                website: nil,
+                year: 2023,
+                hasFile: true,
+                path: "/movies/sample",
+                qualityProfileId: 1,
+                monitored: true,
+                minimumAvailability: "released",
+                runtime: 120,
+                cleanTitle: nil,
+                imdbId: "tt1234567",
+                tmdbId: 100,
+                titleSlug: nil,
+                folderName: nil,
+                movieFile: nil
+            )
+        }
 
-    static var previews: some View {
-        MovieDetailsSection(
-            movie: sampleMovie,
-            qualityProfileName: "1080p",
-            formattedSizeOnDisk: "5 GB",
-            openIMDb: {},
-            openTMDb: {}
-        )
-        .padding()
-        .previewLayout(.sizeThatFits)
+        static var previews: some View {
+            MovieDetailsSection(
+                movie: sampleMovie,
+                qualityProfileName: "1080p",
+                formattedSizeOnDisk: "5 GB",
+                openIMDb: {},
+                openTMDb: {}
+            )
+            .padding()
+            .previewLayout(.sizeThatFits)
+        }
     }
-}
 #endif

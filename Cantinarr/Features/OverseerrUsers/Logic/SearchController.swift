@@ -53,7 +53,7 @@ final class SearchController: ObservableObject {
         self.filters = filters
         self.keywordActivatedSubject = keywordActivatedSubject
         self.recoverAuth = recoverAuth
-        self.clearConnError = clearConnectionError
+        clearConnError = clearConnectionError
         self.setConnectionError = setConnectionError
         self.loadDiscover = loadDiscover
 
@@ -114,7 +114,12 @@ final class SearchController: ObservableObject {
             let resp = try await service.search(query: searchQuery, page: loader.page)
             let items = resp.results.compactMap { raw -> MediaItem? in
                 guard let kind = raw.mediaType, kind == .movie || kind == .tv else { return nil }
-                return MediaItem(id: raw.id, title: raw.title ?? raw.name ?? "Untitled", posterPath: raw.posterPath, mediaType: kind)
+                return MediaItem(
+                    id: raw.id,
+                    title: raw.title ?? raw.name ?? "Untitled",
+                    posterPath: raw.posterPath,
+                    mediaType: kind
+                )
             }
             if loader.page == 1 { results = items } else { results.append(contentsOf: items) }
             loader.endLoading(next: resp.totalPages)
@@ -201,7 +206,9 @@ final class SearchController: ObservableObject {
                 }
             }
             var usable: [OverseerrAPIService.Keyword] = []
-            for await maybe in group { if let kw = maybe { usable.append(kw) } }
+            for await maybe in group {
+                if let kw = maybe { usable.append(kw) }
+            }
             return usable.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         }
     }
@@ -218,7 +225,12 @@ final class SearchController: ObservableObject {
 
         do {
             let resp = try await service.movieRecommendations(for: baseItemId, page: movieRecLoader.page)
-            movieRecs = resp.results.map { MediaItem(id: $0.id, title: $0.title, posterPath: $0.posterPath, mediaType: .movie) }
+            movieRecs = resp.results.map { MediaItem(
+                id: $0.id,
+                title: $0.title,
+                posterPath: $0.posterPath,
+                mediaType: .movie
+            ) }
             movieRecLoader.endLoading(next: resp.totalPages)
         } catch let err as OverseerrError {
             movieFetchError = err
@@ -237,7 +249,8 @@ final class SearchController: ObservableObject {
 
         do {
             let resp = try await service.tvRecommendations(for: baseItemId, page: tvRecLoader.page)
-            tvRecs = resp.results.map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
+            tvRecs = resp.results
+                .map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
             tvRecLoader.endLoading(next: resp.totalPages)
         } catch let err as OverseerrError {
             tvFetchError = err
@@ -254,7 +267,9 @@ final class SearchController: ObservableObject {
         }
         isLoadingTvRecs = false
 
-        if let mvErr = movieFetchError, !(mvErr is OverseerrError), let tvErr = tvFetchError, !(tvErr is OverseerrError) {
+        if let mvErr = movieFetchError, !(mvErr is OverseerrError), let tvErr = tvFetchError,
+           !(tvErr is OverseerrError)
+        {
             setConnectionError("Failed to load recommendations.")
             connectionError = "Failed to load recommendations."
         } else if connectionError == nil && (movieFetchError != nil || tvFetchError != nil) {
@@ -295,7 +310,12 @@ final class SearchController: ObservableObject {
             defer { isLoadingMovieRecs = false; movieRecLoader.endLoading(next: movieRecLoader.totalPages) }
             do {
                 let resp = try await service.movieRecommendations(for: baseID, page: movieRecLoader.page)
-                let more = resp.results.map { MediaItem(id: $0.id, title: $0.title, posterPath: $0.posterPath, mediaType: .movie) }
+                let more = resp.results.map { MediaItem(
+                    id: $0.id,
+                    title: $0.title,
+                    posterPath: $0.posterPath,
+                    mediaType: .movie
+                ) }
                 movieRecs.append(contentsOf: more)
                 movieRecLoader.endLoading(next: resp.totalPages)
             } catch is OverseerrError {
@@ -320,7 +340,12 @@ final class SearchController: ObservableObject {
             defer { isLoadingTvRecs = false; tvRecLoader.endLoading(next: tvRecLoader.totalPages) }
             do {
                 let resp = try await service.tvRecommendations(for: baseID, page: tvRecLoader.page)
-                let more = resp.results.map { MediaItem(id: $0.id, title: $0.name, posterPath: $0.posterPath, mediaType: .tv) }
+                let more = resp.results.map { MediaItem(
+                    id: $0.id,
+                    title: $0.name,
+                    posterPath: $0.posterPath,
+                    mediaType: .tv
+                ) }
                 tvRecs.append(contentsOf: more)
                 tvRecLoader.endLoading(next: resp.totalPages)
             } catch is OverseerrError {

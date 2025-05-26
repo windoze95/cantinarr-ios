@@ -189,7 +189,6 @@ struct OverseerrUsersHomeView: View {
         let filteredSuggestions = overseerrUsersVM.keywordSuggestions
             .filter { !overseerrUsersVM.filters.activeKeywordIDs.contains($0.id) }
 
-
         SearchResultsRowView(
             results: overseerrUsersVM.results,
             isLoading: overseerrUsersVM.isLoadingSearch,
@@ -376,49 +375,77 @@ private struct KeywordSuggestionsRowView: View {
 }
 
 #if DEBUG
-struct TrendingDisplayView_Previews: PreviewProvider {
-    static let sampleItem = OverseerrUsersViewModel.MediaItem(id: 1, title: "Sample", posterPath: nil, mediaType: .movie)
-    static var previews: some View {
-        Group {
-            TrendingDisplayView(items: [], isLoading: true, connectionError: nil, loadMore: { _ in }, retry: {})
-                .previewDisplayName("Loading")
-            TrendingDisplayView(items: [], isLoading: false, connectionError: nil, loadMore: { _ in }, retry: {})
-                .previewDisplayName("Empty")
-            TrendingDisplayView(items: [sampleItem, sampleItem], isLoading: false, connectionError: nil, loadMore: { _ in }, retry: {})
+    struct TrendingDisplayView_Previews: PreviewProvider {
+        static let sampleItem = OverseerrUsersViewModel.MediaItem(
+            id: 1,
+            title: "Sample",
+            posterPath: nil,
+            mediaType: .movie
+        )
+        static var previews: some View {
+            Group {
+                TrendingDisplayView(items: [], isLoading: true, connectionError: nil, loadMore: { _ in }, retry: {})
+                    .previewDisplayName("Loading")
+                TrendingDisplayView(items: [], isLoading: false, connectionError: nil, loadMore: { _ in }, retry: {})
+                    .previewDisplayName("Empty")
+                TrendingDisplayView(
+                    items: [sampleItem, sampleItem],
+                    isLoading: false,
+                    connectionError: nil,
+                    loadMore: { _ in },
+                    retry: {}
+                )
                 .previewDisplayName("Populated")
+            }
+            .previewLayout(.sizeThatFits)
         }
-        .previewLayout(.sizeThatFits)
     }
-}
 
-struct SearchResultsRowView_Previews: PreviewProvider {
-    static let sampleItem = TrendingDisplayView_Previews.sampleItem
-    static var previews: some View {
-        Group {
-            SearchResultsRowView(results: [], isLoading: true, showLocalLoading: false, searchText: "Avengers", loadMore: { _ in })
+    struct SearchResultsRowView_Previews: PreviewProvider {
+        static let sampleItem = TrendingDisplayView_Previews.sampleItem
+        static var previews: some View {
+            Group {
+                SearchResultsRowView(
+                    results: [],
+                    isLoading: true,
+                    showLocalLoading: false,
+                    searchText: "Avengers",
+                    loadMore: { _ in }
+                )
                 .previewDisplayName("Loading")
-            SearchResultsRowView(results: [], isLoading: false, showLocalLoading: false, searchText: "Avengers", loadMore: { _ in })
+                SearchResultsRowView(
+                    results: [],
+                    isLoading: false,
+                    showLocalLoading: false,
+                    searchText: "Avengers",
+                    loadMore: { _ in }
+                )
                 .previewDisplayName("Empty")
-            SearchResultsRowView(results: [sampleItem], isLoading: false, showLocalLoading: false, searchText: "Avengers", loadMore: { _ in })
+                SearchResultsRowView(
+                    results: [sampleItem],
+                    isLoading: false,
+                    showLocalLoading: false,
+                    searchText: "Avengers",
+                    loadMore: { _ in }
+                )
                 .previewDisplayName("Populated")
+            }
+            .previewLayout(.sizeThatFits)
         }
-        .previewLayout(.sizeThatFits)
     }
-}
 
-struct KeywordSuggestionsRowView_Previews: PreviewProvider {
-    static let sampleKeyword = OverseerrAPIService.Keyword(id: 1, name: "Action")
-    static var previews: some View {
-        Group {
-            KeywordSuggestionsRowView(keywords: [], isLoading: true, choose: { _ in })
-                .previewDisplayName("Loading")
-            KeywordSuggestionsRowView(keywords: [], isLoading: false, choose: { _ in })
-                .previewDisplayName("Empty")
-            KeywordSuggestionsRowView(keywords: [sampleKeyword, sampleKeyword], isLoading: false, choose: { _ in })
-                .previewDisplayName("Populated")
+    struct KeywordSuggestionsRowView_Previews: PreviewProvider {
+        static let sampleKeyword = OverseerrAPIService.Keyword(id: 1, name: "Action")
+        static var previews: some View {
+            Group {
+                KeywordSuggestionsRowView(keywords: [], isLoading: true, choose: { _ in })
+                    .previewDisplayName("Loading")
+                KeywordSuggestionsRowView(keywords: [], isLoading: false, choose: { _ in })
+                    .previewDisplayName("Empty")
+                KeywordSuggestionsRowView(keywords: [sampleKeyword, sampleKeyword], isLoading: false, choose: { _ in })
+                    .previewDisplayName("Populated")
+            }
+            .previewLayout(.sizeThatFits)
         }
-        .previewLayout(.sizeThatFits)
     }
-}
 #endif
-

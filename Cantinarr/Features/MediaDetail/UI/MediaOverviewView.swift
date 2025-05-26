@@ -11,12 +11,11 @@ struct MediaOverviewView: View {
 }
 
 #if DEBUG
-struct MediaOverviewView_Previews: PreviewProvider {
-    static var previews: some View {
-        MediaOverviewView(overview: "This is a mock overview of the movie used for SwiftUI previews.")
-            .padding()
-            .previewLayout(.sizeThatFits)
+    struct MediaOverviewView_Previews: PreviewProvider {
+        static var previews: some View {
+            MediaOverviewView(overview: "This is a mock overview of the movie used for SwiftUI previews.")
+                .padding()
+                .previewLayout(.sizeThatFits)
+        }
     }
-}
 #endif
-

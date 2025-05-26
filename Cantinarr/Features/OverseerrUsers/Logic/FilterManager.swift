@@ -1,8 +1,8 @@
 // File: FilterManager.swift
 // Purpose: Manages discover filter state for OverseerrUsers
 
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 final class FilterManager: ObservableObject {

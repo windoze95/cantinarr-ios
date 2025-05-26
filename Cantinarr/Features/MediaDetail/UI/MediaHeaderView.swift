@@ -1,5 +1,5 @@
-import SwiftUI
 import NukeUI
+import SwiftUI
 
 /// Header displaying poster, title and action buttons.
 struct MediaHeaderView: View {
@@ -103,23 +103,22 @@ struct MediaHeaderView: View {
 }
 
 #if DEBUG
-struct MediaHeaderView_Previews: PreviewProvider {
-    @State static var showTrailer = false
-    @State static var showReport = false
+    struct MediaHeaderView_Previews: PreviewProvider {
+        @State static var showTrailer = false
+        @State static var showReport = false
 
-    static var previews: some View {
-        MediaHeaderView(
-            posterURL: URL(string: "https://example.com/poster.jpg"),
-            backdropURL: URL(string: "https://example.com/backdrop.jpg"),
-            title: "Example Movie Title That Is Quite Long",
-            availability: .available,
-            trailerVideoID: "abc123",
-            youtubeEmbedURL: URL(string: "https://www.youtube.com/embed/abc123"),
-            showTrailerPlayer: $showTrailer,
-            showReport: $showReport
-        )
-        .preferredColorScheme(.dark)
+        static var previews: some View {
+            MediaHeaderView(
+                posterURL: URL(string: "https://example.com/poster.jpg"),
+                backdropURL: URL(string: "https://example.com/backdrop.jpg"),
+                title: "Example Movie Title That Is Quite Long",
+                availability: .available,
+                trailerVideoID: "abc123",
+                youtubeEmbedURL: URL(string: "https://www.youtube.com/embed/abc123"),
+                showTrailerPlayer: $showTrailer,
+                showReport: $showReport
+            )
+            .preferredColorScheme(.dark)
+        }
     }
-}
 #endif
-

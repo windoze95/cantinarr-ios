@@ -19,19 +19,18 @@ struct MediaTaglineView: View {
             .background(
                 GeometryReader { g in
                     Color.clear.preference(key: TaglineHeightKey.self,
-                                            value: g.size.height)
+                                           value: g.size.height)
                 }
             )
     }
 }
 
 #if DEBUG
-struct MediaTaglineView_Previews: PreviewProvider {
-    static var previews: some View {
-        MediaTaglineView(tagline: "A thrilling tale of adventure.")
-            .padding()
-            .previewLayout(.sizeThatFits)
+    struct MediaTaglineView_Previews: PreviewProvider {
+        static var previews: some View {
+            MediaTaglineView(tagline: "A thrilling tale of adventure.")
+                .padding()
+                .previewLayout(.sizeThatFits)
+        }
     }
-}
 #endif
-

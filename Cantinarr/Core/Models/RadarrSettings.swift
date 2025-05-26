@@ -55,7 +55,8 @@ struct RadarrSettings: Codable {
                 KeychainHelper.save(key: RadarrSettings.keychainKey(host: host, port: port), data: data)
             }
         } else if let data = KeychainHelper.load(key: RadarrSettings.keychainKey(host: host, port: port)),
-                  let key = String(data: data, encoding: .utf8) {
+                  let key = String(data: data, encoding: .utf8)
+        {
             apiKey = key
         } else {
             apiKey = ""
