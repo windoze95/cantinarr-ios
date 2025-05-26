@@ -55,6 +55,7 @@ extension OverseerrAPIService {
     }
 
     // MARK: - Detail fetchers
+
     func movieDetail(id: Int) async throws -> MovieDetail {
         try await fetchJSON("movie/\(id)")
     }
@@ -64,6 +65,7 @@ extension OverseerrAPIService {
     }
 
     // MARK: - Actions
+
     func request(mediaId id: Int, isMovie: Bool) async throws {
         let body: [String: Any] = ["mediaType": isMovie ? "movie" : "tv", "mediaId": id]
         try await post(endpoint: "request", body: body)
@@ -75,6 +77,7 @@ extension OverseerrAPIService {
     }
 
     // MARK: - Helpers
+
     private func fetchJSON<T: Decodable>(_ endpoint: String) async throws -> T {
         let url = baseURL.appendingPathComponent(endpoint)
         let (data, _) = try await data(for: URLRequest(url: url))

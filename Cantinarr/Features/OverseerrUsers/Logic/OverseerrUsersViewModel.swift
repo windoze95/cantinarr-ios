@@ -6,8 +6,8 @@ import Combine
 import SwiftUI
 import WebKit
 
-@MainActor
 /// Main view model driving Overseerr's user interface.
+@MainActor
 class OverseerrUsersViewModel: ObservableObject {
     // ─────────────────────────────────────────────
 
@@ -57,22 +57,27 @@ class OverseerrUsersViewModel: ObservableObject {
         get { searchController.results }
         set { searchController.results = newValue }
     }
+
     private(set) var keywordSuggestions: [OverseerrAPIService.Keyword] {
         get { searchController.keywordSuggestions }
         set { searchController.keywordSuggestions = newValue }
     }
+
     private(set) var activeKeywords: [OverseerrAPIService.Keyword] {
         get { searchController.activeKeywords }
         set { searchController.activeKeywords = newValue }
     }
+
     private(set) var movieRecs: [MediaItem] {
         get { searchController.movieRecs }
         set { searchController.movieRecs = newValue }
     }
+
     private(set) var tvRecs: [MediaItem] {
         get { searchController.tvRecs }
         set { searchController.tvRecs = newValue }
     }
+
     var isLoadingSearch: Bool { searchController.isLoadingSearch }
     var isLoadingKeywords: Bool { searchController.isLoadingKeywords }
     var isLoadingMovieRecs: Bool { searchController.isLoadingMovieRecs }
@@ -117,8 +122,8 @@ class OverseerrUsersViewModel: ObservableObject {
         // Added callback
         self.service = service
         self.settingsKey = settingsKey
-        self.filters = FilterManager()
-        self.plexSSOHandler = PlexSSOHandler(
+        filters = FilterManager()
+        plexSSOHandler = PlexSSOHandler(
             service: service,
             settingsKey: settingsKey,
             authContext: authContext
@@ -219,7 +224,9 @@ class OverseerrUsersViewModel: ObservableObject {
                 filters.selectedProviders = Set(watchProviders.map(\.id))
             }
             clearConnectionError()
-            if case .authenticated = authState, results.isEmpty && searchQuery.isEmpty && filters.activeKeywordIDs.isEmpty {
+            if case .authenticated = authState,
+               results.isEmpty && searchQuery.isEmpty && filters.activeKeywordIDs.isEmpty
+            {
                 await loadMedia(reset: true)
             }
         } catch is OverseerrError {
@@ -319,6 +326,7 @@ class OverseerrUsersViewModel: ObservableObject {
     // MARK: – Search Handling
 
     // ─────────────────────────────────────────────
+
     // MARK: – Pagination Logic (Discover/Search, Recs) - (Unchanged from previous correct version)
 
     func loadMoreIfNeeded(current item: MediaItem, within list: [MediaItem]) {
@@ -345,7 +353,9 @@ class OverseerrUsersViewModel: ObservableObject {
 
         let wkStore = WKWebsiteDataStore.default().httpCookieStore
         wkStore.getAllCookies { cookies in
-            for c in cookies { wkStore.delete(c) }
+            for c in cookies {
+                wkStore.delete(c)
+            }
         }
 
         Task { await OverseerrAuthManager.shared.probeSession() }
@@ -374,7 +384,6 @@ class OverseerrUsersViewModel: ObservableObject {
             }
         }
     }
-
 }
 
 extension OverseerrUsersViewModel: OverseerrPlexSSODelegate {

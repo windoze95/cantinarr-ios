@@ -52,7 +52,7 @@ class OverseerrAPIService {
     /// URLSession that shares cookies with WKWebView
     private let session: URLSession
 
-    internal let jsonDecoder: JSONDecoder = {
+    let jsonDecoder: JSONDecoder = {
         let d = JSONDecoder()
         d.keyDecodingStrategy = .convertFromSnakeCase
         return d
@@ -123,7 +123,6 @@ class OverseerrAPIService {
             throw OverseerrError.network(error)
         }
     }
-
 }
 
 // Make OverseerrAPIService satisfy OverseerrUsersService

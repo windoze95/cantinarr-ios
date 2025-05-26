@@ -3,8 +3,8 @@
 
 import SwiftUI
 
-@MainActor
 /// Fetches and caches trending movies/TV shows from Overseerr.
+@MainActor
 final class TrendingViewModel: ObservableObject {
     typealias MediaItem = OverseerrUsersViewModel.MediaItem // reuse struct
 

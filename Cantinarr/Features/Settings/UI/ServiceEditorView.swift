@@ -11,9 +11,9 @@ struct ServiceEditorView: View {
 
     // Typed configurations for supported service kinds
     @State private var radarrSettings: RadarrSettings =
-        RadarrSettings(host: "", apiKey: "")
+        .init(host: "", apiKey: "")
     @State private var overseerrSettings: OverseerrSettings =
-        OverseerrSettings(host: "", port: nil)
+        .init(host: "", port: nil)
 
     // ───────── Validation helpers
     private var isDisplayNameOK: Bool {
@@ -66,43 +66,43 @@ struct ServiceEditorView: View {
                 TextField("e.g. “Overseerr – Basement Plex”", text: $draft.displayName)
             }
 
-        Section("Configuration") {
-            switch draft.kind {
-            case .radarr:
-                TextField("Host", text: $radarrSettings.host)
-                    .textInputAutocapitalization(.none)
-                    .autocorrectionDisabled()
-                TextField(
-                    "Port",
-                    text: Binding(
-                        get: { radarrSettings.port ?? "" },
-                        set: { radarrSettings.port = $0.isEmpty ? nil : $0 }
+            Section("Configuration") {
+                switch draft.kind {
+                case .radarr:
+                    TextField("Host", text: $radarrSettings.host)
+                        .textInputAutocapitalization(.none)
+                        .autocorrectionDisabled()
+                    TextField(
+                        "Port",
+                        text: Binding(
+                            get: { radarrSettings.port ?? "" },
+                            set: { radarrSettings.port = $0.isEmpty ? nil : $0 }
+                        )
                     )
-                )
-                Toggle("Use SSL", isOn: $radarrSettings.useSSL)
-                TextField(
-                    "URL Base",
-                    text: Binding(
-                        get: { radarrSettings.urlBase ?? "" },
-                        set: { radarrSettings.urlBase = $0.isEmpty ? nil : $0 }
+                    Toggle("Use SSL", isOn: $radarrSettings.useSSL)
+                    TextField(
+                        "URL Base",
+                        text: Binding(
+                            get: { radarrSettings.urlBase ?? "" },
+                            set: { radarrSettings.urlBase = $0.isEmpty ? nil : $0 }
+                        )
                     )
-                )
-                SecureField("API Key", text: $radarrSettings.apiKey)
-                Toggle("Primary Instance", isOn: $radarrSettings.isPrimary)
-            case .overseerrUsers:
-                TextField("Host", text: $overseerrSettings.host)
-                    .textInputAutocapitalization(.none)
-                    .autocorrectionDisabled()
-                TextField(
-                    "Port",
-                    text: Binding(
-                        get: { overseerrSettings.port ?? "" },
-                        set: { overseerrSettings.port = $0.isEmpty ? nil : $0 }
+                    SecureField("API Key", text: $radarrSettings.apiKey)
+                    Toggle("Primary Instance", isOn: $radarrSettings.isPrimary)
+                case .overseerrUsers:
+                    TextField("Host", text: $overseerrSettings.host)
+                        .textInputAutocapitalization(.none)
+                        .autocorrectionDisabled()
+                    TextField(
+                        "Port",
+                        text: Binding(
+                            get: { overseerrSettings.port ?? "" },
+                            set: { overseerrSettings.port = $0.isEmpty ? nil : $0 }
+                        )
                     )
-                )
-                Toggle("Use SSL", isOn: $overseerrSettings.useSSL)
+                    Toggle("Use SSL", isOn: $overseerrSettings.useSSL)
+                }
             }
-        }
         }
         .navigationTitle(draft.displayName.isEmpty ? "New Service"
             : "Edit Service")

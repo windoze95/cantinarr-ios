@@ -4,8 +4,8 @@
 import Combine
 import SwiftUI
 
-@MainActor
 /// Handles fetching and displaying the user's Radarr movie library.
+@MainActor
 class RadarrMoviesViewModel: ObservableObject {
     @Published var movies: [RadarrMovie] = []
     @Published var isLoading: Bool = false
