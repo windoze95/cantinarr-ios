@@ -214,32 +214,56 @@ struct OverseerrUsersHomeView: View {
             // Movie Recommendations
             if overseerrUsersVM.isLoadingMovieRecs && overseerrUsersVM.movieRecs.isEmpty {
                 Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                    .frame(height: 200)
+                HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
+                    MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                        .frame(width: 110)
+                } placeholder: {
+                    LoadingCardView()
+                }
+                .frame(height: 200)
             } else if !overseerrUsersVM.movieRecs.isEmpty {
                 Text("Movies You Might Like")
                     .font(.headline).padding(.horizontal)
-                HorizontalMediaRow(
+                HorizontalItemRow(
                     items: overseerrUsersVM.movieRecs,
-                    isLoading: overseerrUsersVM.isLoadingMovieRecs
+                    isLoading: overseerrUsersVM.isLoadingMovieRecs,
+                    onAppear: { item in overseerrUsersVM.loadMoreMovieRecsIfNeeded(current: item) }
                 ) { item in
-                    overseerrUsersVM.loadMoreMovieRecsIfNeeded(current: item)
+                    MediaCardView(id: item.id,
+                                  mediaType: item.mediaType,
+                                  title: item.title,
+                                  posterPath: item.posterPath)
+                        .frame(width: 110)
+                } placeholder: {
+                    LoadingCardView()
                 }
             }
 
             // TV Recommendations
             if overseerrUsersVM.isLoadingTvRecs && overseerrUsersVM.tvRecs.isEmpty {
                 Text("Shows You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
-                HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                    .frame(height: 200)
+                HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
+                    MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                        .frame(width: 110)
+                } placeholder: {
+                    LoadingCardView()
+                }
+                .frame(height: 200)
             } else if !overseerrUsersVM.tvRecs.isEmpty {
                 Text("Shows You Might Like")
                     .font(.headline).padding(.horizontal)
-                HorizontalMediaRow(
+                HorizontalItemRow(
                     items: overseerrUsersVM.tvRecs,
-                    isLoading: overseerrUsersVM.isLoadingTvRecs
+                    isLoading: overseerrUsersVM.isLoadingTvRecs,
+                    onAppear: { item in overseerrUsersVM.loadMoreTvRecsIfNeeded(current: item) }
                 ) { item in
-                    overseerrUsersVM.loadMoreTvRecsIfNeeded(current: item)
+                    MediaCardView(id: item.id,
+                                  mediaType: item.mediaType,
+                                  title: item.title,
+                                  posterPath: item.posterPath)
+                        .frame(width: 110)
+                } placeholder: {
+                    LoadingCardView()
                 }
             }
         }
@@ -280,14 +304,27 @@ private struct TrendingDisplayView: View {
                 .font(.title2)
                 .padding(.horizontal)
                 .opacity(0)
-            HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                .frame(height: 200)
+            HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
+                MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                    .frame(width: 110)
+            } placeholder: {
+                LoadingCardView()
+            }
+            .frame(height: 200)
         } else if !items.isEmpty {
             Text("Trending")
                 .font(.title2)
                 .padding(.horizontal)
-            HorizontalMediaRow(items: items, isLoading: isLoading) { item in
+            HorizontalItemRow(items: items, isLoading: isLoading, onAppear: { item in
                 loadMore(item)
+            }) { item in
+                MediaCardView(id: item.id,
+                              mediaType: item.mediaType,
+                              title: item.title,
+                              posterPath: item.posterPath)
+                    .frame(width: 110)
+            } placeholder: {
+                LoadingCardView()
             }
         } else {
             Text("Trending")
@@ -314,8 +351,13 @@ private struct SearchResultsRowView: View {
                 .font(.headline)
                 .padding(.horizontal)
                 .opacity(0)
-            HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                .frame(height: 200)
+            HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
+                MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                    .frame(width: 110)
+            } placeholder: {
+                LoadingCardView()
+            }
+            .frame(height: 200)
         } else if !showLocalLoading && !isLoading && results.isEmpty && !searchText.isEmpty {
             HStack {
                 Spacer()
@@ -335,8 +377,16 @@ private struct SearchResultsRowView: View {
             Text("Search Results")
                 .font(.headline)
                 .padding(.horizontal)
-            HorizontalMediaRow(items: results, isLoading: isLoading) { item in
+            HorizontalItemRow(items: results, isLoading: isLoading, onAppear: { item in
                 loadMore(item)
+            }) { item in
+                MediaCardView(id: item.id,
+                              mediaType: item.mediaType,
+                              title: item.title,
+                              posterPath: item.posterPath)
+                    .frame(width: 110)
+            } placeholder: {
+                LoadingCardView()
             }
         }
     }
