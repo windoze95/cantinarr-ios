@@ -231,8 +231,13 @@ private struct SearchResultsSection: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     if (isSearchLoadingLocal || isLoadingSearch) && results.isEmpty {
-                        HorizontalMediaRow(items: [], isLoading: true) { _ in }
-                            .frame(height: 180)
+                        HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) {
+                            MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                                .frame(width: 110)
+                        } placeholder: {
+                            LoadingCardView()
+                        }
+                        .frame(height: 180)
                     } else if !isSearchLoadingLocal && !isLoadingSearch && results.isEmpty {
                         HStack {
                             Spacer()
@@ -247,11 +252,18 @@ private struct SearchResultsSection: View {
                         }
                         .frame(height: 160)
                     } else {
-                        HorizontalMediaRow(
+                        HorizontalItemRow(
                             items: results,
-                            isLoading: isLoadingSearch
+                            isLoading: isLoadingSearch,
+                            onAppear: { item in loadMore(item) }
                         ) { item in
-                            loadMore(item)
+                            MediaCardView(id: item.id,
+                                          mediaType: item.mediaType,
+                                          title: item.title,
+                                          posterPath: item.posterPath)
+                                .frame(width: 110)
+                        } placeholder: {
+                            LoadingCardView()
                         }
                     }
                 }
@@ -310,22 +322,36 @@ private struct RecommendationRowsView: View {
                 Text("Movies you might like")
                     .font(.headline)
                     .padding(.horizontal)
-                HorizontalMediaRow(
+                HorizontalItemRow(
                     items: movieRecs,
-                    isLoading: isLoadingMovie
+                    isLoading: isLoadingMovie,
+                    onAppear: { item in loadMoreMovie(item) }
                 ) { item in
-                    loadMoreMovie(item)
+                    MediaCardView(id: item.id,
+                                  mediaType: item.mediaType,
+                                  title: item.title,
+                                  posterPath: item.posterPath)
+                        .frame(width: 110)
+                } placeholder: {
+                    LoadingCardView()
                 }
             }
             if !tvRecs.isEmpty {
                 Text("Shows you might like")
                     .font(.headline)
                     .padding(.horizontal)
-                HorizontalMediaRow(
+                HorizontalItemRow(
                     items: tvRecs,
-                    isLoading: isLoadingTv
+                    isLoading: isLoadingTv,
+                    onAppear: { item in loadMoreTv(item) }
                 ) { item in
-                    loadMoreTv(item)
+                    MediaCardView(id: item.id,
+                                  mediaType: item.mediaType,
+                                  title: item.title,
+                                  posterPath: item.posterPath)
+                        .frame(width: 110)
+                } placeholder: {
+                    LoadingCardView()
                 }
             }
         }
