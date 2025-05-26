@@ -11,7 +11,17 @@ struct RootShellView: View {
     @State private var isMenuOpen = false
     @State private var showSettingsSheet = false
 
+    /// Width of the invisible edge used to detect swipe-from-edge gestures.
     private let edgeWidth: CGFloat = 24
+
+    /// Provides drag and tap gestures for the side menu.
+    /// The thresholds are defined in ``SideMenuGestureManager``.
+    private var menuGestures: SideMenuGestureManager {
+        SideMenuGestureManager(
+            openMenu: { withAnimation { isMenuOpen = true } },
+            closeMenu: { withAnimation { isMenuOpen = false } }
+        )
+    }
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -36,43 +46,20 @@ struct RootShellView: View {
                 if isMenuOpen {
                     Color.clear
                         .contentShape(Rectangle())
-                        .onTapGesture {
-                            withAnimation { isMenuOpen = false }
-                        }
-                        .gesture(
-                            DragGesture(minimumDistance: 20)
-                                .onEnded { value in
-                                    if value.translation.width < -40 {
-                                        withAnimation { isMenuOpen = false }
-                                    }
-                                }
-                        )
+                        .onTapGesture { menuGestures.closeMenu() }
+                        .gesture(menuGestures.closeDragGesture())
                         .ignoresSafeArea()
                 }
             }
             // Gesture to close menu by swiping left on content area
-            .gesture(
-                DragGesture(minimumDistance: 20)
-                    .onEnded { value in
-                        if isMenuOpen, value.translation.width < -40 {
-                            withAnimation { isMenuOpen = false }
-                        }
-                    }
-            )
+            .gesture(menuGestures.closeDragGesture())
             // Overlay for edge swipe to open menu
             .overlay(alignment: .leading) {
                 if !isMenuOpen {
                     Color.clear
                         .frame(width: edgeWidth)
                         .contentShape(Rectangle())
-                        .gesture(
-                            DragGesture(minimumDistance: 20)
-                                .onEnded { value in
-                                    if value.translation.width > 40 {
-                                        withAnimation { isMenuOpen = true }
-                                    }
-                                }
-                        )
+                        .gesture(menuGestures.openDragGesture())
                         .ignoresSafeArea(.container, edges: [.vertical])
                 }
             }
