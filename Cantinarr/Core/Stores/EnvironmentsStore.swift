@@ -18,7 +18,9 @@ private let environmentsFileURL: URL = {
 
 /// Global state: all servers + which one is selected
 final class EnvironmentsStore: ObservableObject {
-    @Published var environments: [ServerEnvironment]
+    @Published var environments: [ServerEnvironment] {
+        didSet { validateSelections() }
+    }
     @Published var selectedEnvironmentID: ServerEnvironment.ID
     @Published var selectedServiceID: ServiceInstance.ID?
 
@@ -60,6 +62,7 @@ final class EnvironmentsStore: ObservableObject {
         environments = envs
         selectedEnvironmentID = envs.first?.id ?? UUID()
         selectedServiceID = envs.first?.services.first?.id
+        validateSelections()
 
         // Auto‑save whenever the list *or* the selection changes
         saveCancellable = Publishers
@@ -100,4 +103,27 @@ final class EnvironmentsStore: ObservableObject {
 
     func select(environment env: ServerEnvironment) { selectedEnvironmentID = env.id }
     func select(service svc: ServiceInstance) { selectedServiceID = svc.id }
+
+    /// Ensures current selections reference existing items.
+    /// Falls back to the first available environment and service when needed.
+    func validateSelections() {
+        guard !environments.isEmpty else {
+            selectedServiceID = nil
+            return
+        }
+
+        // Environment
+        if !environments.contains(where: { $0.id == selectedEnvironmentID }) {
+            selectedEnvironmentID = environments.first!.id
+        }
+
+        // Service inside the selected environment
+        if let env = environments.first(where: { $0.id == selectedEnvironmentID }) {
+            if !env.services.contains(where: { $0.id == selectedServiceID }) {
+                selectedServiceID = env.services.first?.id
+            }
+        } else {
+            selectedServiceID = nil
+        }
+    }
 }
