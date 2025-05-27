@@ -12,16 +12,6 @@ struct CantinarrApp: App {
     @StateObject private var environmentsStore = EnvironmentsStore()
     @StateObject private var userSession = UserSession()
 
-    init() {
-        // Bootstrap OverseerrAuthManager once.
-        // The demo environment always has at least one service:
-        if let demoSvc = EnvironmentsStore().selectedServiceInstance?
-            .decode(OverseerrSettings.self)
-        {
-            let svc = OverseerrAPIService(settings: demoSvc)
-            Task { await OverseerrAuthManager.shared.configure(service: svc) }
-        }
-    }
 
     // MARK: - Body
 
@@ -32,6 +22,13 @@ struct CantinarrApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(environmentsStore)
                 .environmentObject(userSession)
+                .task {
+                    if let settings = environmentsStore.selectedServiceInstance?
+                        .decode(OverseerrSettings.self) {
+                        let svc = OverseerrAPIService(settings: settings)
+                        await OverseerrAuthManager.shared.configure(service: svc)
+                    }
+                }
         }
     }
 }
