@@ -16,6 +16,15 @@ final class SettingsViewModel: ObservableObject {
         // Make a deep copy of drafts to avoid direct mutation issues with store's source
         drafts = store.environments.map { EnvironmentDraft($0) }
 
+        // Keep our drafts in sync if the store changes elsewhere
+        store.$environments
+            .dropFirst()
+            .map { $0.map(EnvironmentDraft.init) }
+            .sink { [weak self] drafts in
+                if self?.drafts != drafts { self?.drafts = drafts }
+            }
+            .store(in: &cancellables)
+
         // Propagate edits back to store
         $drafts
             .dropFirst() // Avoid initial sync
