@@ -328,57 +328,6 @@ class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
         return "\(alphanumericTitle)-\(year)".replacingOccurrences(of: "--+", with: "-", options: .regularExpression)
     }
 
-    // Renamed to avoid conflict if you add a model named MovieHistoryRecord
-    struct RadarrMovieHistoryRecord: Codable, Identifiable { // Corrected struct name
-        let id: Int
-        let movieId: Int
-        let sourceTitle: String?
-        let quality: RadarrHistoryQuality?
-        let qualityCutoffNotMet: Bool?
-        let date: Date?
-        let eventType: String? // e.g. "grabbed", "downloadFolderImported", "downloadFailed"
-        let data: RadarrHistoryData?
-    }
-
-    struct RadarrHistoryQuality: Codable {
-        let quality: RadarrQualityDetail?
-        let revision: RadarrRevision?
-    }
-
-    struct RadarrQualityDetail: Codable {
-        let id: Int?
-        let name: String?
-        let source: String?
-        let resolution: Int?
-    }
-
-    struct RadarrRevision: Codable {
-        let version: Int?
-        let real: Int?
-        let isRepack: Bool?
-    }
-
-    struct RadarrHistoryData: Codable {
-        let nzbInfoUrl: String? // Note: Radarr's casing might vary
-        let releaseGroup: String?
-        let age: String? // Radarr often returns age as a string like "1d" or "1h"
-        // ... other fields that might appear in the 'data' dictionary
-        let message: String?
-        let reason: String? // For failed events
-        let downloadClient: String?
-        let downloadClientName: String?
-
-        // Custom coding keys if JSON keys are different (e.g., "NzbInfoUrl" vs "nzbInfoUrl")
-        enum CodingKeys: String, CodingKey {
-            case nzbInfoUrl
-            case releaseGroup
-            case age
-            case message
-            case reason
-            case downloadClient
-            case downloadClientName
-        }
-    }
 }
 
 extension RadarrAPIService: RadarrServiceType {}
