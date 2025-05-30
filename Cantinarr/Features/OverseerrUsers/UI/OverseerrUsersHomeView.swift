@@ -274,10 +274,10 @@ struct OverseerrUsersHomeView: View {
 // MARK: - Subviews
 
 private struct TrendingDisplayView: View {
-    let items: [OverseerrUsersViewModel.MediaItem]
+    let items: [MediaItem]
     let isLoading: Bool
     let connectionError: String?
-    let loadMore: (OverseerrUsersViewModel.MediaItem) -> Void
+    let loadMore: (MediaItem) -> Void
     let retry: () -> Void
 
     var body: some View {
@@ -339,11 +339,11 @@ private struct TrendingDisplayView: View {
 }
 
 private struct SearchResultsRowView: View {
-    let results: [OverseerrUsersViewModel.MediaItem]
+    let results: [MediaItem]
     let isLoading: Bool
     let showLocalLoading: Bool
     let searchText: String
-    let loadMore: (OverseerrUsersViewModel.MediaItem) -> Void
+    let loadMore: (MediaItem) -> Void
 
     var body: some View {
         if (showLocalLoading || isLoading) && results.isEmpty {
@@ -426,7 +426,7 @@ private struct KeywordSuggestionsRowView: View {
 
 #if DEBUG
     struct TrendingDisplayView_Previews: PreviewProvider {
-        static let sampleItem = OverseerrUsersViewModel.MediaItem(
+        static let sampleItem = MediaItem(
             id: 1,
             title: "Sample",
             posterPath: nil,

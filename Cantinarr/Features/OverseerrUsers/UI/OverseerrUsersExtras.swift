@@ -3,8 +3,6 @@
 
 import SwiftUI
 
-/// Convenience typealias used in this feature
-typealias MediaItem = OverseerrUsersViewModel.MediaItem
 
 // MARK: – Keyword suggestion pills
 

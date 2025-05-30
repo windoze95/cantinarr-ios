@@ -14,12 +14,6 @@ class OverseerrUsersViewModel: ObservableObject {
     // MARK: – Nested types
 
     // ─────────────────────────────────────────────
-    struct MediaItem: Identifiable {
-        let id: Int
-        let title: String
-        let posterPath: String?
-        let mediaType: MediaType
-    }
 
     @Published var filters: FilterManager
 

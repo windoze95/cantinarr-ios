@@ -29,16 +29,6 @@ enum OverseerrError: Error, LocalizedError {
     }
 }
 
-struct User: Codable { // This struct should match the /auth/me response
-    let id: Int
-    let username: String?
-    let email: String? // Add if present in /auth/me
-    let permissions: Int? // Bitmask or specific permission flags
-    let requestCount: Int? // Total requests made by user
-    let avatar: String? // Add if present
-    // Add other fields like 'movieQuotaLimit', 'movieQuotaDays', 'tvQuotaLimit', 'tvQuotaDays'
-    // and 'movieRequestsRemaining', 'tvRequestsRemaining' if the API provides them directly.
-}
 
 @MainActor
 class OverseerrAPIService {
