@@ -14,7 +14,7 @@ final class MediaDetailViewModel: ObservableObject {
     @Published var overview = ""
     @Published var posterURL: URL?
     @Published var backdropURL: URL?
-    @Published var seasons: [OverseerrAPIService.Season] = []
+    @Published var seasons: [Season] = []
     @Published var isLoading = false
     @Published var error: String?
 

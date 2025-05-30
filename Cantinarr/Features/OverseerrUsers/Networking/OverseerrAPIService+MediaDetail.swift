@@ -1,58 +1,7 @@
 import Foundation
 
 extension OverseerrAPIService {
-    struct MovieDetail: Codable {
-        let id: Int
-        let title: String
-        let tagline: String?
-        let overview: String?
-        let runtime: Int?
-        let releaseDate: String?
-        let posterPath: String?
-        let backdropPath: String?
-        let mediaInfo: MediaInfo?
-        let relatedVideos: [RelatedVideo]?
-    }
-
-    struct Season: Codable, Identifiable {
-        let id: Int
-        let seasonNumber: Int
-        let episodeCount: Int
-        var mediaInfo: MediaInfo?
-    }
-
-    struct TVDetail: Codable {
-        let id: Int
-        let name: String
-        let tagline: String?
-        let overview: String?
-        let posterPath: String?
-        let backdropPath: String?
-        let seasons: [Season]
-        let mediaInfo: MediaInfo?
-        let relatedVideos: [RelatedVideo]?
-    }
-
-    struct MediaInfo: Codable {
-        let status: MediaAvailability
-        let plexUrl: URL?
-    }
-
-    struct RelatedVideo: Codable, Identifiable {
-        let url: String?
-        let key: String?
-        let name: String?
-        let size: Int?
-        let type: String?
-        let site: String?
-        var id: String { key ?? UUID().uuidString }
-    }
-
-    struct MediaRequest: Codable, Identifiable {
-        let id: Int
-        let status: Int
-        let is4k: Bool?
-    }
+    // Detail models moved to Features/OverseerrUsers/MediaDetail/Models
 
     // MARK: - Detail fetchers
 

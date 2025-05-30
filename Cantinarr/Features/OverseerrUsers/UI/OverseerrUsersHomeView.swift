@@ -393,9 +393,9 @@ private struct SearchResultsRowView: View {
 }
 
 private struct KeywordSuggestionsRowView: View {
-    let keywords: [OverseerrAPIService.Keyword]
+    let keywords: [Keyword]
     let isLoading: Bool
-    let choose: (OverseerrAPIService.Keyword) -> Void
+    let choose: (Keyword) -> Void
 
     var body: some View {
         if isLoading {
@@ -485,7 +485,7 @@ private struct KeywordSuggestionsRowView: View {
     }
 
     struct KeywordSuggestionsRowView_Previews: PreviewProvider {
-        static let sampleKeyword = OverseerrAPIService.Keyword(id: 1, name: "Action")
+        static let sampleKeyword = Keyword(id: 1, name: "Action")
         static var previews: some View {
             Group {
                 KeywordSuggestionsRowView(keywords: [], isLoading: true, choose: { _ in })

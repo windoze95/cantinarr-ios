@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Displays a grid of seasons for a TV show.
 struct SeasonGridView: View {
-    let seasons: [OverseerrAPIService.Season]
+    let seasons: [Season]
     let requestAction: () -> Void
 
     var body: some View {
@@ -38,7 +38,7 @@ struct SeasonGridView: View {
 #if DEBUG
     struct SeasonGridView_Previews: PreviewProvider {
         static var previews: some View {
-            let mockSeason = OverseerrAPIService.Season(
+            let mockSeason = Season(
                 id: 1,
                 seasonNumber: 1,
                 episodeCount: 8,

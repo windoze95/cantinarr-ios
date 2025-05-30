@@ -178,7 +178,7 @@ struct OverseerrUsersAdvancedView: View {
 // MARK: - Subviews
 
 private struct ActiveKeywordsRow: View {
-    let keywords: [OverseerrAPIService.Keyword]
+    let keywords: [Keyword]
     let remove: (Int) -> Void
 
     var body: some View {
@@ -273,11 +273,11 @@ private struct SearchResultsSection: View {
 }
 
 private struct KeywordFilterListView: View {
-    let activeKeywords: [OverseerrAPIService.Keyword]
+    let activeKeywords: [Keyword]
     let removeKeyword: (Int) -> Void
-    let suggestions: [OverseerrAPIService.Keyword]
+    let suggestions: [Keyword]
     let isLoadingSuggestions: Bool
-    let chooseSuggestion: (OverseerrAPIService.Keyword) -> Void
+    let chooseSuggestion: (Keyword) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
