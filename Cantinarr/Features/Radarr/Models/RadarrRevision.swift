@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct RadarrRevision: Codable {
+struct RadarrRevision: Codable, Hashable, Equatable {
     let version: Int?
     let real: Int?
     let isRepack: Bool?

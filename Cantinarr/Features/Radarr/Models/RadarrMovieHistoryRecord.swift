@@ -12,4 +12,7 @@ struct RadarrMovieHistoryRecord: Codable, Identifiable {
     let date: Date?
     let eventType: String? // e.g. "grabbed", "downloadFolderImported", "downloadFailed"
     let data: RadarrHistoryData?
+    let downloadId: String?
+
+    // TODO: include movieFileId or other fields if required by Radarr updates
 }

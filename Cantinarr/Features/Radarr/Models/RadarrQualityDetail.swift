@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct RadarrQualityDetail: Codable {
+struct RadarrQualityDetail: Codable, Hashable, Equatable {
     let id: Int?
     let name: String?
     let source: String?

@@ -10,4 +10,8 @@ struct RadarrMovieFile: Codable, Identifiable, Hashable, Equatable {
     let size: Int64?
     let dateAdded: Date?
     let mediaInfo: RadarrMediaInfo?
+    let movieId: Int?
+    let quality: RadarrHistoryQuality?
+
+    // TODO: additional fields like sceneName and indexerFlags could be added
 }
