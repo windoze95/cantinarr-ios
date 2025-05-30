@@ -8,8 +8,8 @@ final class SearchController: ObservableObject {
     // Published search state
     @Published var searchQuery: String = ""
     @Published var results: [MediaItem] = []
-    @Published var keywordSuggestions: [OverseerrAPIService.Keyword] = []
-    @Published var activeKeywords: [OverseerrAPIService.Keyword] = []
+    @Published var keywordSuggestions: [Keyword] = []
+    @Published var activeKeywords: [Keyword] = []
     @Published var movieRecs: [MediaItem] = []
     @Published var tvRecs: [MediaItem] = []
 
@@ -22,7 +22,7 @@ final class SearchController: ObservableObject {
 
     // Combine publishers for observers
     var searchResultsPublisher: AnyPublisher<[MediaItem], Never> { $results.eraseToAnyPublisher() }
-    var keywordSuggestionsPublisher: AnyPublisher<[OverseerrAPIService.Keyword], Never> {
+    var keywordSuggestionsPublisher: AnyPublisher<[Keyword], Never> {
         $keywordSuggestions.eraseToAnyPublisher()
     }
 
@@ -156,7 +156,7 @@ final class SearchController: ObservableObject {
         }
     }
 
-    func activate(keyword k: OverseerrAPIService.Keyword) {
+    func activate(keyword k: Keyword) {
         guard !filters.activeKeywordIDs.contains(k.id) else { return }
         searchQuery = ""
         filters.activeKeywordIDs.insert(k.id)
@@ -177,8 +177,8 @@ final class SearchController: ObservableObject {
         }
     }
 
-    private func filterUsableKeywords(_ raw: [OverseerrAPIService.Keyword]) async -> [OverseerrAPIService.Keyword] {
-        await withTaskGroup(of: OverseerrAPIService.Keyword?.self) { group in
+    private func filterUsableKeywords(_ raw: [Keyword]) async -> [Keyword] {
+        await withTaskGroup(of: Keyword?.self) { group in
             for kw in raw {
                 group.addTask { [weak self] in
                     guard let self = self else { return nil }
@@ -205,7 +205,7 @@ final class SearchController: ObservableObject {
                     return nil
                 }
             }
-            var usable: [OverseerrAPIService.Keyword] = []
+            var usable: [Keyword] = []
             for await maybe in group {
                 if let kw = maybe { usable.append(kw) }
             }

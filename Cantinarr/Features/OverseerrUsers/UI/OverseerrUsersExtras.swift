@@ -9,8 +9,8 @@ typealias MediaItem = OverseerrUsersViewModel.MediaItem
 // MARK: – Keyword suggestion pills
 
 struct KeywordSuggestionRow: View {
-    let keywords: [OverseerrAPIService.Keyword] // Ensure OverseerrAPIService.Keyword is Identifiable
-    let choose: (OverseerrAPIService.Keyword) -> Void
+    let keywords: [Keyword] // Ensure Keyword is Identifiable
+    let choose: (Keyword) -> Void
 
     // Adjust rows based on desired density and pill height
     private let rows: [GridItem] = [
@@ -43,7 +43,7 @@ struct ActiveKeywordsView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 // Explicitly provide the id for ForEach if compiler struggles.
-                // Though vm.activeKeywords (if [OverseerrAPIService.Keyword]) should work directly
+                // Though vm.activeKeywords (if [Keyword]) should work directly
                 // as Keyword is Identifiable. This is a safeguard.
                 ForEach(vm.activeKeywords, id: \.id) { kw in
                     HStack(spacing: 4) {

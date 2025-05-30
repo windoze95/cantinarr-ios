@@ -29,7 +29,7 @@ class OverseerrUsersViewModel: ObservableObject {
 
     // ─────────────────────────────────────────────
     // Filter state handled by `filters`
-    @Published var watchProviders: [OverseerrAPIService.WatchProvider] = []
+    @Published var watchProviders: [WatchProvider] = []
 
     lazy var searchController: SearchController = {
         let controller = SearchController(
@@ -58,12 +58,12 @@ class OverseerrUsersViewModel: ObservableObject {
         set { searchController.results = newValue }
     }
 
-    private(set) var keywordSuggestions: [OverseerrAPIService.Keyword] {
+    private(set) var keywordSuggestions: [Keyword] {
         get { searchController.keywordSuggestions }
         set { searchController.keywordSuggestions = newValue }
     }
 
-    private(set) var activeKeywords: [OverseerrAPIService.Keyword] {
+    private(set) var activeKeywords: [Keyword] {
         get { searchController.activeKeywords }
         set { searchController.activeKeywords = newValue }
     }
@@ -197,7 +197,7 @@ class OverseerrUsersViewModel: ObservableObject {
         searchController.clearSearchResultsAndRecs()
     }
 
-    func activate(keyword k: OverseerrAPIService.Keyword) {
+    func activate(keyword k: Keyword) {
         searchController.activate(keyword: k)
     }
 

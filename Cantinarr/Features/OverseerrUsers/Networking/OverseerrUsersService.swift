@@ -13,7 +13,7 @@ protocol OverseerrUsersService {
     func loginWithPlexToken(_ token: String) async throws
 
     // Fetch watch providers (movie vs tv)
-    func fetchWatchProviders(isMovie: Bool) async throws -> [OverseerrAPIService.WatchProvider]
+    func fetchWatchProviders(isMovie: Bool) async throws -> [WatchProvider]
 
     // Discover endpoints
     func fetchMovies(
@@ -21,27 +21,25 @@ protocol OverseerrUsersService {
         genreIds: [Int],
         keywordIds: [Int],
         page: Int
-    ) async throws -> OverseerrAPIService.DiscoverResponse<OverseerrAPIService.Movie>
+    ) async throws -> DiscoverResponse<Movie>
 
     func fetchTV(
         providerIds: [Int],
         genreIds: [Int],
         keywordIds: [Int],
         page: Int
-    ) async throws -> OverseerrAPIService.DiscoverResponse<OverseerrAPIService.TVShow>
+    ) async throws -> DiscoverResponse<TVShow>
 
     // Keyword search
-    func keywordSearch(query: String) async throws
-        -> [OverseerrAPIService.Keyword]
+    func keywordSearch(query: String) async throws -> [Keyword]
 
     // Recommendations
     func movieRecommendations(for id: Int, page: Int) async throws
-        -> OverseerrAPIService.DiscoverResponse<OverseerrAPIService.Movie>
+        -> DiscoverResponse<Movie>
 
     func tvRecommendations(for id: Int, page: Int) async throws
-        -> OverseerrAPIService.DiscoverResponse<OverseerrAPIService.TVShow>
+        -> DiscoverResponse<TVShow>
 
     // Search
-    func search(query: String, page: Int)
-        async throws -> OverseerrAPIService.DiscoverResponse<OverseerrAPIService.SearchItem>
+    func search(query: String, page: Int) async throws -> DiscoverResponse<SearchItem>
 }

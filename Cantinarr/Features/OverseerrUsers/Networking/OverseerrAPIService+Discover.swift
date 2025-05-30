@@ -3,10 +3,7 @@ import Foundation
 extension OverseerrAPIService {
     // MARK: - Watch Providers
 
-    struct WatchProvider: Codable, Identifiable {
-        let id: Int
-        let name: String
-    }
+    // Models moved to Features/OverseerrUsers/Models/Discover
 
     func fetchWatchProviders(isMovie: Bool) async throws -> [WatchProvider] {
         let endpoint = isMovie ? "watchproviders/movies" : "watchproviders/tv"
@@ -18,10 +15,7 @@ extension OverseerrAPIService {
 
     // MARK: - Keywords
 
-    struct Keyword: Codable, Identifiable {
-        let id: Int
-        let name: String
-    }
+    // Keyword model moved to Features/OverseerrUsers/Models/Discover
 
     func keywordSearch(query: String) async throws -> [Keyword] {
         guard !query.isEmpty else { return [] }
@@ -47,41 +41,7 @@ extension OverseerrAPIService {
 
     // MARK: - Discover
 
-    struct DiscoverResponse<T: Codable>: Codable {
-        let page: Int
-        let totalPages: Int
-        let results: [T]
-    }
-
-    struct Movie: Codable, Identifiable {
-        let id: Int
-        let title: String
-        let posterPath: String?
-        let genreIds: [Int]?
-    }
-
-    struct TVShow: Codable, Identifiable {
-        let id: Int
-        let name: String
-        let posterPath: String?
-        let genreIds: [Int]?
-    }
-
-    struct TrendingItem: Codable, Identifiable {
-        let id: Int
-        let mediaType: MediaType
-        let title: String?
-        let name: String?
-        let posterPath: String?
-    }
-
-    struct SearchItem: Codable, Identifiable {
-        let id: Int
-        let mediaType: MediaType?
-        let title: String?
-        let name: String?
-        let posterPath: String?
-    }
+    // Discover models moved to Features/OverseerrUsers/Models/Discover
 
     func search(query: String, page: Int) async throws -> DiscoverResponse<SearchItem> {
         var comps = URLComponents(url: baseURL.appendingPathComponent("search"), resolvingAgainstBaseURL: false)!
