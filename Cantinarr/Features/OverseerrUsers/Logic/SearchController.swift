@@ -3,7 +3,6 @@ import Foundation
 
 @MainActor
 final class SearchController: ObservableObject {
-    typealias MediaItem = OverseerrUsersViewModel.MediaItem
 
     // Published search state
     @Published var searchQuery: String = ""

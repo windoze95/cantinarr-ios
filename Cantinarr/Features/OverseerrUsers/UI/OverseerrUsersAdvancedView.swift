@@ -205,10 +205,10 @@ private struct ActiveKeywordsRow: View {
 
 private struct SearchResultsSection: View {
     let isQueryEmpty: Bool
-    let results: [OverseerrUsersViewModel.MediaItem]
+    let results: [MediaItem]
     let isLoadingSearch: Bool
     let isSearchLoadingLocal: Bool
-    let loadMore: (OverseerrUsersViewModel.MediaItem) -> Void
+    let loadMore: (MediaItem) -> Void
 
     var body: some View {
         Group {
@@ -309,12 +309,12 @@ private struct KeywordFilterListView: View {
 }
 
 private struct RecommendationRowsView: View {
-    let movieRecs: [OverseerrUsersViewModel.MediaItem]
-    let tvRecs: [OverseerrUsersViewModel.MediaItem]
+    let movieRecs: [MediaItem]
+    let tvRecs: [MediaItem]
     let isLoadingMovie: Bool
     let isLoadingTv: Bool
-    let loadMoreMovie: (OverseerrUsersViewModel.MediaItem) -> Void
-    let loadMoreTv: (OverseerrUsersViewModel.MediaItem) -> Void
+    let loadMoreMovie: (MediaItem) -> Void
+    let loadMoreTv: (MediaItem) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -360,7 +360,7 @@ private struct RecommendationRowsView: View {
 
 #if DEBUG
     struct SearchResultsSection_Previews: PreviewProvider {
-        static let sampleItem = OverseerrUsersViewModel.MediaItem(
+        static let sampleItem = MediaItem(
             id: 1,
             title: "Sample",
             posterPath: nil,
