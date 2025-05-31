@@ -1,6 +1,8 @@
 // File: TrendingViewModel.swift
 // Purpose: Defines TrendingViewModel component for Cantinarr
 
+#if canImport(Combine) && canImport(SwiftUI)
+import Combine
 import SwiftUI
 
 /// Fetches and caches trending movies/TV shows from Overseerr.
@@ -88,3 +90,4 @@ final class TrendingViewModel: ObservableObject {
         }
     }
 }
+#endif
