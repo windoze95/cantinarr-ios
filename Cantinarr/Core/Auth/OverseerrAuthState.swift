@@ -2,7 +2,6 @@
 // Purpose: Defines OverseerrAuthState component for Cantinarr
 
 import Foundation
-import SwiftUI
 
 /// Single source of truth for Overseerr session state.
 enum OverseerrAuthState: Equatable {

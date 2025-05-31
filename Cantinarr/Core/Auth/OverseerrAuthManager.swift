@@ -1,6 +1,7 @@
 // File: OverseerrAuthManager.swift
 // Purpose: Defines OverseerrAuthManager component for Cantinarr
 
+#if canImport(Combine)
 import Combine
 import Foundation
 
@@ -73,3 +74,4 @@ actor OverseerrAuthManager {
         await probeSession()
     }
 }
+#endif
