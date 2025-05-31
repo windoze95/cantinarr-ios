@@ -19,6 +19,7 @@ let package = Package(
             ],
             sources: [
                 "Core/Models",
+                "Core/Stores",
                 "Features/Radarr/Models",
                 "Features/OverseerrUsers/Models"
             ]

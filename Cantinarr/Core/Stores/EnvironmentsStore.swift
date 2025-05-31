@@ -1,23 +1,29 @@
 // File: EnvironmentsStore.swift
 // Purpose: Defines EnvironmentsStore component for Cantinarr
 
+// This file relies on Combine and SwiftUI which are only available on Apple
+// platforms. Guard its contents so the package can compile on Linux.
+#if canImport(Combine) && canImport(SwiftUI)
 import Combine
 import Foundation
 import SwiftUI
 
-/// Where we save the single JSON blob.
-private let environmentsFileURL: URL = {
-    // ~/Library/Application Support/Cantinarr/environments.json
+/// Where we save the single JSON blob by default.
+private func defaultEnvironmentsFileURL() -> URL {
+    // ~/Library/Application Support/Cantinarr/environments.json
     let dir = FileManager.default
         .urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         .appendingPathComponent("Cantinarr", isDirectory: true)
     try? FileManager.default.createDirectory(at: dir,
                                              withIntermediateDirectories: true)
     return dir.appendingPathComponent("environments.json")
-}()
+}
+
+private let defaultFileURL = defaultEnvironmentsFileURL()
 
 /// Global state: all servers + which one is selected
 final class EnvironmentsStore: ObservableObject {
+    private let fileURL: URL
     @Published var environments: [ServerEnvironment] {
         didSet { validateSelections() }
     }
@@ -38,9 +44,10 @@ final class EnvironmentsStore: ObservableObject {
         return [ServerEnvironment(name: "Default", services: [overseerr])]
     }()
 
-    init() {
+    init(fileURL: URL = defaultFileURL) {
+        self.fileURL = fileURL
         // Load from disk or fall back to sample
-        var envs = (try? Self.load()) ?? Self.sampleData
+        var envs = (try? Self.load(from: fileURL)) ?? Self.sampleData
 
         // Migrate Radarr API keys from stored configuration to Keychain
         for eIndex in envs.indices {
@@ -74,16 +81,22 @@ final class EnvironmentsStore: ObservableObject {
             }
     }
 
-    private static func load() throws -> [ServerEnvironment] {
-        let data = try Data(contentsOf: environmentsFileURL)
+    private static func load(from url: URL) throws -> [ServerEnvironment] {
+        let data = try Data(contentsOf: url)
         return try JSONDecoder().decode([ServerEnvironment].self, from: data)
     }
 
     @discardableResult
     private func save() throws -> URL {
         let data = try JSONEncoder().encode(environments)
-        try data.write(to: environmentsFileURL, options: .atomic)
-        return environmentsFileURL
+        try data.write(to: fileURL, options: .atomic)
+        return fileURL
+    }
+
+    /// Exposed for testing purposes to synchronously persist changes.
+    @discardableResult
+    func saveNow() throws -> URL {
+        try save()
     }
 
     // MARK:  – Convenience
@@ -127,3 +140,4 @@ final class EnvironmentsStore: ObservableObject {
         }
     }
 }
+#endif
