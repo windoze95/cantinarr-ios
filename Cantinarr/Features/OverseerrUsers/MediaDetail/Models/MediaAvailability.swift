@@ -1,7 +1,10 @@
 // File: MediaAvailability.swift
 // Purpose: Defines MediaAvailability component for Cantinarr
 
+import Foundation
+#if canImport(SwiftUI)
 import SwiftUI
+#endif
 
 enum MediaAvailability: Int, Codable {
     case unknown = 1
@@ -23,6 +26,7 @@ enum MediaAvailability: Int, Codable {
     }
 
     /// Brand colours that match Overseerr’s UI.
+#if canImport(SwiftUI)
     var tint: Color {
         switch self {
         case .unknown: .gray
@@ -33,4 +37,5 @@ enum MediaAvailability: Int, Codable {
         case .deleted: .red
         }
     }
+#endif
 }
