@@ -1,8 +1,10 @@
 // File: OverseerrAuthManager.swift
 // Purpose: Defines OverseerrAuthManager component for Cantinarr
 
-import Combine
 import Foundation
+
+#if canImport(Combine)
+import Combine
 
 /// Actor = thread‑safe without extra locks.
 actor OverseerrAuthManager {
@@ -73,3 +75,4 @@ actor OverseerrAuthManager {
         await probeSession()
     }
 }
+#endif
