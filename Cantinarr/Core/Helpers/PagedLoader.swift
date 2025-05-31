@@ -3,6 +3,7 @@
 
 //  Encapsulates generic paging counters + guard logic.
 
+#if canImport(SwiftUI)
 import SwiftUI
 
 /// Utility that tracks paging state for infinite‑scroll style lists.
@@ -40,3 +41,4 @@ struct PagedLoader {
         // Current implementation keeps page number, assuming retry will use the same page.
     }
 }
+#endif
