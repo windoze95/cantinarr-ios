@@ -23,10 +23,14 @@ actor OverseerrAuthManager {
     private var service: OverseerrServiceType!
 
     /// Call once from `App.bootstrap` after you know which Overseerr you're talking to.
-    func configure(service: OverseerrServiceType) {
+    /// - Parameter autoProbe: If `true` the manager immediately validates the
+    ///   existing session in a background task. Defaults to `true`.
+    func configure(service: OverseerrServiceType, autoProbe: Bool = true) {
         self.service = service
         lastProbe = nil
-        Task { await probeSession() }
+        if autoProbe {
+            Task { await probeSession() }
+        }
     }
 
     // MARK: – Cached validation
