@@ -46,8 +46,7 @@ final class OverseerrAuthManagerTests: XCTestCase {
     func testEnsureAuthenticatedIsThrottled() async {
         let service = MockService(authResult: true)
         let manager = OverseerrAuthManager.shared
-        await manager.configure(service: service)
-        await Task.yield()
+        await manager.configure(service: service, autoProbe: false)
         service.authCallCount = 0
         await manager.ensureAuthenticated()
         XCTAssertEqual(service.authCallCount, 1)
