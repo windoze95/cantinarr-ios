@@ -24,8 +24,11 @@ let package = Package(
                 "Core/Models",
                 "Core/Helpers",
                 "Core/Stores",
+                "Core/Auth",
                 "Features/Radarr/Models",
-                "Features/OverseerrUsers/Models"
+                "Features/OverseerrUsers/Models",
+                "Features/OverseerrUsers/MediaDetail/Models",
+                "Features/OverseerrUsers/Networking/OverseerrServiceType.swift"
             ]
         ),
         .testTarget(
