@@ -2,8 +2,11 @@
 // Purpose: Defines KeychainHelper component for Cantinarr
 
 import Foundation
+#if canImport(Security)
 import Security
+#endif
 
+#if canImport(Security)
 class KeychainHelper {
     /// Save sensitive data (e.g., API keys) to the Keychain.
     /// Data is stored with `kSecAttrAccessibleAfterFirstUnlock` so it remains
@@ -48,3 +51,12 @@ class KeychainHelper {
         return SecItemDelete(query as CFDictionary)
     }
 }
+#else
+typealias OSStatus = Int32
+
+class KeychainHelper {
+    static func save(key _: String, data _: Data) -> OSStatus { 0 }
+    static func load(key _: String) -> Data? { nil }
+    @discardableResult static func delete(key _: String) -> OSStatus { 0 }
+}
+#endif

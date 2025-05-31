@@ -15,10 +15,16 @@ let package = Package(
             path: "Cantinarr",
             exclude: [
                 "Core/Models/UserSession.swift",
-                "Core/Models/RadarrSettings.swift"
+                "Core/Helpers/PagedLoader.swift",
+                "Core/Helpers/Shimmer.swift",
+                "Core/Helpers/WebView.swift",
+                "Core/Helpers/OverseerrAuthContextProvider.swift",
+                "Core/Helpers/OverseerrPlexSSODelegate.swift"
             ],
             sources: [
                 "Core/Models",
+                "Core/Stores",
+                "Core/Helpers",
                 "Features/Radarr/Models",
                 "Features/OverseerrUsers/Models"
             ]
