@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct RadarrHistoryQuality: Codable {
+struct RadarrHistoryQuality: Codable, Hashable, Equatable {
     let quality: RadarrQualityDetail?
     let revision: RadarrRevision?
 }
