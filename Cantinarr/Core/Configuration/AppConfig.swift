@@ -1,6 +1,8 @@
 // File: AppConfig.swift
 // Purpose: Defines AppConfig component for Cantinarr
 
+// This file uses UIKit which is only available on Apple platforms.
+#if canImport(UIKit)
 import UIKit
 
 //  Centralised tunable constants.
@@ -16,3 +18,4 @@ extension UIApplication {
                    to: nil, from: nil, for: nil)
     }
 }
+#endif

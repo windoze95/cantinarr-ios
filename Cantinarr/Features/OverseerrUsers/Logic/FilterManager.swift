@@ -1,6 +1,9 @@
 // File: FilterManager.swift
 // Purpose: Manages discover filter state for OverseerrUsers
 
+// This file relies on Combine which is only available on Apple platforms.
+// Guard its contents so the package can compile on Linux.
+#if canImport(Combine)
 import Combine
 import Foundation
 
@@ -13,3 +16,4 @@ final class FilterManager: ObservableObject {
 
     init() {}
 }
+#endif
