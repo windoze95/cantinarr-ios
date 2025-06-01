@@ -4,7 +4,7 @@
 import NukeUI
 import SwiftUI
 
-struct MediaCardView: View {
+struct MediaCardView: View, Equatable {
     let id: Int
     let mediaType: MediaType
     let title: String
@@ -76,5 +76,12 @@ struct MediaCardView: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
         }
+    }
+
+    static func == (lhs: MediaCardView, rhs: MediaCardView) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.mediaType == rhs.mediaType &&
+        lhs.title == rhs.title &&
+        lhs.posterPath == rhs.posterPath
     }
 }
