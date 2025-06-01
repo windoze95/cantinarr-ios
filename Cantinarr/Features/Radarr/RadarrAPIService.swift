@@ -1,12 +1,11 @@
 // File: RadarrAPIService.swift
 // Purpose: Defines RadarrAPIService component for Cantinarr
 
-import Combine // Import Combine for ObservableObject
 import Foundation
 
 /// Networking layer for communicating with a Radarr instance.
 @MainActor
-class RadarrAPIService: ObservableObject { // ADDED ObservableObject conformance
+class RadarrAPIService {
     private let settings: RadarrSettings
     private let baseURL: URL
     private let session: URLSession
