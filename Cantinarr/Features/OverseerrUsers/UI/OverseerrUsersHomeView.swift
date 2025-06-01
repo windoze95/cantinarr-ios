@@ -124,7 +124,8 @@ struct OverseerrUsersHomeView: View {
         VStack(spacing: 15) {
             Spacer()
             Image(systemName: "wifi.exclamationmark")
-                .font(.system(size: 50))
+                .font(.largeTitle)
+                .imageScale(.large)
                 .foregroundColor(.orange)
             Text("Service Configuration Error")
                 .font(.title3)

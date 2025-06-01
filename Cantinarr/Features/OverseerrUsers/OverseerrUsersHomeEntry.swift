@@ -105,7 +105,8 @@ struct OverseerrUsersHomeEntry: View {
             VStack(spacing: 15) {
                 Spacer()
                 Image(systemName: "link.icloud.fill") // Example icon
-                    .font(.system(size: 60))
+                    .font(.largeTitle)
+                    .imageScale(.large)
                     .foregroundColor(.blue)
                     .padding(.bottom)
                 Text("Login Required")
