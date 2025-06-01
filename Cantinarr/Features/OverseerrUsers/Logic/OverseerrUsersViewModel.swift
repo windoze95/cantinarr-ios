@@ -209,7 +209,9 @@ class OverseerrUsersViewModel: ObservableObject {
         do {
             async let movieProviders = service.fetchWatchProviders(isMovie: true)
             async let tvProviders = service.fetchWatchProviders(isMovie: false)
-            let combined = try await(movieProviders + tvProviders)
+            let movies = try await movieProviders
+            let tv = try await tvProviders
+            let combined = movies + tv
             let unique = Dictionary(grouping: combined, by: \.id).compactMap { $0.value.first }
             watchProviders = unique
                 .sorted(by: { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending })
