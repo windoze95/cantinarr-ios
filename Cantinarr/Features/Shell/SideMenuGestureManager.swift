@@ -1,6 +1,7 @@
 // File: SideMenuGestureManager.swift
 // Purpose: Encapsulates drag and tap gestures for the side menu
 
+#if canImport(SwiftUI)
 import SwiftUI
 
 /// Handles the gestures that control the slide-out side menu.
@@ -18,11 +19,21 @@ struct SideMenuGestureManager {
     /// Points the user must drag horizontally before the menu toggles.
     var dragThreshold: CGFloat = 40
 
+    /// Returns true if the drag should open the menu for a given translation.
+    func shouldOpen(for translation: CGSize) -> Bool {
+        translation.width > dragThreshold
+    }
+
+    /// Returns true if the drag should close the menu for a given translation.
+    func shouldClose(for translation: CGSize) -> Bool {
+        translation.width < -dragThreshold
+    }
+
     /// Dragging right past `dragThreshold` opens the menu.
     func openDragGesture() -> some Gesture {
         DragGesture(minimumDistance: minDragDistance)
             .onEnded { value in
-                if value.translation.width > dragThreshold {
+                if shouldOpen(for: value.translation) {
                     openMenu()
                 }
             }
@@ -32,7 +43,7 @@ struct SideMenuGestureManager {
     func closeDragGesture() -> some Gesture {
         DragGesture(minimumDistance: minDragDistance)
             .onEnded { value in
-                if value.translation.width < -dragThreshold {
+                if shouldClose(for: value.translation) {
                     closeMenu()
                 }
             }
@@ -43,3 +54,4 @@ struct SideMenuGestureManager {
         TapGesture().onEnded { closeMenu() }
     }
 }
+#endif
