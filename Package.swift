@@ -31,7 +31,8 @@ let package = Package(
                 "Features/Shell",
                 "Features/Settings",
                 "Features/OverseerrUsers/UI",
-                "Features/OverseerrUsers/MediaDetail",
+                "Features/OverseerrUsers/MediaDetail/UI",
+                "Features/OverseerrUsers/MediaDetail/Logic",
                 "Features/Radarr/UI",
                 "Features/Radarr/Logic"
             ],
