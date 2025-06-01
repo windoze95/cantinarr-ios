@@ -127,7 +127,10 @@ struct MediaDetailView: View {
     private var closeButton: some View {
         Button { dismiss() } label: {
             Image(systemName: "xmark.circle.fill")
-                .font(.title2).padding().foregroundColor(.secondary)
+                .font(.title2)
+                .padding()
+                .foregroundColor(.secondary)
+                .accessibilityLabel("Close")
         }
     }
 

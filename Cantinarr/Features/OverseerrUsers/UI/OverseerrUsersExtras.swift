@@ -49,6 +49,7 @@ struct ActiveKeywordsView: View {
                             .font(.caption)
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.secondary)
+                            .accessibilityLabel("Remove keyword")
                             .onTapGesture { vm.remove(keywordID: kw.id) }
                     }
                     .padding(.horizontal, 10)
