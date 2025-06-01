@@ -370,9 +370,8 @@ class OverseerrUsersViewModel: ObservableObject {
             } catch is CancellationError {
                 plexSSOTask = nil
             } catch {
-                if case .authenticated = OverseerrAuthManager.shared.value {
-                    return
-                }
+                let current = await OverseerrAuthManager.shared.currentValue()
+                if case .authenticated = current { return }
                 print("🔴 Plex SSO failed: \(error.localizedDescription)")
                 self.connectionError = "Plex login failed. Please try again. (\(error.localizedDescription))"
                 self.authState = .unauthenticated

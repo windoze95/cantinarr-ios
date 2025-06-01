@@ -19,33 +19,35 @@ final class OverseerrAuthManagerTests: XCTestCase {
         func reportIssue(mediaId id: Int, type: String, message: String) async throws { fatalError("not used") }
     }
 
-    override func tearDown() {
-        OverseerrAuthManager.shared.subject.send(.unknown)
-    }
 
     func testProbeSessionAuthenticated() async {
         let service = MockService(authResult: true)
         let manager = OverseerrAuthManager.shared
+        await manager.setState(.unknown)
         await manager.configure(service: service)
         await Task.yield()
         await manager.probeSession()
-        XCTAssertEqual(manager.value, .authenticated(expiry: nil))
+        let current = await manager.currentValue()
+        XCTAssertEqual(current, .authenticated(expiry: nil))
         XCTAssertEqual(service.authCallCount, 2)
     }
 
     func testProbeSessionUnauthenticated() async {
         let service = MockService(authResult: false)
         let manager = OverseerrAuthManager.shared
+        await manager.setState(.unknown)
         await manager.configure(service: service)
         await Task.yield()
         await manager.probeSession()
-        XCTAssertEqual(manager.value, .unauthenticated)
+        let current = await manager.currentValue()
+        XCTAssertEqual(current, .unauthenticated)
         XCTAssertEqual(service.authCallCount, 2)
     }
 
     func testEnsureAuthenticatedIsThrottled() async {
         let service = MockService(authResult: true)
         let manager = OverseerrAuthManager.shared
+        await manager.setState(.unknown)
         await manager.configure(service: service, autoProbe: false)
         service.authCallCount = 0
         await manager.ensureAuthenticated()
@@ -57,11 +59,13 @@ final class OverseerrAuthManagerTests: XCTestCase {
     func testRecoverFromAuthFailureTransitionsState() async {
         let service = MockService(authResult: true)
         let manager = OverseerrAuthManager.shared
+        await manager.setState(.unknown)
         await manager.configure(service: service)
         await Task.yield()
-        manager.subject.send(.unauthenticated)
+        await manager.setState(.unauthenticated)
         await manager.recoverFromAuthFailure()
-        XCTAssertEqual(manager.value, .authenticated(expiry: nil))
+        let current = await manager.currentValue()
+        XCTAssertEqual(current, .authenticated(expiry: nil))
     }
 }
 #endif
