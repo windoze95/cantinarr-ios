@@ -219,6 +219,7 @@ private struct SearchResultsSection: View {
                                       mediaType: item.mediaType,
                                       title: item.title,
                                       posterPath: item.posterPath)
+                            .equatable()
                             .onAppear { loadMore(item) }
                     }
                 }
@@ -233,6 +234,7 @@ private struct SearchResultsSection: View {
                     if (isSearchLoadingLocal || isLoadingSearch) && results.isEmpty {
                         HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                             MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                                .equatable()
                                 .frame(width: 110)
                         } placeholder: {
                             LoadingCardView()
@@ -261,6 +263,7 @@ private struct SearchResultsSection: View {
                                           mediaType: item.mediaType,
                                           title: item.title,
                                           posterPath: item.posterPath)
+                                .equatable()
                                 .frame(width: 110)
                         } placeholder: {
                             LoadingCardView()
@@ -331,6 +334,7 @@ private struct RecommendationRowsView: View {
                                   mediaType: item.mediaType,
                                   title: item.title,
                                   posterPath: item.posterPath)
+                        .equatable()
                         .frame(width: 110)
                 } placeholder: {
                     LoadingCardView()
@@ -349,6 +353,7 @@ private struct RecommendationRowsView: View {
                                   mediaType: item.mediaType,
                                   title: item.title,
                                   posterPath: item.posterPath)
+                        .equatable()
                         .frame(width: 110)
                 } placeholder: {
                     LoadingCardView()

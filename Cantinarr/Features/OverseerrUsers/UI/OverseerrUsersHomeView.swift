@@ -216,6 +216,7 @@ struct OverseerrUsersHomeView: View {
                 Text("Movies You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
                 HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                     MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                        .equatable()
                         .frame(width: 110)
                 } placeholder: {
                     LoadingCardView()
@@ -233,6 +234,7 @@ struct OverseerrUsersHomeView: View {
                                   mediaType: item.mediaType,
                                   title: item.title,
                                   posterPath: item.posterPath)
+                        .equatable()
                         .frame(width: 110)
                 } placeholder: {
                     LoadingCardView()
@@ -244,6 +246,7 @@ struct OverseerrUsersHomeView: View {
                 Text("Shows You Might Like").font(.headline).padding(.horizontal).opacity(0) // Placeholder title
                 HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                     MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                        .equatable()
                         .frame(width: 110)
                 } placeholder: {
                     LoadingCardView()
@@ -261,6 +264,7 @@ struct OverseerrUsersHomeView: View {
                                   mediaType: item.mediaType,
                                   title: item.title,
                                   posterPath: item.posterPath)
+                        .equatable()
                         .frame(width: 110)
                 } placeholder: {
                     LoadingCardView()
@@ -306,6 +310,7 @@ private struct TrendingDisplayView: View {
                 .opacity(0)
             HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                 MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                    .equatable()
                     .frame(width: 110)
             } placeholder: {
                 LoadingCardView()
@@ -322,6 +327,7 @@ private struct TrendingDisplayView: View {
                               mediaType: item.mediaType,
                               title: item.title,
                               posterPath: item.posterPath)
+                    .equatable()
                     .frame(width: 110)
             } placeholder: {
                 LoadingCardView()
@@ -353,6 +359,7 @@ private struct SearchResultsRowView: View {
                 .opacity(0)
             HorizontalItemRow(items: [MediaItem](), isLoading: true, onAppear: { _ in }) { _ in
                 MediaCardView(id: 0, mediaType: .movie, title: "", posterPath: nil)
+                    .equatable()
                     .frame(width: 110)
             } placeholder: {
                 LoadingCardView()
@@ -384,6 +391,7 @@ private struct SearchResultsRowView: View {
                               mediaType: item.mediaType,
                               title: item.title,
                               posterPath: item.posterPath)
+                    .equatable()
                     .frame(width: 110)
             } placeholder: {
                 LoadingCardView()
