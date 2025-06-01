@@ -13,7 +13,8 @@ struct ServiceConnectionErrorView: View {
     var body: some View {
         VStack(spacing: 20) {
             Image(systemName: "wifi.exclamationmark")
-                .font(.system(size: 60))
+                .font(.largeTitle)
+                .imageScale(.large)
                 .foregroundColor(.orange)
 
             Text("Cannot Connect to \(serviceName)")
