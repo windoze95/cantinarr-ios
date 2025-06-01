@@ -10,7 +10,6 @@ private let sharedDataStore = WKWebsiteDataStore.default()
 
 // OverseerrError lives in Models/OverseerrError.swift
 // keeping networking code focused on API requests.
-@MainActor
 class OverseerrAPIService {
     // MARK: – Configuration
 

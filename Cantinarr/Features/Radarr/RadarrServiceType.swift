@@ -1,6 +1,5 @@
 import Foundation
 
-@MainActor
 protocol RadarrServiceType {
     func getMovies() async throws -> [RadarrMovie]
     func getMovie(id: Int) async throws -> RadarrMovie
