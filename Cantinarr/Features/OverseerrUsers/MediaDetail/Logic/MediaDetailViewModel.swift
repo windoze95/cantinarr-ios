@@ -23,17 +23,14 @@ final class MediaDetailViewModel: ObservableObject {
 
     //    private let id: Int
     private let service: OverseerrServiceType
-    private let userSession: UserSession
 
     init(id: Int,
          mediaType: MediaType,
-         service: OverseerrServiceType,
-         userSession: UserSession)
+         service: OverseerrServiceType)
     {
         self.id = id
         self.mediaType = mediaType
         self.service = service
-        self.userSession = userSession
     }
 
     // MARK: – bootstrap
@@ -112,8 +109,6 @@ final class MediaDetailViewModel: ObservableObject {
     func report(issue type: String, message: String) async {
         try? await service.reportIssue(mediaId: id, type: type, message: message)
     }
-
-    var isAdmin: Bool { userSession.role == .admin }
 }
 
 private extension URL {

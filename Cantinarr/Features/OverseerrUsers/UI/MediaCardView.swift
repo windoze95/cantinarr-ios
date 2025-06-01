@@ -11,7 +11,6 @@ struct MediaCardView: View {
     let posterPath: String?
 
     @EnvironmentObject private var envStore: EnvironmentsStore
-    @EnvironmentObject private var userSession: UserSession
 
     // MARK: – Image helper
 
@@ -30,8 +29,7 @@ struct MediaCardView: View {
                 MediaDetailView(
                     id: id,
                     mediaType: mediaType,
-                    service: OverseerrAPIService(settings: settings),
-                    userSession: userSession
+                    service: OverseerrAPIService(settings: settings)
                 )
             } label: {
                 posterAndTitle
