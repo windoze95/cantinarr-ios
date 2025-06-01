@@ -7,16 +7,24 @@ actor OverseerrAuthManager {
     // MARK: – Public singleton
 
     static let shared = OverseerrAuthManager()
-    private init() {}
 
-    // MARK: – Published state
+    let subject: CurrentValueSubject<OverseerrAuthState, Never>
+    nonisolated let publisher: AnyPublisher<OverseerrAuthState, Never>
+    var value: OverseerrAuthState { subject.value }
 
-    nonisolated let subject = CurrentValueSubject<OverseerrAuthState, Never>(.unknown)
-    nonisolated var publisher: AnyPublisher<OverseerrAuthState, Never> {
-        subject.eraseToAnyPublisher()
+    /// Async accessor for the current auth state.
+    func currentValue() -> OverseerrAuthState { value }
+
+    /// Directly update the auth state. Intended for testing.
+    func setState(_ newState: OverseerrAuthState) {
+        subject.send(newState)
     }
 
-    nonisolated var value: OverseerrAuthState { subject.value }
+    private init() {
+        let subj = CurrentValueSubject<OverseerrAuthState, Never>(.unknown)
+        subject = subj
+        publisher = subj.eraseToAnyPublisher()
+    }
 
     // MARK: – Config injected once at app launch
 
