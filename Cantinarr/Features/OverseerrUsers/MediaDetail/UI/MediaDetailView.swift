@@ -13,15 +13,13 @@ struct MediaDetailView: View {
 
     init(id: Int,
          mediaType: MediaType,
-         service: OverseerrServiceType,
-         userSession: UserSession)
+         service: OverseerrServiceType)
     {
         _vm = StateObject(
             wrappedValue: MediaDetailViewModel(
                 id: id,
                 mediaType: mediaType,
-                service: service,
-                userSession: userSession
+                service: service
             )
         )
     }

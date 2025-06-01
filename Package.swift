@@ -14,7 +14,6 @@ let package = Package(
             name: "CantinarrModels",
             path: "Cantinarr",
             exclude: [
-                "Core/Models/UserSession.swift",
                 "Core/Helpers/OverseerrAuthContextProvider.swift",
                 "Core/Helpers/OverseerrPlexSSODelegate.swift",
                 "Core/Helpers/Shimmer.swift",

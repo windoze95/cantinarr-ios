@@ -10,7 +10,6 @@ struct CantinarrApp: App {
     let persistenceController = PersistenceController.shared
 
     @StateObject private var environmentsStore = EnvironmentsStore()
-    @StateObject private var userSession = UserSession()
 
 
     // MARK: - Body
@@ -21,7 +20,6 @@ struct CantinarrApp: App {
                 // Only include this if you actually need the Core Data context in your views.
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(environmentsStore)
-                .environmentObject(userSession)
                 .task {
                     if let settings = environmentsStore.selectedServiceInstance?
                         .decode(OverseerrSettings.self) {
