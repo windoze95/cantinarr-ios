@@ -21,8 +21,12 @@ struct KeywordSuggestionRow: View {
             // Using LazyHGrid for potentially many keywords
             LazyHGrid(rows: rows, spacing: 8) {
                 ForEach(keywords) { kw in // Keyword must be Identifiable
-                    PillView(item: kw, nameKeyPath: \.name)
-                        .onTapGesture { choose(kw) }
+                    Button(action: { choose(kw) }) {
+                        PillView(item: kw, nameKeyPath: \.name)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .accessibilityLabel(Text("Keyword \(kw.name)"))
                 }
             }
             .padding(.horizontal)

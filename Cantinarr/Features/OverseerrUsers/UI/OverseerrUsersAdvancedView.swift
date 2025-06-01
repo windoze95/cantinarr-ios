@@ -143,14 +143,17 @@ struct OverseerrUsersAdvancedView: View {
                     UIApplication.shared.endEditing()
                 }
         )
-        .background(
-            Color.clear
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    searchFieldFocused = false
-                    UIApplication.shared.endEditing()
-                }
-        )
+        .background {
+            Button(action: {
+                searchFieldFocused = false
+                UIApplication.shared.endEditing()
+            }) {
+                Color.clear.contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .frame(minWidth: 44, minHeight: 44)
+            .accessibilityLabel("Dismiss keyboard")
+        }
         .safeAreaInset(edge: .top) {
             HStack(spacing: 12) {
                 SearchBarView(text: $searchText, focus: $searchFieldFocused)
@@ -185,21 +188,24 @@ private struct ActiveKeywordsRow: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(keywords, id: \.id) { kw in
-                    HStack(spacing: 4) {
-                        Text(kw.name).font(.caption)
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
-                            .accessibilityLabel("Remove keyword")
-                            .onTapGesture { remove(kw.id) }
+                    Button(action: { remove(kw.id) }) {
+                        HStack(spacing: 4) {
+                            Text(kw.name).font(.caption)
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.accentColor.opacity(0.25)))
+                        .foregroundColor(Color.accentColor)
+                        .frame(minWidth: 44, minHeight: 44)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(Color.accentColor.opacity(0.25)))
-                    .foregroundColor(Color.accentColor)
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text("Remove keyword \(kw.name)"))
                 }
             }
             .padding(.horizontal)
-            .frame(height: 32)
+            .frame(height: 44)
         }
     }
 }

@@ -8,28 +8,36 @@ struct SeasonGridView: View {
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)]) {
             ForEach(seasons) { s in
-                VStack(spacing: 4) {
-                    Text("Season \(s.seasonNumber)")
-                    Text("\(s.episodeCount) eps")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Label(s.mediaInfo?.status.label ?? "–", systemImage: "circle.fill")
-                        .font(.caption2)
-                        .foregroundColor(.white)
-                        .padding(4)
-                        .background(s.mediaInfo?.status.tint ?? .gray)
-                        .cornerRadius(4)
-                }
-                .padding(8)
-                .background(
-                    Material.ultraThin,
-                    in: RoundedRectangle(cornerRadius: 8)
-                )
-                .onTapGesture {
+                Button(action: {
                     if s.mediaInfo?.status != .available {
                         requestAction()
                     }
+                }) {
+                    VStack(spacing: 4) {
+                        Text("Season \(s.seasonNumber)")
+                        Text("\(s.episodeCount) eps")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Label(s.mediaInfo?.status.label ?? "–", systemImage: "circle.fill")
+                            .font(.caption2)
+                            .foregroundColor(.white)
+                            .padding(4)
+                            .background(s.mediaInfo?.status.tint ?? .gray)
+                            .cornerRadius(4)
+                    }
+                    .padding(8)
+                    .background(
+                        Material.ultraThin,
+                        in: RoundedRectangle(cornerRadius: 8)
+                    )
+                    .frame(minWidth: 44, minHeight: 44)
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(
+                    s.mediaInfo?.status != .available ?
+                        "Request season \(s.seasonNumber)" :
+                        "Season \(s.seasonNumber) available"
+                ))
             }
         }
     }
