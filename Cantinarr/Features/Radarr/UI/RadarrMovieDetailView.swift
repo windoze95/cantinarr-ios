@@ -2,6 +2,7 @@
 // Purpose: Defines RadarrMovieDetailView component for Cantinarr
 
 import NukeUI
+import Nuke
 import SwiftUI
 
 private struct TaglineHeightKeyRadarr: PreferenceKey {

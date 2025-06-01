@@ -1,4 +1,5 @@
 import NukeUI
+import Nuke
 import SwiftUI
 
 /// Header for the Radarr movie detail screen showing poster and basic info.

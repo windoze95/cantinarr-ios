@@ -1,4 +1,5 @@
 import NukeUI
+import Nuke
 import SwiftUI
 
 /// Header displaying poster, title and action buttons.

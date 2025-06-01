@@ -2,6 +2,7 @@
 // Purpose: Defines MediaDetailView component for Cantinarr
 
 import NukeUI
+import Nuke
 import SwiftUI
 
 struct MediaDetailView: View {
