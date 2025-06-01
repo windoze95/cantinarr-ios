@@ -1,3 +1,4 @@
+#if canImport(Combine) && canImport(SwiftUI)
 import Combine
 import Foundation
 
@@ -356,3 +357,5 @@ final class SearchController: ObservableObject {
         }
     }
 }
+
+#endif
