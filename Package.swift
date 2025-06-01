@@ -18,7 +18,22 @@ let package = Package(
                 "Core/Helpers/OverseerrAuthContextProvider.swift",
                 "Core/Helpers/OverseerrPlexSSODelegate.swift",
                 "Core/Helpers/Shimmer.swift",
-                "Core/Helpers/WebView.swift"
+                "Core/Helpers/WebView.swift",
+                // Exclude SwiftUI and UI-related resources not used by SwiftPM
+                "App",
+                "Views",
+                "Navigation",
+                "Persistence",
+                "Assets.xcassets",
+                "Cantinarr.xcdatamodeld",
+                "LaunchScreen.storyboard",
+                "Features/Shared",
+                "Features/Shell",
+                "Features/Settings",
+                "Features/OverseerrUsers/UI",
+                "Features/OverseerrUsers/MediaDetail",
+                "Features/Radarr/UI",
+                "Features/Radarr/Logic"
             ],
             sources: [
                 "Core/Models",
