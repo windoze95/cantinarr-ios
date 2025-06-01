@@ -1,6 +1,7 @@
 // File: RootShellView.swift
 // Purpose: Defines RootShellView component for Cantinarr
 
+#if canImport(SwiftUI)
 import SwiftUI
 
 /// The global frame: a slide‑out sidebar on the left + a detail pane.
@@ -158,3 +159,4 @@ struct RootShellView: View {
         }
     }
 }
+#endif

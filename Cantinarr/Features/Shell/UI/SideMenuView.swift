@@ -1,6 +1,7 @@
 // File: SideMenuView.swift
 // Purpose: Defines SideMenuView component for Cantinarr
 
+#if canImport(SwiftUI)
 import SwiftUI
 
 /// Drawer content: gear, services, utilities, env‑picker.
@@ -66,3 +67,4 @@ struct SideMenuView: View {
         )
     }
 }
+#endif

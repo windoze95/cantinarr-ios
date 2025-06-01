@@ -28,7 +28,8 @@ let package = Package(
                 "Cantinarr.xcdatamodeld",
                 "LaunchScreen.storyboard",
                 "Features/Shared",
-                "Features/Shell",
+                "Features/Shell/RootShellView.swift",
+                "Features/Shell/UI/SideMenuView.swift",
                 "Features/Settings",
                 "Features/OverseerrUsers/UI",
                 "Features/OverseerrUsers/MediaDetail/UI",
@@ -48,7 +49,8 @@ let package = Package(
                 "Features/OverseerrUsers/Networking/OverseerrServiceType.swift",
                 "Features/OverseerrUsers/Logic/FilterManager.swift",
                 "Features/OverseerrUsers/Logic/SearchController.swift",
-                "Features/OverseerrUsers/Networking/OverseerrUsersService.swift"
+                "Features/OverseerrUsers/Networking/OverseerrUsersService.swift",
+                "Features/Shell/SideMenuGestureManager.swift"
             ]
         ),
         .testTarget(
