@@ -8,28 +8,8 @@ import WebKit
 /// Shared cookie store so that WKWebView and URLSession share authentication cookies.
 private let sharedDataStore = WKWebsiteDataStore.default()
 
-/// Errors specific to Overseerr API interactions.
-enum OverseerrError: Error, LocalizedError {
-    case notAuthenticated
-    case apiError(message: String, statusCode: Int)
-    case invalidResponse
-    case network(Error)
-
-    var errorDescription: String? {
-        switch self {
-        case .notAuthenticated:
-            return "Authentication required."
-        case let .apiError(message, _):
-            return message
-        case .invalidResponse:
-            return "Invalid response from server."
-        case let .network(error):
-            return error.localizedDescription
-        }
-    }
-}
-
-
+// OverseerrError lives in Models/OverseerrError.swift
+// keeping networking code focused on API requests.
 @MainActor
 class OverseerrAPIService {
     // MARK: – Configuration
