@@ -2,6 +2,7 @@
 // Purpose: Defines RadarrMovieListItemView component for Cantinarr
 
 import NukeUI
+import Nuke
 import SwiftUI
 
 /// Row in the movies list showing title, runtime and quality.

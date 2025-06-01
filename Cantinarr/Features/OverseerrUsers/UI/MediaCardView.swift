@@ -2,6 +2,7 @@
 // Purpose: Defines MediaCardView component for Cantinarr
 
 import NukeUI
+import Nuke
 import SwiftUI
 
 struct MediaCardView: View, Equatable {
