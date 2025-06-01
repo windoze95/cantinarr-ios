@@ -46,7 +46,7 @@ struct RadarrMoviesView: View {
     @ViewBuilder
     private var moviesListView: some View {
         List {
-            ForEach(viewModel.movies) { movie in
+            ForEach(Array(viewModel.movies.enumerated()), id: \.element.id) { idx, movie in
                 // Use NavigationLink(value:label:) with navigationDestination for cleaner navigation
                 NavigationLink(value: movie) { // Value type must be Hashable (RadarrMovie is Identifiable)
                     RadarrMovieListItemView(
@@ -57,6 +57,11 @@ struct RadarrMoviesView: View {
                 .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 16))
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
+                .onAppear {
+                    if idx >= viewModel.movies.count - AppConfig.prefetchThreshold {
+                        viewModel.loadMoreIfNeeded(currentMovie: movie)
+                    }
+                }
             }
         }
         .listStyle(.plain)
