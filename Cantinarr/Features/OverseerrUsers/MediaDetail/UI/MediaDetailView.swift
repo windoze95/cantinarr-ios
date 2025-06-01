@@ -2,6 +2,7 @@
 // Purpose: Defines MediaDetailView component for Cantinarr
 
 import NukeUI
+import Nuke
 import SwiftUI
 
 struct MediaDetailView: View {
@@ -27,9 +28,14 @@ struct MediaDetailView: View {
     // MARK: – Global blurred background
 
     @ViewBuilder
-    private var blurredBackground: some View {
+    private func blurredBackground(size: CGSize) -> some View {
         if let url = vm.backdropURL {
-            LazyImage(url: url) { state in
+            LazyImage(
+                request: ImageRequest(
+                    url: url,
+                    processors: [ImageProcessors.Resize(size: size, unit: .points)]
+                )
+            ) { state in
                 state.image?
                     .resizable()
                     .scaledToFill()
@@ -44,7 +50,7 @@ struct MediaDetailView: View {
 
     var body: some View {
         GeometryReader { rootGeo in
-            blurredBackground
+            blurredBackground(size: rootGeo.size)
             // Safe width & height the content is allowed to use
             let safeWidth = rootGeo.size.width
                 - rootGeo.safeAreaInsets.leading

@@ -1,4 +1,5 @@
 import NukeUI
+import Nuke
 import SwiftUI
 
 /// Header for the Radarr movie detail screen showing poster and basic info.
@@ -14,7 +15,17 @@ struct MovieHeaderView: View {
                            startPoint: .bottom, endPoint: .center)
 
             HStack(alignment: .bottom, spacing: 16) {
-                LazyImage(url: movie.posterURL) { state in
+                LazyImage(
+                    request: ImageRequest(
+                        url: movie.posterURL,
+                        processors: [
+                            ImageProcessors.Resize(
+                                size: CGSize(width: 120, height: 180),
+                                unit: .points
+                            ),
+                        ]
+                    )
+                ) { state in
                     state.image?.resizable()
                         .scaledToFill()
                         .frame(width: 120, height: 180)
@@ -55,10 +66,17 @@ struct MovieHeaderView: View {
         }
         .background {
             if let url = movie.fanartURL {
-                LazyImage(url: url) { state in
-                    state.image?.resizable()
-                        .scaledToFill()
-                        .overlay(Color.black.opacity(0.3))
+                GeometryReader { geo in
+                    LazyImage(
+                        request: ImageRequest(
+                            url: url,
+                            processors: [ImageProcessors.Resize(size: geo.size, unit: .points)]
+                        )
+                    ) { state in
+                        state.image?.resizable()
+                            .scaledToFill()
+                            .overlay(Color.black.opacity(0.3))
+                    }
                 }
             }
         }

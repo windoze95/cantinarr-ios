@@ -2,6 +2,7 @@
 // Purpose: Defines RadarrMovieDetailView component for Cantinarr
 
 import NukeUI
+import Nuke
 import SwiftUI
 
 private struct TaglineHeightKeyRadarr: PreferenceKey {
@@ -25,9 +26,14 @@ struct RadarrMovieDetailView: View {
     }
 
     @ViewBuilder
-    private var blurredBackground: some View {
+    private func blurredBackground(size: CGSize) -> some View {
         if let url = viewModel.movie?.fanartURL {
-            LazyImage(url: url) { state in
+            LazyImage(
+                request: ImageRequest(
+                    url: url,
+                    processors: [ImageProcessors.Resize(size: size, unit: .points)]
+                )
+            ) { state in
                 state.image?
                     .resizable()
                     .scaledToFill()
@@ -42,7 +48,7 @@ struct RadarrMovieDetailView: View {
 
     var body: some View {
         GeometryReader { rootGeo in
-            blurredBackground
+            blurredBackground(size: rootGeo.size)
 
             let safeWidth = rootGeo.size.width - rootGeo.safeAreaInsets.leading - rootGeo.safeAreaInsets.trailing
             let safeHeight = rootGeo.size.height - rootGeo.safeAreaInsets.bottom
