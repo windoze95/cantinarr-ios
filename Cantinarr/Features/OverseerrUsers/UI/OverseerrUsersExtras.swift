@@ -34,32 +34,3 @@ struct KeywordSuggestionRow: View {
     }
 }
 
-struct ActiveKeywordsView: View {
-    @EnvironmentObject var vm: OverseerrUsersViewModel
-
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                // Explicitly provide the id for ForEach if compiler struggles.
-                // Though vm.activeKeywords (if [Keyword]) should work directly
-                // as Keyword is Identifiable. This is a safeguard.
-                ForEach(vm.activeKeywords, id: \.id) { kw in
-                    HStack(spacing: 4) {
-                        Text(kw.name)
-                            .font(.caption)
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
-                            .accessibilityLabel("Remove keyword")
-                            .onTapGesture { vm.remove(keywordID: kw.id) }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(Color.accentColor.opacity(0.25)))
-                    .foregroundColor(Color.accentColor)
-                }
-            }
-            .padding(.horizontal)
-            .frame(height: 32)
-        }
-    }
-}
