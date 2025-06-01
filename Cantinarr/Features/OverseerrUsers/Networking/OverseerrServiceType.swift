@@ -1,6 +1,5 @@
 import Foundation
 
-@MainActor
 protocol OverseerrServiceType {
     func isAuthenticated() async -> Bool
     func fetchTrending(providerIds: [Int], page: Int) async throws -> DiscoverResponse<TrendingItem>

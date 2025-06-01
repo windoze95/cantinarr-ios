@@ -4,7 +4,6 @@
 import Foundation
 
 /// Networking layer for communicating with a Radarr instance.
-@MainActor
 class RadarrAPIService {
     private let settings: RadarrSettings
     private let baseURL: URL
