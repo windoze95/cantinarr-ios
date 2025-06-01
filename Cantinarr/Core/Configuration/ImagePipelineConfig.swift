@@ -19,7 +19,6 @@ enum ImagePipelineConfig {
         var config = ImagePipeline.Configuration()
         config.dataCache = dataCache
         config.imageCache = imageCache
-        config.isDeduplicationEnabled = true
         config.isProgressiveDecodingEnabled = true
 
         ImagePipeline.shared = ImagePipeline(configuration: config)
