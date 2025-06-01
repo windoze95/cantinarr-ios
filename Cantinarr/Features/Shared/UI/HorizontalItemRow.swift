@@ -4,18 +4,22 @@ import SwiftUI
 struct HorizontalItemRow<Item: Identifiable, ItemView: View, PlaceholderView: View>: View {
     let items: [Item]
     let isLoading: Bool
+    /// Called when an item near the end of the list appears. Use to prefetch more content.
     let onAppear: (Item) -> Void
     let content: (Item) -> ItemView
     let placeholder: () -> PlaceholderView
+    let prefetchThreshold: Int
 
     init(items: [Item],
          isLoading: Bool,
+         prefetchThreshold: Int = AppConfig.prefetchThreshold,
          onAppear: @escaping (Item) -> Void,
          @ViewBuilder content: @escaping (Item) -> ItemView,
          @ViewBuilder placeholder: @escaping () -> PlaceholderView)
     {
         self.items = items
         self.isLoading = isLoading
+        self.prefetchThreshold = prefetchThreshold
         self.onAppear = onAppear
         self.content = content
         self.placeholder = placeholder
@@ -25,11 +29,13 @@ struct HorizontalItemRow<Item: Identifiable, ItemView: View, PlaceholderView: Vi
 extension HorizontalItemRow where PlaceholderView == EmptyView {
     init(items: [Item],
          isLoading: Bool,
+         prefetchThreshold: Int = AppConfig.prefetchThreshold,
          onAppear: @escaping (Item) -> Void,
          @ViewBuilder content: @escaping (Item) -> ItemView)
     {
         self.init(items: items,
                   isLoading: isLoading,
+                  prefetchThreshold: prefetchThreshold,
                   onAppear: onAppear,
                   content: content,
                   placeholder: { EmptyView() })
@@ -45,9 +51,13 @@ extension HorizontalItemRow {
                         placeholder()
                     }
                 } else {
-                    ForEach(items) { item in
+                    ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
                         content(item)
-                            .onAppear { onAppear(item) }
+                            .onAppear {
+                                if idx >= items.count - prefetchThreshold {
+                                    onAppear(item)
+                                }
+                            }
                     }
                     if isLoading && !items.isEmpty {
                         placeholder()
