@@ -11,6 +11,10 @@ struct CantinarrApp: App {
 
     @StateObject private var environmentsStore = EnvironmentsStore()
 
+    init() {
+        ImagePipelineConfig.configureShared()
+    }
+
 
     // MARK: - Body
 

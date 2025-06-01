@@ -50,7 +50,17 @@ struct RadarrMovieListItemView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             // Poster Image
-            LazyImage(url: movie.posterURL) { state in
+            LazyImage(
+                request: ImageRequest(
+                    url: movie.posterURL,
+                    processors: [
+                        ImageProcessors.Resize(
+                            size: CGSize(width: 80, height: 120),
+                            unit: .points
+                        ),
+                    ]
+                )
+            ) { state in
                 if let image = state.image {
                     image
                         .resizable()
@@ -115,29 +125,39 @@ struct RadarrMovieListItemView: View {
         }
         .padding(10)
         .background(
-            ZStack {
-                LazyImage(url: movie.fanartURL) { state in
-                    if let image = state.image {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .blur(radius: 3, opaque: true) // Opaque blur
-                    } else {
-                        Color.clear // Fallback if no fanart
+            GeometryReader { geo in
+                ZStack {
+                    LazyImage(
+                        request: ImageRequest(
+                            url: movie.fanartURL,
+                            processors: [
+                                ImageProcessors.Resize(size: geo.size, unit: .points)
+                            ]
+                        )
+                    ) { state in
+                        if let image = state.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .blur(radius: 3, opaque: true) // Opaque blur
+                        } else {
+                            Color.clear // Fallback if no fanart
+                        }
                     }
-                }
-                .scaleEffect(1.1) // Slightly zoom to ensure blur covers edges
-                .clipped()
+                    .scaleEffect(1.1) // Slightly zoom to ensure blur covers edges
+                    .clipped()
 
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.black.opacity(0.75),
-                        Color.black.opacity(0.5),
-                        Color.black.opacity(0.75),
-                    ]),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.black.opacity(0.75),
+                            Color.black.opacity(0.5),
+                            Color.black.opacity(0.75),
+                        ]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
             }
         )
         .cornerRadius(12)

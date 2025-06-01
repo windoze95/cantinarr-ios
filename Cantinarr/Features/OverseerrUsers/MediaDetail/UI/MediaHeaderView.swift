@@ -18,7 +18,17 @@ struct MediaHeaderView: View {
                            startPoint: .bottom, endPoint: .top)
             HStack(alignment: .bottom, spacing: 16) {
                 if let url = posterURL {
-                    LazyImage(url: url) { state in
+                    LazyImage(
+                        request: ImageRequest(
+                            url: url,
+                            processors: [
+                                ImageProcessors.Resize(
+                                    size: CGSize(width: 120, height: 180),
+                                    unit: .points
+                                ),
+                            ]
+                        )
+                    ) { state in
                         state.image?.resizable()
                             .scaledToFill()
                             .frame(width: 120, height: 180)
@@ -45,10 +55,17 @@ struct MediaHeaderView: View {
         }
         .background {
             if let url = backdropURL {
-                LazyImage(url: url) { state in
-                    state.image?.resizable()
-                        .scaledToFill()
-                        .overlay(Color.black.opacity(0.25))
+                GeometryReader { geo in
+                    LazyImage(
+                        request: ImageRequest(
+                            url: url,
+                            processors: [ImageProcessors.Resize(size: geo.size, unit: .points)]
+                        )
+                    ) { state in
+                        state.image?.resizable()
+                            .scaledToFill()
+                            .overlay(Color.black.opacity(0.25))
+                    }
                 }
             }
         }

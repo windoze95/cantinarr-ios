@@ -48,7 +48,17 @@ struct MediaCardView: View, Equatable {
     private var posterAndTitle: some View {
         VStack(spacing: 8) {
             if let url = posterURL {
-                LazyImage(url: url) { state in
+                LazyImage(
+                    request: ImageRequest(
+                        url: url,
+                        processors: [
+                            ImageProcessors.Resize(
+                                size: CGSize(width: 100, height: 150),
+                                unit: .points
+                            )
+                        ]
+                    )
+                ) { state in
                     if let img = state.image {
                         img.resizable()
                             .scaledToFill()
