@@ -189,6 +189,7 @@ private struct ActiveKeywordsRow: View {
                         Text(kw.name).font(.caption)
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.secondary)
+                            .accessibilityLabel("Remove keyword")
                             .onTapGesture { remove(kw.id) }
                     }
                     .padding(.horizontal, 10)

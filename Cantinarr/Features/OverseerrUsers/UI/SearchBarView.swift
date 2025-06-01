@@ -29,6 +29,7 @@ struct SearchBarView: View {
                     Image(systemName: "xmark.circle.fill")
                         .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("Clear search text")
                 }
                 .buttonStyle(.plain)
             }

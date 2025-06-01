@@ -161,6 +161,7 @@ struct OverseerrUsersHomeView: View {
             } label: {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundColor(.secondary)
+                    .accessibilityLabel("Dismiss error")
             }
             .buttonStyle(.plain)
         }

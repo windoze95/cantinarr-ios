@@ -152,6 +152,7 @@ struct RadarrMovieDetailView: View {
                 .foregroundColor(.white.opacity(0.7))
                 .background(Circle().fill(Color.black.opacity(0.3))) // Slight background for better visibility
                 .shadow(radius: 3)
+                .accessibilityLabel("Close")
         }
         .padding()
     }
