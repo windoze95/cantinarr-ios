@@ -117,7 +117,7 @@ struct RootShellView: View {
                     .id(svcID) // Recreate the view when the service ID changes
                 } else {
                     // This case should ideally not happen if selection implies valid settings
-                    Text("Error: Could not load Overseerr settings for \(selectedServiceInstance.displayName).")
+                    Text("Unable to load settings for \(selectedServiceInstance.displayName). Please open settings to reconfigure the service.")
                         .foregroundColor(.red)
                 }
 
@@ -131,7 +131,7 @@ struct RootShellView: View {
                     )
                     .id(svcID) // Recreate the view when the service ID changes
                 } else {
-                    Text("Error: Could not load Radarr settings for \(selectedServiceInstance.displayName).")
+                    Text("Unable to load settings for \(selectedServiceInstance.displayName). Please open settings to reconfigure the service.")
                         .foregroundColor(.red)
                 }
             }
