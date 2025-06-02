@@ -38,9 +38,9 @@ class RadarrMovieDetailViewModel: ObservableObject {
             movie = fetchedMovie
             await fetchQualityProfileName(id: fetchedMovie.qualityProfileId)
         } catch let APIServiceError.apiError(message: message, statusCode: statusCode) {
-            self.error = "Radarr API Error (\(statusCode)): \(message)"
+            self.error = "Radarr API Error (\(statusCode)): \(message). Please check your Radarr settings or try again later."
         } catch {
-            self.error = "Failed to load movie details: \(error.localizedDescription)"
+            self.error = "Failed to load movie details: (\(error.localizedDescription)). Please check your Radarr settings or try again later."
         }
         isLoading = false
     }
@@ -52,7 +52,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
             qualityProfileName = profiles.first(where: { $0.id == id })?.name ?? "Unknown Profile (\(id))"
         } catch {
             print("🔴 Failed to fetch quality profile name: \(error.localizedDescription)")
-            qualityProfileName = "Error (\(id))"
+            qualityProfileName = "Error (\(id)). Please check your Radarr settings or try again later."
         }
     }
 
@@ -96,7 +96,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
             commandStatusMessage = movieToUpdate.monitored ? "Movie is now monitored." : "Movie is no longer monitored."
             showCommandStatusAlert = true
         } catch {
-            commandStatusMessage = "Failed to update monitoring status: \(error.localizedDescription)"
+            commandStatusMessage = "Failed to update monitoring status: (\(error.localizedDescription)). Please check your Radarr settings or try again later."
             showCommandStatusAlert = true
             // Revert local state if API call failed
             // No need to toggle again here if the original self.movie wasn't changed yet
@@ -131,7 +131,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
             // Optionally, refresh movie details after a delay or based on command status
             // For now, just show the command response message.
         } catch {
-            commandStatusMessage = "Failed to trigger movie search: \(error.localizedDescription)"
+            commandStatusMessage = "Failed to trigger movie search: (\(error.localizedDescription)). Please check your Radarr settings or try again later."
         }
         showCommandStatusAlert = true
     }
@@ -149,7 +149,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
             // After deletion, the view should probably be dismissed or state cleared
             movie = nil // Clear the movie to indicate it's gone
         } catch {
-            commandStatusMessage = "Failed to delete movie: \(error.localizedDescription)"
+            commandStatusMessage = "Failed to delete movie: (\(error.localizedDescription)). Please check your Radarr settings or try again later."
             showCommandStatusAlert = true
         }
     }
