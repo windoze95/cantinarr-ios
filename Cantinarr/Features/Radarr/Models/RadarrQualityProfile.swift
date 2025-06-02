@@ -8,5 +8,5 @@ struct RadarrQualityProfile: Codable, Identifiable {
     let name: String
     let cutoff: Int?
 
-    // TODO: include items array if later needed for editing profiles
+    // Items array omitted; add it if editing profiles requires it later
 }

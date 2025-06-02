@@ -127,7 +127,7 @@ final class SearchController: ObservableObject {
         } catch is OverseerrError {
             loader.cancelLoading(); recoverAuth()
         } catch {
-            print("🔴 Search error: \(error.localizedDescription)")
+            debugLog("🔴 Search error: \(error.localizedDescription)")
             loader.cancelLoading()
             if loader.page == 1 || results.isEmpty {
                 let msg = "Search failed. Check your connection and try again. (\(error.localizedDescription))"
@@ -148,7 +148,7 @@ final class SearchController: ObservableObject {
         } catch {
             keywordSuggestions = []
             keywordFetchError = "Couldn't load keyword suggestions. Check your connection and try again. (\(error.localizedDescription))"
-            print("🔴 Keyword search error: \(error.localizedDescription)")
+            debugLog("🔴 Keyword search error: \(error.localizedDescription)")
         }
         isLoadingKeywords = false
         if connectionError == nil, let err = keywordFetchError {
@@ -201,7 +201,7 @@ final class SearchController: ObservableObject {
                     } catch is OverseerrError {
                         self.recoverAuth()
                     } catch {
-                        print("⚠️ Error probing keyword \(kw.name): \(error.localizedDescription)")
+                        debugLog("⚠️ Error probing keyword \(kw.name): \(error.localizedDescription)")
                     }
                     return nil
                 }
@@ -238,12 +238,12 @@ final class SearchController: ObservableObject {
             if case .notAuthenticated = err {
                 recoverAuth()
             } else {
-                print("🔴 Movie recommendations error: \(err.localizedDescription)")
+                debugLog("🔴 Movie recommendations error: \(err.localizedDescription)")
                 movieRecs = []; movieRecLoader.reset()
             }
         } catch {
             movieFetchError = error
-            print("🔴 Movie recommendations error: \(error.localizedDescription)")
+            debugLog("🔴 Movie recommendations error: \(error.localizedDescription)")
             movieRecs = []; movieRecLoader.reset()
         }
         isLoadingMovieRecs = false
@@ -258,12 +258,12 @@ final class SearchController: ObservableObject {
             if case .notAuthenticated = err {
                 recoverAuth()
             } else {
-                print("🔴 TV recommendations error: \(err.localizedDescription)")
+                debugLog("🔴 TV recommendations error: \(err.localizedDescription)")
                 tvRecs = []; tvRecLoader.reset()
             }
         } catch {
             tvFetchError = error
-            print("🔴 TV recommendations error: \(error.localizedDescription)")
+            debugLog("🔴 TV recommendations error: \(error.localizedDescription)")
             tvRecs = []; tvRecLoader.reset()
         }
         isLoadingTvRecs = false
@@ -324,7 +324,7 @@ final class SearchController: ObservableObject {
                 movieRecLoader.cancelLoading(); recoverAuth()
             } catch {
                 movieRecLoader.cancelLoading()
-                print("🔴 Error loading more movie recommendations: \(error.localizedDescription)")
+                debugLog("🔴 Error loading more movie recommendations: \(error.localizedDescription)")
             }
         }
     }
@@ -354,7 +354,7 @@ final class SearchController: ObservableObject {
                 tvRecLoader.cancelLoading(); recoverAuth()
             } catch {
                 tvRecLoader.cancelLoading()
-                print("🔴 Error loading more TV recommendations: \(error.localizedDescription)")
+                debugLog("🔴 Error loading more TV recommendations: \(error.localizedDescription)")
             }
         }
     }
