@@ -33,9 +33,9 @@ class RadarrMoviesViewModel: ObservableObject {
         do {
             movies = try await service.getMovies()
         } catch let APIServiceError.apiError(message: message, statusCode: statusCode) {
-            self.connectionError = "Radarr API Error (\(statusCode)): \(message)"
+            self.connectionError = "Radarr API Error (\(statusCode)): \(message). Check your network connection or Radarr configuration."
         } catch {
-            connectionError = "Failed to load movies: \(error.localizedDescription)"
+            connectionError = "Failed to load movies: \(error.localizedDescription). Check your network connection or Radarr configuration."
             print("🔴 Radarr Movies VM Error: \(error)")
         }
         isLoading = false
