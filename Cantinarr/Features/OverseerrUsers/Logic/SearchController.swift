@@ -130,8 +130,9 @@ final class SearchController: ObservableObject {
             print("🔴 Search error: \(error.localizedDescription)")
             loader.cancelLoading()
             if loader.page == 1 || results.isEmpty {
-                setConnectionError("Search failed. \(error.localizedDescription)")
-                connectionError = "Search failed. \(error.localizedDescription)"
+                let msg = "Search failed. Check your connection and try again. (\(error.localizedDescription))"
+                setConnectionError(msg)
+                connectionError = msg
             }
         }
     }
@@ -146,7 +147,7 @@ final class SearchController: ObservableObject {
             // handled in recover
         } catch {
             keywordSuggestions = []
-            keywordFetchError = "Failed to load keyword suggestions. \(error.localizedDescription)"
+            keywordFetchError = "Couldn't load keyword suggestions. Check your connection and try again. (\(error.localizedDescription))"
             print("🔴 Keyword search error: \(error.localizedDescription)")
         }
         isLoadingKeywords = false
@@ -270,15 +271,16 @@ final class SearchController: ObservableObject {
         if let mvErr = movieFetchError, !(mvErr is OverseerrError), let tvErr = tvFetchError,
            !(tvErr is OverseerrError)
         {
-            setConnectionError("Failed to load recommendations.")
-            connectionError = "Failed to load recommendations."
+            let msg = "Failed to load recommendations. Check your connection and try again."
+            setConnectionError(msg)
+            connectionError = msg
         } else if connectionError == nil && (movieFetchError != nil || tvFetchError != nil) {
             if let mvErr = movieFetchError, !(mvErr is OverseerrError) {
-                let msg = "Failed to load movie recommendations. \(mvErr.localizedDescription)"
+                let msg = "Failed to load movie recommendations. Check your connection and try again. (\(mvErr.localizedDescription))"
                 setConnectionError(msg)
                 connectionError = msg
             } else if let tvErr = tvFetchError, !(tvErr is OverseerrError) {
-                let msg = "Failed to load TV recommendations. \(tvErr.localizedDescription)"
+                let msg = "Failed to load TV recommendations. Check your connection and try again. (\(tvErr.localizedDescription))"
                 setConnectionError(msg)
                 connectionError = msg
             }
