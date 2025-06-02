@@ -84,7 +84,7 @@ final class TrendingViewModel: ObservableObject {
             // Only set error if items are empty, otherwise it might be a pagination error
             // and some content is still visible. Or, always show if it's a significant failure.
             if items.isEmpty {
-                connectionError = "Failed to load trending items. \(error.localizedDescription)"
+                connectionError = "Failed to load trending items. Check your connection and try again."
             }
             print("Trending fetch failed: \(error)")
         }

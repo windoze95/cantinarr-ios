@@ -66,7 +66,7 @@ final class TrendingViewModelPaginationTests: XCTestCase {
             } catch {
                 loader.cancelLoading()
                 if items.isEmpty {
-                    connectionError = "Failed to load trending items. \(error.localizedDescription)"
+                    connectionError = "Failed to load trending items. Check your connection and try again."
                 }
             }
         }
