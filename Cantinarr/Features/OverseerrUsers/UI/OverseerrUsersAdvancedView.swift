@@ -430,7 +430,8 @@ class OverseerrAuthHelper: NSObject, ASWebAuthenticationPresentationContextProvi
                 let comps = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
                 let token = comps.queryItems?.first(where: { $0.name == "token" })?.value
             else {
-                debugLog("⚠️ Plex SSO failed: \(error?.localizedDescription ?? \"no token\")")
+                let errorMessage = error?.localizedDescription ?? "no token"
+                debugLog("⚠️ Plex SSO failed: \(errorMessage)")
                 return
             }
             DispatchQueue.main.async {
