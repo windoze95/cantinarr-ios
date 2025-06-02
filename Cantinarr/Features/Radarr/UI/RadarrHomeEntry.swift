@@ -37,9 +37,9 @@ struct RadarrHomeEntry: View {
             // Use the stored instance for the check
             _ = try await radarrServiceInstance.getSystemStatus()
         } catch let APIServiceError.apiError(message: message, statusCode: statusCode) {
-            self.initialConnectionError = "Radarr API Error (\(statusCode)): \(message)"
+            self.initialConnectionError = "Radarr API Error (\(statusCode)): \(message). Please check your network connection or edit the service settings."
         } catch {
-            initialConnectionError = "Could not connect to Radarr: \(error.localizedDescription)"
+            initialConnectionError = "Could not connect to Radarr: \(error.localizedDescription). Please check your network connection or edit the service settings."
         }
         isLoadingInitialCheck = false
     }
