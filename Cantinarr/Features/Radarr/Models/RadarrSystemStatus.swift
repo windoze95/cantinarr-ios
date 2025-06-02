@@ -11,5 +11,5 @@ struct RadarrSystemStatus: Codable {
     let osVersion: String?
     let isDebug: Bool?
 
-    // TODO: include additional fields like branch, runtimeVersion if needed
+    // Additional fields like branch or runtimeVersion can be added if needed
 }

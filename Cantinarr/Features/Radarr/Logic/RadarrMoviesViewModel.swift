@@ -36,7 +36,7 @@ class RadarrMoviesViewModel: ObservableObject {
             self.connectionError = "Radarr API Error (\(statusCode)): \(message). Check your network connection or Radarr configuration."
         } catch {
             connectionError = "Failed to load movies: \(error.localizedDescription). Check your network connection or Radarr configuration."
-            print("🔴 Radarr Movies VM Error: \(error)")
+            debugLog("🔴 Radarr Movies VM Error: \(error)")
         }
         isLoading = false
     }
@@ -50,7 +50,7 @@ class RadarrMoviesViewModel: ObservableObject {
             }
             qualityProfiles = profileMap
         } catch {
-            print("🔴 Failed to load Radarr quality profiles: \(error.localizedDescription)")
+            debugLog("🔴 Failed to load Radarr quality profiles: \(error.localizedDescription)")
             // Non-critical, list view can show IDs or "N/A" for profile names
         }
     }

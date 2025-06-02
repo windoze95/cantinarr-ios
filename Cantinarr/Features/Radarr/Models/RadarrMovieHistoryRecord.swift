@@ -14,5 +14,5 @@ struct RadarrMovieHistoryRecord: Codable, Identifiable {
     let data: RadarrHistoryData?
     let downloadId: String?
 
-    // TODO: include movieFileId or other fields if required by Radarr updates
+    // Include movieFileId or other fields if required by future Radarr updates
 }

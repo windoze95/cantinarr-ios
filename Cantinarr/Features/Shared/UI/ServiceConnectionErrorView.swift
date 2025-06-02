@@ -54,8 +54,8 @@ struct ServiceConnectionErrorView: View {
             ServiceConnectionErrorView(
                 serviceName: "Demo Overseerr",
                 errorMessage: "The server at 192.168.1.100:5055 could not be reached. Please check your network connection or edit the service settings.",
-                onRetry: { print("Retry tapped") },
-                onEditSettings: { print("Edit Settings tapped") }
+                onRetry: { debugLog("Retry tapped") },
+                onEditSettings: { debugLog("Edit Settings tapped") }
             )
         }
     }

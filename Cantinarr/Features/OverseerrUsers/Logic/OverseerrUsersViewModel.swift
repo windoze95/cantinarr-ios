@@ -130,7 +130,7 @@ class OverseerrUsersViewModel: ObservableObject {
                     try await service.loginWithPlexToken(savedToken)
                     await OverseerrAuthManager.shared.probeSession()
                 } catch {
-                    print("Failed to restore Plex token: \(error.localizedDescription)")
+                    debugLog("Failed to restore Plex token: \(error.localizedDescription)")
                     plexSSOHandler.deleteTokenFromKeychain()
                 }
             }
@@ -228,7 +228,7 @@ class OverseerrUsersViewModel: ObservableObject {
         } catch is OverseerrError {
             recoverFromAuthFailure()
         } catch {
-            print("🔴 Provider load error: \(error.localizedDescription)")
+            debugLog("🔴 Provider load error: \(error.localizedDescription)")
             connectionError = "Failed to load service configuration. \(error.localizedDescription)"
             watchProviders = []
         }
@@ -296,7 +296,7 @@ class OverseerrUsersViewModel: ObservableObject {
                 ) }
                 responsePage = rawResp.page; responseTotalPages = rawResp.totalPages
             case .person, .collection, .unknown:
-                print("⚠️ Unsupported media type for discover: \(filters.selectedMedia)")
+                debugLog("⚠️ Unsupported media type for discover: \(filters.selectedMedia)")
                 loader.cancelLoading(); return
             }
 
@@ -309,7 +309,7 @@ class OverseerrUsersViewModel: ObservableObject {
         } catch is OverseerrError {
             loader.cancelLoading(); recoverFromAuthFailure()
         } catch {
-            print("🔴 Media load error (\(filters.selectedMedia)): \(error.localizedDescription)")
+            debugLog("🔴 Media load error (\(filters.selectedMedia)): \(error.localizedDescription)")
             loader.cancelLoading()
             if loader.page == 1 || results.isEmpty {
                 connectionError = "Failed to load \(filters.selectedMedia.displayName). \(error.localizedDescription)"
@@ -372,7 +372,7 @@ class OverseerrUsersViewModel: ObservableObject {
             } catch {
                 let current = await OverseerrAuthManager.shared.currentValue()
                 if case .authenticated = current { return }
-                print("🔴 Plex SSO failed: \(error.localizedDescription)")
+                debugLog("🔴 Plex SSO failed: \(error.localizedDescription)")
                 self.connectionError = "Plex login failed. Please try again. (\(error.localizedDescription))"
                 self.authState = .unauthenticated
                 plexSSOTask = nil
@@ -383,6 +383,6 @@ class OverseerrUsersViewModel: ObservableObject {
 
 extension OverseerrUsersViewModel: OverseerrPlexSSODelegate {
     func didReceivePlexToken(_ token: String) {
-        print("⚠️ Received Plex Token via delegate (Legacy/Unexpected): \(token)")
+        debugLog("⚠️ Received Plex Token via delegate (Legacy/Unexpected): \(token)")
     }
 }

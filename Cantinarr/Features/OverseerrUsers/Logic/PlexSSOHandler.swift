@@ -31,7 +31,7 @@ final class PlexSSOHandler {
         let plexURL = buildPlexOAuthURL(code: pin.code)
         let web = ASWebAuthenticationSession(url: plexURL, callbackURLScheme: nil) { _, error in
             if let err = error as? ASWebAuthenticationSessionError, err.code != .canceledLogin {
-                print("ASWebAuthenticationSession failed: \(err.localizedDescription)")
+                debugLog("ASWebAuthenticationSession failed: \(err.localizedDescription)")
             }
         }
         web.presentationContextProvider = authContext

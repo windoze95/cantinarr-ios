@@ -168,11 +168,11 @@ class RadarrAPIService {
             return try jsonDecoder.decode(T.self, from: data)
         } catch {
             // Log the raw payload to aid debugging
-            print("🔴 Radarr decoding error for endpoint \(endpoint): \(error)")
+            debugLog("🔴 Radarr decoding error for endpoint \(endpoint): \(error)")
             if let rawDataString = String(data: data, encoding: .utf8) {
-                print("🔴 Raw data: \(rawDataString)")
+                debugLog("🔴 Raw data: \(rawDataString)")
             } else {
-                print("🔴 Raw data: Could not decode as UTF-8")
+                debugLog("🔴 Raw data: Could not decode as UTF-8")
             }
             throw error
         }

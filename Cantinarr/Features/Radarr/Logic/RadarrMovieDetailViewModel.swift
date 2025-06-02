@@ -51,7 +51,7 @@ class RadarrMovieDetailViewModel: ObservableObject {
             let profiles = try await radarrService.getQualityProfiles()
             qualityProfileName = profiles.first(where: { $0.id == id })?.name ?? "Unknown Profile (\(id))"
         } catch {
-            print("🔴 Failed to fetch quality profile name: \(error.localizedDescription)")
+            debugLog("🔴 Failed to fetch quality profile name: \(error.localizedDescription)")
             qualityProfileName = "Error (\(id)). Please check your Radarr settings or try again later."
         }
     }
